@@ -1,5 +1,3 @@
-# @MrMNTG @MusammilN
-# please give credits https://github.com/MN-BOTS/ShobanaFilterBot
 import logging
 import logging.config
 import os
@@ -8,7 +6,7 @@ import asyncio
 from datetime import date, datetime
 import pytz
 import aiohttp
-from aiohttp import web as webserver # Web server import
+from aiohttp import web as webserver 
 
 # Get logging configurations
 logging.config.fileConfig('logging.conf')
@@ -16,6 +14,13 @@ logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("imdbpy").setLevel(logging.ERROR)
 logging.getLogger("asyncio").setLevel(logging.CRITICAL - 1)
+
+# 👇 FIX: Create event loop BEFORE importing Pyrogram
+try:
+    loop = asyncio.get_event_loop()
+except RuntimeError:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
 import tgcrypto
 from pyrogram import Client, __version__
@@ -34,21 +39,18 @@ from pyrogram import utils as pyroutils
 pyroutils.MIN_CHAT_ID = -999999999999
 pyroutils.MIN_CHANNEL_ID = -100999999999999
 
-PORT_CODE = int(environ.get("PORT", 8080))
+PORT = environ.get("PORT", "8080")
 
-# 👇👇 DUMMY WEB SERVER CODE START 👇👇
 routes = webserver.RouteTableDef()
 
 @routes.get("/", allow_head=True)
 async def root_route_handler(request):
-    return webserver.json_response("MNTG Bot is Running!")
+    return webserver.json_response("Bot is Running on Render! ✅")
 
 async def web_server():
     web_app = webserver.Application(client_max_size=30000000)
     web_app.add_routes(routes)
     return web_app
-# 👆👆 DUMMY WEB SERVER CODE END 👆👆
-
 
 async def preload_auth_channels():
     if not await db.get_auth_channels():
@@ -56,19 +58,17 @@ async def preload_auth_channels():
         logging.info("Set default AUTH_CHANNELs in DB.")
 
 async def keep_alive():
-    """Send a request every 111 seconds to keep the bot alive (if required)."""
     async with aiohttp.ClientSession() as session:
         while True:
             try:
-                await session.get(KEEP_ALIVE_URL)
-                logging.info("Sent keep-alive request.")
+                if KEEP_ALIVE_URL:
+                    await session.get(KEEP_ALIVE_URL)
+                    logging.info("Sent keep-alive request.")
             except Exception as e:
                 logging.error(f"Keep-alive request failed: {e}")
             await asyncio.sleep(111)
 
-
 class Bot(Client):
-
     def __init__(self):
         super().__init__(
             name=SESSION,
@@ -84,10 +84,22 @@ class Bot(Client):
         while True:
             await asyncio.sleep(24 * 60 * 60)
             logging.info("🔄 Bot is restarting")
-            await self.send_message(chat_id=LOG_CHANNEL, text="🔄 Bot is restarting ...")
+            try:
+                await self.send_message(chat_id=LOG_CHANNEL, text="🔄 Bot is restarting ...")
+            except:
+                pass
             os.execl(sys.executable, sys.executable, *sys.argv)
 
     async def start(self, **kwargs):
+        try:
+            app = webserver.AppRunner(await web_server())
+            await app.setup()
+            bind_address = "0.0.0.0"
+            await webserver.TCPSite(app, bind_address, int(PORT)).start()
+            logging.info(f"✅ Web Server Started on Port {PORT}")
+        except Exception as e:
+            logging.error(f"❌ Web Server Error: {e}")
+
         b_users, b_chats = await db.get_banned()
         temp.BANNED_USERS = b_users
         temp.BANNED_CHATS = b_chats
@@ -99,42 +111,37 @@ class Bot(Client):
         temp.B_NAME = me.first_name
         self.username = '@' + me.username
 
-        # ✅ preload auth channels from info.py if DB is empty
         await preload_auth_channels()
 
         logging.info(f"{me.first_name} running on Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
-        await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT)
+        
+        try:
+            await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT)
+        except Exception as e:
+            logging.error(f"⚠️ LOG_CHANNEL Error: Bot is not Admin in Log Channel! Error: {e}")
 
         print("mntg4u</>")
 
         tz = pytz.timezone('Asia/Kolkata')
         today = date.today()
         now = datetime.now(tz)
-        time = now.strftime("%H:%M:%S %p")
-        await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_GC_TXT.format(today, time))
+        time_str = now.strftime("%H:%M:%S %p")
+        
+        try:
+            await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_GC_TXT.format(today, time_str))
+        except Exception:
+            pass
 
         asyncio.create_task(self.kulasthree())
-        asyncio.create_task(keep_alive())
-
-        # 👇👇 WEB SERVER STARTUP CODE 👇👇
-        app = webserver.AppRunner(await web_server())
-        await app.setup()
-        bind_address = "0.0.0.0"
-        await webserver.TCPSite(app, bind_address, PORT_CODE).start()
-        logging.info(f"Web Server Started on Port {PORT_CODE}")
-        # 👆👆 WEB SERVER STARTED 👆👆
+        if KEEP_ALIVE_URL:
+            asyncio.create_task(keep_alive())
 
     async def stop(self, *args):
         await super().stop()
         logging.info("Bot stopped. Bye.")
 
-    async def iter_messages(
-        self,
-        chat_id: Union[int, str],
-        limit: int,
-        offset: int = 0,
-    ) -> Optional[AsyncGenerator["types.Message", None]]:
+    async def iter_messages(self, chat_id: Union[int, str], limit: int, offset: int = 0) -> Optional[AsyncGenerator["types.Message", None]]:
         current = offset
         while True:
             new_diff = min(200, limit - current)
@@ -145,6 +152,7 @@ class Bot(Client):
                 yield message
                 current += 1
 
-
-app = Bot()
-app.run()
+if __name__ == "__main__":
+    app = Bot()
+    # 👇 FIX: Run with the explicitly created event loop
+    loop.run_until_complete(app.run())
