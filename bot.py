@@ -154,5 +154,4 @@ class Bot(Client):
 
 if __name__ == "__main__":
     app = Bot()
-    # 👇 FIX: Run with the explicitly created event loop
-    loop.run_until_complete(app.run())
+    app.run()
