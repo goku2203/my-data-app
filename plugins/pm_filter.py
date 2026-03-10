@@ -1,5 +1,3 @@
-# Kanged From @TroJanZheX
-#hyper link mode by mn-bots
 import asyncio
 import re
 import ast
@@ -8,10 +6,8 @@ import time
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty, ButtonUrlInvalid
 from Script import script
 import pyrogram
-from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, \
-    make_inactive
-from info import ADMINS, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, \
-    SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE
+from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, make_inactive
+from info import ADMINS, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
@@ -19,11 +15,7 @@ from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_
 from database.users_chats_db import db
 from info import HYPER_MODE
 from database.ia_filterdb import Media, get_file_details, get_search_results
-from database.filters_mdb import (
-    del_all,
-    find_filter,
-    get_filters,
-)
+from database.filters_mdb import del_all, find_filter, get_filters
 import logging
 import random
 from info import PICS
@@ -35,16 +27,18 @@ logger.setLevel(logging.INFO)
 BUTTONS = {}
 SPELL_CHECK = {}
 
-# --- MISSING LOG SETTINGS ---
 MISSING_LOG_CHANNEL = -1003555146843
 LOG_COOLDOWN = 600
 RECENT_REQUESTS = {}
 
-# 👇 🔥 SUPER FIX: GOKU STARK NAME CLEANER 🔥 👇
-def fix_goku_name(name):
+# 👇 FIX: Search & Button Name Cleaner 👇
+def clean_filename(name):
     if not name: return ""
-    return re.sub(r'@?goku[\s\-_]*stark', '@goku_stark', name, flags=re.IGNORECASE)
-# 👆 --------------------------------------- 👆
+    # Remove all variations of goku stark
+    pattern = r"(?i)(@goku_stark|@goku\s?stark|@gokustark|goku\s?stark|gokustark|@goku|goku|stark)"
+    cleaned = re.sub(pattern, "", name)
+    # Remove leftover brackets, hyphens or spaces at the start/end
+    return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
 
 @Client.on_message((filters.group | filters.private) & filters.text)
 async def give_filter(client, message):
@@ -90,7 +84,7 @@ async def next_page(bot, query):
         cap_lines = []
         for file in files:
             file_link = f"https://t.me/{temp.U_NAME}?start=file_{file.file_id}"
-            disp_name = fix_goku_name(file.file_name) # Fix applied here
+            disp_name = clean_filename(file.file_name) # Cleaned Name for Button
             cap_lines.append(f"📁 {get_size(file.file_size)} - [{disp_name}]({file_link})")
         cap_text = "\n".join(cap_lines)
         btn = []
@@ -98,7 +92,7 @@ async def next_page(bot, query):
         if settings['button']:
             btn = []
             for file in files:
-                disp_name = fix_goku_name(file.file_name) # Fix applied here
+                disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                 btn.append([
                     InlineKeyboardButton(
                         text=f"📂[{get_size(file.file_size)}] ➵ {disp_name}", callback_data=f'files#{file.file_id}'
@@ -107,7 +101,7 @@ async def next_page(bot, query):
         else:
             btn = []
             for file in files:
-                disp_name = fix_goku_name(file.file_name) # Fix applied here
+                disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                 btn.append([
                     InlineKeyboardButton(
                         text=f"{disp_name}", callback_data=f'files#{file.file_id}'
@@ -243,20 +237,19 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     title = chat.title
                 except:
                     await query.message.edit_text("Make sure I'm present in your group!!", quote=True)
-                    return await query.answer('@Goku_Stark')
+                    return await query.answer('Processing...')
             else:
                 await query.message.edit_text(
                     "I'm not connected to any groups!\nCheck /connections or connect to any groups",
                     quote=True
                 )
-                return await query.answer('THIS IS A OPEN SOURCE PROJECT SEARCH SHOBANAFILTERBOT IN GITHUB ')
+                return await query.answer('Action Failed!', show_alert=True)
 
         elif chat_type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
             grp_id = query.message.chat.id
             title = query.message.chat.title
-
         else:
-            return await query.answer('@Goku_Stark')
+            return await query.answer()
 
         st = await client.get_chat_member(grp_id, userid)
         if (st.status == enums.ChatMemberStatus.OWNER) or (str(userid) in ADMINS):
@@ -310,7 +303,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=keyboard,
             parse_mode=enums.ParseMode.MARKDOWN
         )
-        return await query.answer('@Goku_Stark')
+        return await query.answer()
 
     elif "connectcb" in query.data:
         await query.answer()
@@ -327,7 +320,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             )
         else:
             await query.message.edit_text('Some error occurred!!', parse_mode=enums.ParseMode.MARKDOWN)
-        return await query.answer('@Goku_Stark')
+        return await query.answer()
 
     elif "disconnect" in query.data:
         await query.answer()
@@ -347,7 +340,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 f"Some error occurred!!",
                 parse_mode=enums.ParseMode.MARKDOWN
             )
-        return await query.answer('@Goku_Stark')
+        return await query.answer()
 
     elif "deletecb" in query.data:
         await query.answer()
@@ -364,7 +357,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 f"Some error occurred!!",
                 parse_mode=enums.ParseMode.MARKDOWN
             )
-        return await query.answer('@Goku_Stark')
+        return await query.answer()
 
     elif query.data == "backcb":
         await query.answer()
@@ -374,7 +367,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.message.edit_text(
                 "There are no active connections!! Connect to some groups first.",
             )
-            return await query.answer('@Goku_Stark')
+            return await query.answer()
         buttons = []
         for groupid in groupids:
             try:
@@ -414,9 +407,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
         if not files_:
             return await query.answer('No such file exist.')
         files = files_[0]
-        title = fix_goku_name(files.file_name) # Fix applied here
+        
+        # 👇 FIX: Cleaned filename only for this query answer
+        title = clean_filename(files.file_name)
         size = get_size(files.file_size)
-        f_caption = files.caption
+        f_caption = clean_filename(files.caption)
         
         settings = await get_settings(query.message.chat.id)
         if not settings:
@@ -432,8 +427,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f_caption = f_caption
         if f_caption is None:
             f_caption = f"{title}"
-            
-        f_caption = fix_goku_name(f_caption) # Fix applied here
 
         try:
             if not await is_subscribed(query.from_user.id, client):
@@ -461,30 +454,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         files_ = await get_file_details(file_id)
         if not files_:
             return await query.answer('No such file exist.')
-        files = files_[0]
-        title = fix_goku_name(files.file_name) # Fix applied here
-        size = get_size(files.file_size)
-        f_caption = files.caption
-        if CUSTOM_FILE_CAPTION:
-            try:
-                f_caption = CUSTOM_FILE_CAPTION.format(file_name='' if title is None else title,
-                                                       file_size='' if size is None else size,
-                                                       file_caption='' if f_caption is None else f_caption)
-            except Exception as e:
-                logger.exception(e)
-                f_caption = f_caption
-        if f_caption is None:
-            f_caption = f"{title}"
             
-        f_caption = fix_goku_name(f_caption) # Fix applied here
-        
         await query.answer()
-        await client.send_cached_media(
-            chat_id=query.from_user.id,
-            file_id=file_id,
-            caption=f_caption,
-            protect_content=True if ident == 'checksubp' else False
-        )
+        # Note: Sending is now fully handled in commands.py
+        await client.send_message(query.from_user.id, "Please request from Bot PM.")
 
     elif query.data == "pages":
         await query.answer()
@@ -531,7 +504,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ),
             reply_markup=reply_markup
         )
-        await query.answer('@Goku_Stark')
+        await query.answer()
 
     elif query.data == "help":
         buttons = [
@@ -758,7 +731,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
         if str(grp_id) != str(grpid):
             await query.message.edit("Your Active Connection Has Been Changed. Go To /settings.")
-            return await query.answer('@Goku_Stark')
+            return await query.answer()
 
         if status == "True":
             await save_group_settings(grpid, set_type, False)
@@ -796,7 +769,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ]
             reply_markup = InlineKeyboardMarkup(buttons)
             await query.message.edit_reply_markup(reply_markup)
-    await query.answer('@Goku_Stark')
+    await query.answer()
 
 async def auto_filter(client, msg, spoll=False):
     try:
@@ -900,7 +873,7 @@ async def auto_filter(client, msg, spoll=False):
         if HYPER_MODE:
             cap_lines = []
             for file in files:
-                disp_name = fix_goku_name(file.file_name) # Fix applied here
+                disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                 file_link = f"https://t.me/{temp.U_NAME}?start={pre}_{file.file_id}"
                 cap_lines.append(f"📁 {get_size(file.file_size)} - [{disp_name}]({file_link})")
             cap_text = "\n".join(cap_lines)
@@ -921,7 +894,7 @@ async def auto_filter(client, msg, spoll=False):
             if settings["button"]:
                 btn = []
                 for file in files:
-                    disp_name = fix_goku_name(file.file_name) # Fix applied here
+                    disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                     btn.append([
                         InlineKeyboardButton(
                             text=f"📂[{get_size(file.file_size)}]--{disp_name}", 
@@ -931,7 +904,7 @@ async def auto_filter(client, msg, spoll=False):
             else:
                 btn = []
                 for file in files:
-                    disp_name = fix_goku_name(file.file_name) # Fix applied here
+                    disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                     btn.append([
                         InlineKeyboardButton(
                             text=f"{disp_name}",
