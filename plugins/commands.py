@@ -91,12 +91,19 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
         # -----------------------------------------------------
         # 🔥 UNGALODA CUSTOM MESSAGE INGA MAATHIKONGA 🔥
         # -----------------------------------------------------
-        my_custom_message = (
-    "\n\n<b>📢 Join Our Channels :</b>\n"
+        CUSTOM_FILE_CAPTION = """<b>📂 File: {file_name}</b>
+<b>💾 Size: {file_size}</b>
+
+━━━━━━━━━━━━━━━━━━━━
+"\n\n<b>📢 Join Our Channels :</b>\n"
     "<b>🔸 <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single Channel</a></b>"
     "<b>🔸 <a href='https://t.me/Anime_single'>Anime Channel</a></b>\n"
     "<b>🔸 <a href='https://t.me/+LxPgPQsF7tExZmFl'>Naruto Channel</a></b>\n"
-)
+━━━━━━━━━━━━━━━━━━━━
+
+<b>⚠️ COPYRIGHT WARNING ⚠️</b>
+<blockquote>This message will <b>AUTO-DELETE</b> in <b>1 Minute</b> to prevent copyright strikes! ⏳
+<b>Please forward or save this file immediately!</b></blockquote>"""
         
         if caption:
             caption = str(caption) + my_custom_message
