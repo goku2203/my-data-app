@@ -1,4 +1,3 @@
-# Force Update v2.0 - Confirm New Code
 import os
 import logging
 import random
@@ -22,7 +21,13 @@ logger = logging.getLogger(__name__)
 BATCH_FILES = {}
 AUTO_DELETE_SECONDS = 15
 
-# Helper function to create buttons
+# 👇 FIX: Verify Page-kaga mattum intha cleaner
+def clean_filename(name):
+    if not name: return ""
+    pattern = r"(?i)(@goku_stark|@goku\s?stark|@gokustark|goku\s?stark|gokustark|@goku|goku|stark)"
+    cleaned = re.sub(pattern, "", name)
+    return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
+
 async def create_file_buttons(client, sent_message):
     buttons = []
     if sent_message.chat.username:
@@ -66,6 +71,7 @@ async def auto_delete_file(client, message, delay):
     except Exception as e:
         logger.error(f"Error deleting file: {e}")
 
+# 👇 CUSTOM CAPTION & JOIN CHANNEL LINK INGA THAAN ADD PANNIRUKKEN 👇
 async def send_file_to_user(client, user_id, file_id, protect_content_flag, file_name=None, file_size=None, file_caption=None):
     try:
         caption = None
@@ -81,6 +87,17 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 caption = file_caption if file_caption else file_name
         else:
             caption = file_caption if file_caption else file_name
+
+        # -----------------------------------------------------
+        # 🔥 UNGALODA CUSTOM MESSAGE INGA MAATHIKONGA 🔥
+        # -----------------------------------------------------
+        my_custom_message = "\n\n<b>📢 Join Our Channel : <a href='https://t.me/super_goku_god'>Goku Updates</a></b>"
+        
+        if caption:
+            caption = str(caption) + my_custom_message
+        else:
+            caption = my_custom_message
+        # -----------------------------------------------------
 
         if FILE_CHANNEL_SENDING_MODE and FILE_CHANNELS:
             channel_id = random.choice(FILE_CHANNELS)
@@ -132,6 +149,7 @@ async def checksub_callback(client, callback_query):
     
     if await is_subscribed(user_id, client):
         try:
+            # 🟢 INGA CLEAN_FILENAME USE PANNA KUDATHU (So original name varum) 🟢
             await send_file_to_user(
                 client=client,
                 user_id=user_id,
@@ -197,19 +215,13 @@ async def start(client, message):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
         
-        # 1. Naruto Style Loading Effect
         m = await message.reply_text(
             text="<b>🌀 𝐆𝐚𝐭𝐡𝐞𝐫𝐢𝐧𝐠 𝐂𝐡𝐚𝐤𝐫𝐚... ⏳</b>",
             parse_mode=enums.ParseMode.HTML
         )
-
-        # 2. Wait for 1.5 seconds
         await asyncio.sleep(1.5)
-
-        # 3. Loading text delete
         await m.delete()
 
-        # 4. Main Bot Entry with Photo
         await message.reply_photo(
             photo=random.choice(PICS),
             caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
@@ -218,7 +230,6 @@ async def start(client, message):
         )
         return
 
-    # DEEP LINK HANDLING STARTS HERE
     if not await is_subscribed(message.from_user.id, client):
         links = await create_invite_links(client)
         btn = [[InlineKeyboardButton("🤖 Join Updates Channel", url=url)] for url in links.values()]
@@ -306,7 +317,8 @@ async def start(client, message):
 
                 files_ = await get_file_details(temp_file_id)
                 if files_:
-                    file_name = files_[0].file_name
+                    # 🟢 INGA CLEAN_FILENAME USE PANNI IRUKKEN (Verify Box la peru varathu) 🟢
+                    file_name = clean_filename(files_[0].file_name)
                     file_size = get_size(files_[0].file_size)
             except Exception as e:
                 print(f"Error getting file details: {e}")
@@ -320,7 +332,6 @@ async def start(client, message):
                 reply_markup=InlineKeyboardMarkup(buttons),
                 protect_content=True
             )
-            # 👇 FIX: Changed 3600 (1 Hr) to 10800 (3 Hrs) for Verify Box Delete!
             asyncio.create_task(auto_delete_message(client, verify_msg, 600))
             return
 
@@ -365,7 +376,6 @@ async def start(client, message):
                     )
             except FloodWait as e:
                 await asyncio.sleep(e.x)
-                logger.warning(f"Floodwait of {e.x} sec.")
                 await client.send_cached_media(
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
@@ -391,16 +401,13 @@ async def start(client, message):
         async for msg in client.iter_messages(int(f_chat_id), int(l_msg_id), int(f_msg_id)):
             if msg.media:
                 media = getattr(msg, msg.media.value)
+                file_name = getattr(media, 'file_name', '')
+                f_caption = getattr(msg, 'caption', file_name)
                 if BATCH_FILE_CAPTION:
                     try:
-                        f_caption=BATCH_FILE_CAPTION.format(file_name=getattr(media, 'file_name', ''), file_size=getattr(media, 'file_size', ''), file_caption=getattr(msg, 'caption', ''))
+                        f_caption=BATCH_FILE_CAPTION.format(file_name=file_name, file_size=getattr(media, 'file_size', ''), file_caption=f_caption)
                     except Exception as e:
                         logger.exception(e)
-                        f_caption = getattr(msg, 'caption', '')
-                else:
-                    media = getattr(msg, msg.media.value)
-                    file_name = getattr(media, 'file_name', '')
-                    f_caption = getattr(msg, 'caption', file_name)
                 try:
                     await msg.copy(message.chat.id, caption=f_caption, protect_content=True if protect == "/pbatch" else False)
                 except FloodWait as e:
@@ -423,13 +430,11 @@ async def start(client, message):
             await asyncio.sleep(1) 
         return await sts.delete()
         
-
     files_ = await get_file_details(file_id)           
     if not files_:
         pre, file_id = ((base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii")).split("_", 1)
         try:
             protect_content_flag = True if pre == 'filep' else False
-            
             await send_file_to_user(
                 client=client,
                 user_id=message.from_user.id,
@@ -441,6 +446,7 @@ async def start(client, message):
             pass
         return await message.reply('No such file exist.')
     files = files_[0]
+    # 🟢 INGA CLEAN_FILENAME USE PANNA KUDATHU (So original name varum) 🟢
     title = files.file_name
     size=get_size(files.file_size)
     f_caption=files.caption
@@ -451,7 +457,7 @@ async def start(client, message):
             logger.exception(e)
             f_caption=f_caption
     if f_caption is None:
-        f_caption = f"{files.file_name}"
+        f_caption = f"{title}"
     
     protect_content_flag = True if pre == 'filep' else False
     
@@ -490,8 +496,6 @@ async def set_auth_channels(client, message: Message):
 
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
 async def channel_info(bot, message):
-    
-    """Send basic information of channel"""
     if isinstance(CHANNELS, (int, str)):
         channels = [CHANNELS]
     elif isinstance(CHANNELS, list):
@@ -518,10 +522,8 @@ async def channel_info(bot, message):
         await message.reply_document(file)
         os.remove(file)
 
-
 @Client.on_message(filters.command('logs') & filters.user(ADMINS))
 async def log_file(bot, message):
-    """Send log file"""
     try:
         await message.reply_document('TelegramBot.txt')
     except Exception as e:
@@ -529,7 +531,6 @@ async def log_file(bot, message):
 
 @Client.on_message(filters.command('delete') & filters.user(ADMINS))
 async def delete(bot, message):
-    """Delete file from database"""
     reply = message.reply_to_message
     if reply and reply.media:
         msg = await message.reply("Processing...⏳", quote=True)
@@ -600,7 +601,6 @@ async def delete_all_index_confirm(bot, message):
     await Media.collection.drop()
     await message.answer('by tamiltechgk')
     await message.message.edit('Succesfully Deleted All The Indexed Files.')
-
 
 @Client.on_message(filters.command('settings'))
 async def settings(client, message):
@@ -735,11 +735,9 @@ async def save_template(client, message):
         else:
             await message.reply_text("I'm not connected to any groups!", quote=True)
             return
-
     elif chat_type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         grp_id = message.chat.id
         title = message.chat.title
-
     else:
         return
 
@@ -756,12 +754,6 @@ async def save_template(client, message):
     template = message.text.split(" ", 1)[1]
     await save_group_settings(grp_id, 'template', template)
     await sts.edit(f"Successfully changed template for {title} to\n\n{template}")
-
-# Helper: Padam perai clean-a edukka (Smart Match-kaga)
-def get_clean_name(name):
-    clean = re.sub(r"(\[.*?\]|\{.*?\}|\(.*?\)|720p|1080p|480p|HEVC|x264|x265|mkv|mp4|avi|www\.|@\w+)", "", name, flags=re.IGNORECASE)
-    clean = re.sub(r"\s+", " ", clean).strip()
-    return clean.lower()
 
 @Client.on_message(filters.command("plan") & filters.private)
 async def premium_plans(client, message):
