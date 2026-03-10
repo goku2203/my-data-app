@@ -535,19 +535,44 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
 
-    elif query.data == "owner_panel":
+elif query.data == "owner_panel":
         if query.from_user.id not in ADMINS:
             return await query.answer("Kuthu Vangiruva! Ithu Owner ku mattum thaan! 😠", show_alert=True)
             
         import psutil
+        import time
         from utils import get_size
+        from info import BOT_START_TIME
+        from datetime import datetime
         
-        await query.answer("Fetching Live Stats... ⏳")
+        await query.answer("Fetching Advanced Live Stats... ⏳")
         
+        # Ping and Uptime Setup
+        start_t = time.time()
+        st_msg = await query.message.reply("📡 Checking server connection...")
+        ping_time = round((time.time() - start_t) * 1000, 2)
+        await st_msg.delete()
+        
+        uptime_sec = int(time.time() - BOT_START_TIME)
+        uptime = f"{uptime_sec // 86400}d {(uptime_sec % 86400) // 3600}h {(uptime_sec % 3600) // 60}m"
+        
+        # User & File Stats
         total_users = await db.total_users_count()
         total_chats = await db.total_chat_count()
         total_files = await Media.count_documents()
         
+        # 🟢 MONTHLY VERIFIED & ACTIVE USERS LOGIC 🟢
+        now = datetime.now()
+        # Intha maasam 1st date-a edukkurom (Reset aagurathuku)
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        # Active today (Innikku verify panni bot use panravanga)
+        daily_active = await db.col.count_documents({"verify_status.verify_until": {"$gt": now}})
+        
+        # Monthly verified (Intha maasam verify pannavanga - Automatic Reset)
+        monthly_verified = await db.col.count_documents({"verify_status.verify_until": {"$gte": start_of_month}})
+        
+        # DB & Server Size
         monsize = await db.get_db_size()
         free_db = 536870912 - monsize
         db_percent = round((monsize / 536870912) * 100, 2)
@@ -556,23 +581,22 @@ async def cb_handler(client: Client, query: CallbackQuery):
         ram = psutil.virtual_memory().percent
         disk = psutil.disk_usage('/').percent
         
-        verified_users = await db.get_verified_count() 
-        
         text = (
             "<b>👑 <u>𝐎𝐖𝐍𝐄𝐑 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 𝐏𝐀𝐍𝐄𝐋</u> 👑</b>\n\n"
-            f"<i>Hi {query.from_user.mention}! Ithu unnoda secret dashboard. 😎</i>\n\n"
-            "<b>📊 <u>𝐋𝐢𝐯𝐞 𝐁𝐨𝐭 𝐒𝐭𝐚𝐭𝐬</u>:</b>\n"
-            f"👤 <b>Total Users:</b> <code>{total_users}</code>\n"
+            f"<i>Welcome back {query.from_user.mention}!</i>\n\n"
+            "<b>🤖 <u>𝐁𝐨𝐭 𝐏𝐞𝐫𝐟𝐨𝐫𝐦𝐚𝐧𝐜𝐞</u>:</b>\n"
+            f"⏱️ <b>Uptime:</b> <code>{uptime}</code>\n"
+            f"🚀 <b>Ping:</b> <code>{ping_time} ms</code>\n\n"
+            "<b>📊 <u>𝐓𝐫𝐚𝐟𝐟𝐢𝐜 & 𝐔𝐬𝐞𝐫𝐬</u>:</b>\n"
+            f"👤 <b>Total Users (DB):</b> <code>{total_users}</code>\n"
             f"👥 <b>Total Groups:</b> <code>{total_chats}</code>\n"
-            f"📂 <b>Total Files:</b> <code>{total_files}</code>\n"
-            f"✅ <b>Verified Users:</b> <code>~ {verified_users}</code>\n\n"
-            "<b>🖥️ <u>𝐒𝐞𝐫𝐯𝐞𝐫 & 𝐇𝐚𝐫𝐝𝐰𝐚𝐫𝐞</u>:</b>\n"
-            f"⚡ <b>CPU Usage:</b> <code>{cpu}%</code>\n"
-            f"💽 <b>RAM Usage:</b> <code>{ram}%</code>\n"
-            f"💿 <b>Storage:</b> <code>{disk}%</code>\n\n"
-            "<b>💾 <u>𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞 𝐂𝐚𝐩𝐚𝐜𝐢𝐭𝐲</u>:</b>\n"
-            f"📊 <b>Used:</b> <code>{db_percent}%</code>\n"
-            f"🆓 <b>Free:</b> <code>{get_size(free_db)}</code>"
+            f"🟢 <b>Active Users (Today):</b> <code>{daily_active}</code>\n"
+            f"📅 <b>Monthly Verified:</b> <code>{monthly_verified}</code>\n\n"
+            "<b>📂 <u>𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞 𝐒𝐭𝐚𝐭𝐬</u>:</b>\n"
+            f"🗂️ <b>Total Files:</b> <code>{total_files}</code>\n"
+            f"💾 <b>DB Used:</b> <code>{db_percent}%</code> | <b>Free:</b> <code>{get_size(free_db)}</code>\n\n"
+            "<b>🖥️ <u>𝐒𝐞𝐫𝐯𝐞𝐫 𝐇𝐚𝐫𝐝𝐰𝐚𝐫𝐞</u>:</b>\n"
+            f"⚡ <b>CPU:</b> <code>{cpu}%</code> | 💽 <b>RAM:</b> <code>{ram}%</code>"
         )
         
         buttons = [
