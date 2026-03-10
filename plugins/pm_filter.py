@@ -535,7 +535,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             parse_mode=enums.ParseMode.HTML
         )
 
-elif query.data == "owner_panel":
+    elif query.data == "owner_panel":
         if query.from_user.id not in ADMINS:
             return await query.answer("Kuthu Vangiruva! Ithu Owner ku mattum thaan! 😠", show_alert=True)
             
