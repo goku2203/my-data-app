@@ -812,12 +812,27 @@ async def auto_filter(client, msg, spoll=False):
                 
                 search_msg = await message.reply_text(
                     f"<b>🔍 Searching...</b>\n"
-                    f"<code>[⬛⬛⬜⬜⬜⬜⬜⬜] 20%</code>"
+                    f"<code>[⬛⬛⬜⬜⬜⬜⬜⬜⬜⬜] 20%</code>"
                 )
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.3)
+                await search_msg.edit(
+                    f"<b>🔍 Searching...</b>\n"
+                    f"<code>[⬛⬛⬛⬛⬜⬜⬜⬜⬜⬜] 40%</code>"
+                )
+                await asyncio.sleep(0.3)
+                await search_msg.edit(
+                    f"<b>🔍 Searching...</b>\n"
+                    f"<code>[⬛⬛⬛⬛⬛⬛⬜⬜⬜⬜] 60%</code>"
+                )
+                await asyncio.sleep(0.3)
+                await search_msg.edit(
+                    f"<b>🔍 Searching...</b>\n"
+                    f"<code>[⬛⬛⬛⬛⬛⬛⬛⬛⬜⬜] 80%</code>"
+                )
+                await asyncio.sleep(0.3)
                 await search_msg.edit(
                     f"<b>✅ Completed!</b>\n"
-                    f"<code>[⬛⬛⬛⬛⬛⬛⬛⬛] 100%</code>\n\n"
+                    f"<code>[⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛] 100%</code>\n\n"
                     f"<i>Here is your result 👇</i>"
                 )
                 
