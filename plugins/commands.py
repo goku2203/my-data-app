@@ -5,6 +5,7 @@ import asyncio
 import re
 import json
 import base64
+import html # Added for safe HTML parsing
 from datetime import datetime, timedelta
 from Script import script
 from pyrogram import Client, filters, enums
@@ -21,7 +22,6 @@ logger = logging.getLogger(__name__)
 BATCH_FILES = {}
 AUTO_DELETE_SECONDS = 15
 
-# 👇 FIX: Verify Page-kaga mattum intha cleaner
 def clean_filename(name):
     if not name: return ""
     pattern = r"(?i)(@goku_stark|@goku\s?stark|@gokustark|goku\s?stark|gokustark|@goku|goku|stark)"
@@ -71,52 +71,45 @@ async def auto_delete_file(client, message, delay):
     except Exception as e:
         logger.error(f"Error deleting file: {e}")
 
-# 👇 CUSTOM CAPTION & JOIN CHANNEL LINK INGA THAAN ADD PANNIRUKKEN 👇
+# 👇 BULLETPROOF SEND_FILE FUNCTION 👇
 async def send_file_to_user(client, user_id, file_id, protect_content_flag, file_name=None, file_size=None, file_caption=None):
     try:
+        # Safe HTML Escaping
+        safe_file_name = html.escape(file_name) if file_name else "Unknown File"
+        safe_file_size = html.escape(file_size) if file_size else "Unknown Size"
+        
         caption = None
         if CUSTOM_FILE_CAPTION:
             try:
                 caption = CUSTOM_FILE_CAPTION.format(
-                    file_name=file_name if file_name else "",
-                    file_size=file_size if file_size else "",
-                    file_caption=file_caption if file_caption else ""
+                    file_name=safe_file_name,
+                    file_size=safe_file_size,
+                    file_caption=html.escape(file_caption) if file_caption else ""
                 )
             except Exception as e:
                 logger.error(f"Error formatting caption: {e}")
-                caption = file_caption if file_caption else file_name
+                caption = f"<b>📂 File:</b> <code>{safe_file_name}</code>\n<b>💾 Size:</b> <code>{safe_file_size}</code>"
         else:
-            caption = file_caption if file_caption else file_name
+            caption = f"<b>📂 File:</b> <code>{safe_file_name}</code>\n<b>💾 Size:</b> <code>{safe_file_size}</code>"
 
-        # -----------------------------------------------------
-        # 🔥 UNGALODA CUSTOM MESSAGE INGA MAATHIKONGA 🔥
-        # -----------------------------------------------------
-        CUSTOM_FILE_CAPTION = """<b>📂 File: {file_name}</b>
-<b>💾 Size: {file_size}</b>
-
-━━━━━━━━━━━━━━━━━━━━
-"\n\n<b>📢 Join Our Channels :</b>\n"
-    "<b>🔸 <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single Channel</a></b>"
-    "<b>🔸 <a href='https://t.me/Anime_single'>Anime Channel</a></b>\n"
-    "<b>🔸 <a href='https://t.me/+LxPgPQsF7tExZmFl'>Naruto Channel</a></b>\n"
-━━━━━━━━━━━━━━━━━━━━
-
-<b>⚠️ COPYRIGHT WARNING ⚠️</b>
-<blockquote>This message will <b>AUTO-DELETE</b> in <b>1 Minute</b> to prevent copyright strikes! ⏳
-<b>Please forward or save this file immediately!</b></blockquote>"""
+        # 🔥 UNGALODA CUSTOM MESSAGE 🔥
+        my_custom_message = (
+            "\n\n<b>📢 Join Our Channels :</b>\n"
+            "<b>🔸 <a href='https://t.me/super_goku_god'>Goku Updates</a></b>"
+        )
         
         if caption:
-            caption = str(caption) + my_custom_message
+            final_caption = str(caption) + my_custom_message
         else:
-            caption = my_custom_message
-        # -----------------------------------------------------
+            final_caption = my_custom_message
 
         if FILE_CHANNEL_SENDING_MODE and FILE_CHANNELS:
             channel_id = random.choice(FILE_CHANNELS)
             sent_message = await client.send_cached_media(
                 chat_id=channel_id,
                 file_id=file_id,
-                caption=caption,
+                caption=final_caption,
+                parse_mode=enums.ParseMode.HTML, # 🟢 Explicit HTML Mode
                 protect_content=protect_content_flag
             )
             asyncio.create_task(auto_delete_file(client, sent_message, FILE_AUTO_DELETE_SECONDS))
@@ -134,20 +127,27 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
             msg = await client.send_cached_media(
                 chat_id=user_id,
                 file_id=file_id,
-                caption=caption,
+                caption=final_caption,
+                parse_mode=enums.ParseMode.HTML, # 🟢 Explicit HTML Mode
                 protect_content=protect_content_flag,
             )
             asyncio.create_task(auto_delete_file(client, msg, 120)) 
             
     except Exception as e:
-        logger.error(f"File send error: {e}")
-        msg = await client.send_cached_media(
-            chat_id=user_id,
-            file_id=file_id,
-            caption=caption,
-            protect_content=protect_content_flag,
-        )
-        asyncio.create_task(auto_delete_file(client, msg, 120))
+        logger.error(f"File send HTML error: {e}")
+        # 🟢 Fallback if HTML fails completely
+        safe_fallback_caption = f"File: {file_name}\nSize: {file_size}\n\nJoin our Channel: https://t.me/super_goku_god"
+        try:
+            msg = await client.send_cached_media(
+                chat_id=user_id,
+                file_id=file_id,
+                caption=safe_fallback_caption,
+                parse_mode=enums.ParseMode.DEFAULT, # Send as plain text
+                protect_content=protect_content_flag,
+            )
+            asyncio.create_task(auto_delete_file(client, msg, 120))
+        except:
+            pass
 
 @Client.on_callback_query(filters.regex(r'^checksubp#') | filters.regex(r'^checksub#'))
 async def checksub_callback(client, callback_query):
@@ -161,7 +161,6 @@ async def checksub_callback(client, callback_query):
     
     if await is_subscribed(user_id, client):
         try:
-            # 🟢 INGA CLEAN_FILENAME USE PANNA KUDATHU (So original name varum) 🟢
             await send_file_to_user(
                 client=client,
                 user_id=user_id,
@@ -190,7 +189,7 @@ async def start(client, message):
         buttons = [
             [
                 InlineKeyboardButton("⛩️ ᴀɴɪᴍᴇ ᴡᴏʀʟᴅ", url="https://t.me/Anime_single"),
-                InlineKeyboardButton(f'ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url='https://t.me/goku_stark'),
+                InlineKeyboardButton(f'ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url='https://t.me/super_goku_god'),
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
@@ -265,7 +264,7 @@ async def start(client, message):
         buttons = [
             [InlineKeyboardButton('ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜroups', url=f'http://t.me/{temp.U_NAME}?startgroup=true')],
             [InlineKeyboardButton('ʜᴇʟᴘ', callback_data='help'), InlineKeyboardButton('ᴀʙᴏᴜᴛ', callback_data='about')],
-            [InlineKeyboardButton(f'Anime Channel​', url='https://t.me/Anime_single'), InlineKeyboardButton(f'ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url='https://t.me/goku_stark')]
+            [InlineKeyboardButton(f'Anime Channel​', url='https://t.me/Anime_single'), InlineKeyboardButton(f'ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url='https://t.me/super_goku_god')]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_photo(
@@ -329,7 +328,6 @@ async def start(client, message):
 
                 files_ = await get_file_details(temp_file_id)
                 if files_:
-                    # 🟢 INGA CLEAN_FILENAME USE PANNI IRUKKEN (Verify Box la peru varathu) 🟢
                     file_name = clean_filename(files_[0].file_name)
                     file_size = get_size(files_[0].file_size)
             except Exception as e:
@@ -368,22 +366,25 @@ async def start(client, message):
             os.remove(file)
             BATCH_FILES[file_id] = msgs
         for msg in msgs:
-            title = msg.get("title")
+            title = clean_filename(msg.get("title", ""))
+            safe_title = html.escape(title)
             size=get_size(int(msg.get("size", 0)))
-            f_caption=msg.get("caption", "")
+            f_caption=clean_filename(msg.get("caption", ""))
+            
             if BATCH_FILE_CAPTION:
                 try:
-                    f_caption=BATCH_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
+                    f_caption=BATCH_FILE_CAPTION.format(file_name=safe_title, file_size=size, file_caption=html.escape(f_caption))
                 except Exception as e:
                     logger.exception(e)
-                    f_caption=f_caption
-            if f_caption is None:
-                f_caption = f"{title}"
+                    f_caption=safe_title
+            if not f_caption:
+                f_caption = safe_title
             try:
                 await client.send_cached_media(
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
+                    parse_mode=enums.ParseMode.HTML, # 🟢 Explicit HTML Mode
                     protect_content=msg.get('protect', False),
                     )
             except FloodWait as e:
@@ -392,6 +393,7 @@ async def start(client, message):
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
+                    parse_mode=enums.ParseMode.HTML,
                     protect_content=msg.get('protect', False),
                     )
             except Exception as e:
@@ -413,18 +415,19 @@ async def start(client, message):
         async for msg in client.iter_messages(int(f_chat_id), int(l_msg_id), int(f_msg_id)):
             if msg.media:
                 media = getattr(msg, msg.media.value)
-                file_name = getattr(media, 'file_name', '')
-                f_caption = getattr(msg, 'caption', file_name)
+                file_name = clean_filename(getattr(media, 'file_name', ''))
+                safe_file_name = html.escape(file_name)
+                f_caption = clean_filename(getattr(msg, 'caption', file_name))
                 if BATCH_FILE_CAPTION:
                     try:
-                        f_caption=BATCH_FILE_CAPTION.format(file_name=file_name, file_size=getattr(media, 'file_size', ''), file_caption=f_caption)
+                        f_caption=BATCH_FILE_CAPTION.format(file_name=safe_file_name, file_size=get_size(getattr(media, 'file_size', 0)), file_caption=html.escape(f_caption))
                     except Exception as e:
                         logger.exception(e)
                 try:
-                    await msg.copy(message.chat.id, caption=f_caption, protect_content=True if protect == "/pbatch" else False)
+                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=True if protect == "/pbatch" else False)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
-                    await msg.copy(message.chat.id, caption=f_caption, protect_content=True if protect == "/pbatch" else False)
+                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=True if protect == "/pbatch" else False)
                 except Exception as e:
                     logger.exception(e)
                     continue
@@ -457,22 +460,14 @@ async def start(client, message):
         except:
             pass
         return await message.reply('No such file exist.')
+        
     files = files_[0]
-    # 🟢 INGA CLEAN_FILENAME USE PANNA KUDATHU (So original name varum) 🟢
     title = files.file_name
-    size=get_size(files.file_size)
-    f_caption=files.caption
-    if CUSTOM_FILE_CAPTION:
-        try:
-            f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
-        except Exception as e:
-            logger.exception(e)
-            f_caption=f_caption
-    if f_caption is None:
-        f_caption = f"{title}"
-    
+    size = get_size(files.file_size)
+    f_caption = files.caption
     protect_content_flag = True if pre == 'filep' else False
     
+    # Send values directly, formatting will be done safely inside send_file_to_user
     await send_file_to_user(
         client=client,
         user_id=message.from_user.id,
