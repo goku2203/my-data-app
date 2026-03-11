@@ -138,8 +138,10 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     RESULT_TXT = """<blockquote><b>⚡ Found something for you!</b></blockquote>
 <i>Check the results below:</i>"""
 
-    CUSTOM_FILE_CAPTION = """<b>📂 File: {file_name}</b>
-<b>💾 Size: {file_size}</b>
+    CUSTOM_FILE_CAPTION = """<b>📂 File:</b> <code>{file_name}</code>
+<b>💾 Size:</b> <code>{file_size}</code>
+
+<b>📝 Details:</b> {file_caption}"""
 
 ━━━━━━━━━━━━━━━━━━━━
 <b>📢 Join Our Channels:</b>
@@ -148,8 +150,8 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 ━━━━━━━━━━━━━━━━━━━━
 
 <b>⚠️ COPYRIGHT WARNING ⚠️</b>
-<blockquote>This message will <b>AUTO-DELETE</b> in <b>1 Minute</b> to prevent copyright strikes! ⏳
-<b>Please forward or save this file immediately!</b></blockquote>"""
+<blockquote><i>This message will <b>AUTO-DELETE</b> in <b>1 Minute</b> to prevent copyright strikes! ⏳
+<b>Please forward or save this file immediately!</i></b></blockquote>"""
 
     RESTART_GC_TXT = """<b>♻️ System Restarted!</b>
 
