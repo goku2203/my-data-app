@@ -5,7 +5,7 @@ import asyncio
 import re
 import json
 import base64
-import html # Added for safe HTML parsing
+import html 
 from datetime import datetime, timedelta
 from Script import script
 from pyrogram import Client, filters, enums
@@ -71,10 +71,8 @@ async def auto_delete_file(client, message, delay):
     except Exception as e:
         logger.error(f"Error deleting file: {e}")
 
-# 👇 BULLETPROOF SEND_FILE FUNCTION 👇
 async def send_file_to_user(client, user_id, file_id, protect_content_flag, file_name=None, file_size=None, file_caption=None):
     try:
-        # Safe HTML Escaping
         safe_file_name = html.escape(file_name) if file_name else "Unknown File"
         safe_file_size = html.escape(file_size) if file_size else "Unknown Size"
         
@@ -92,24 +90,13 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
         else:
             caption = f"<b>📂 File:</b> <code>{safe_file_name}</code>\n<b>💾 Size:</b> <code>{safe_file_size}</code>"
 
-        # 🔥 UNGALODA CUSTOM MESSAGE 🔥
-        my_custom_message = (
-            "\n\n<b>📢 Join Our Channels :</b>\n"
-            "<b>🔸 <a href='https://t.me/super_goku_god'>Goku Updates</a></b>"
-        )
-        
-        if caption:
-            final_caption = str(caption) + my_custom_message
-        else:
-            final_caption = my_custom_message
-
         if FILE_CHANNEL_SENDING_MODE and FILE_CHANNELS:
             channel_id = random.choice(FILE_CHANNELS)
             sent_message = await client.send_cached_media(
                 chat_id=channel_id,
                 file_id=file_id,
-                caption=final_caption,
-                parse_mode=enums.ParseMode.HTML, # 🟢 Explicit HTML Mode
+                caption=caption,
+                parse_mode=enums.ParseMode.HTML, 
                 protect_content=protect_content_flag
             )
             asyncio.create_task(auto_delete_file(client, sent_message, FILE_AUTO_DELETE_SECONDS))
@@ -127,22 +114,21 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
             msg = await client.send_cached_media(
                 chat_id=user_id,
                 file_id=file_id,
-                caption=final_caption,
-                parse_mode=enums.ParseMode.HTML, # 🟢 Explicit HTML Mode
+                caption=caption,
+                parse_mode=enums.ParseMode.HTML,
                 protect_content=protect_content_flag,
             )
             asyncio.create_task(auto_delete_file(client, msg, 120)) 
             
     except Exception as e:
         logger.error(f"File send HTML error: {e}")
-        # 🟢 Fallback if HTML fails completely
-        safe_fallback_caption = f"File: {file_name}\nSize: {file_size}\n\nJoin our Channel: https://t.me/super_goku_god"
+        safe_fallback_caption = f"File: {file_name}\nSize: {file_size}"
         try:
             msg = await client.send_cached_media(
                 chat_id=user_id,
                 file_id=file_id,
                 caption=safe_fallback_caption,
-                parse_mode=enums.ParseMode.DEFAULT, # Send as plain text
+                parse_mode=enums.ParseMode.DEFAULT, 
                 protect_content=protect_content_flag,
             )
             asyncio.create_task(auto_delete_file(client, msg, 120))
@@ -384,7 +370,7 @@ async def start(client, message):
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
-                    parse_mode=enums.ParseMode.HTML, # 🟢 Explicit HTML Mode
+                    parse_mode=enums.ParseMode.HTML, 
                     protect_content=msg.get('protect', False),
                     )
             except FloodWait as e:
@@ -467,7 +453,6 @@ async def start(client, message):
     f_caption = files.caption
     protect_content_flag = True if pre == 'filep' else False
     
-    # Send values directly, formatting will be done safely inside send_file_to_user
     await send_file_to_user(
         client=client,
         user_id=message.from_user.id,
