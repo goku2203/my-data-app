@@ -149,8 +149,8 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 ━━━━━━━━━━━━━━━━━━
 
 <b>⚠️ COPYRIGHT WARNING ⚠️</b>\n
-<blockquote><i>This message will <b>AUTO-DELETE</b> in <b>1 Minute</b> to prevent copyright strikes! ⏳
-<b>Please forward or save this file immediately!</i></b></blockquote>"""
+<blockquote><i>This message will</i> <b>AUTO-DELETE</b> <i>in</i> <b>10 Minute</b> <i>to prevent copyright strikes! ⏳</i>/n
+<b><i>Please forward or save this file immediately!</i></b></blockquote>"""
 
     RESTART_GC_TXT = """<b>♻️ System Restarted!</b>
 
