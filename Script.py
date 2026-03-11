@@ -141,12 +141,13 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     CUSTOM_FILE_CAPTION = """<b>📂 File:</b> <code>{file_name}</code>
 <b>💾 Size:</b> <code>{file_size}</code>
 
-<b>📝 Details:</b> {file_caption}"""
+<b>📝 Details:</b> {file_caption}
 
 ━━━━━━━━━━━━━━━━━━━━
-<b>📢 Join Our Channels:</b>
-🔥 [Anime Channel](https://t.me/Anime_single)
-🤖 [Tech Channel](https://t.me/tamiltechgkofficial)
+    "\n\n<b>📢 Join Our Channels :</b>\n"
+    "<b>🔸 <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single File</a></b>\n"
+    "<b>🔸 <a href='https://t.me/+LxPgPQsF7tExZmFl'>Naruto Channel</a></b>\n"
+    "<b>🔸 <a href='https://t.me/Anime_single'>Anime Lover's</a></b>"
 ━━━━━━━━━━━━━━━━━━━━
 
 <b>⚠️ COPYRIGHT WARNING ⚠️</b>
