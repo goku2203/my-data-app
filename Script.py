@@ -138,19 +138,17 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     RESULT_TXT = """<blockquote><b>⚡ Found something for you!</b></blockquote>
 <i>Check the results below:</i>"""
 
-    CUSTOM_FILE_CAPTION = """<b>📂 File:</b> <code>{file_name}</code>
-<b>💾 Size:</b> <code>{file_size}</code>
+    CUSTOM_FILE_CAPTION = """<b>📂 File:</b> <b><i>{file_caption}</i></b>
+<b>💾 Size:</b> <b>{file_size}</b>
 
-<b>📝 Details:</b> {file_caption}
+━━━━━━━━━━━━━━━━━━
+\n\n<b>📢 Join Our Channels :</b>\n
+    <b>🔸 <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single File</a></b>\n
+    <b>🔸 <a href='https://t.me/+LxPgPQsF7tExZmFl'>Naruto Channel</a></b>\n
+    <b>🔸 <a href='https://t.me/Anime_single'>Anime Lover's</a></b>
+━━━━━━━━━━━━━━━━━━
 
-━━━━━━━━━━━━━━━━━━━━
-    "\n\n<b>📢 Join Our Channels :</b>\n"
-    "<b>🔸 <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single File</a></b>\n"
-    "<b>🔸 <a href='https://t.me/+LxPgPQsF7tExZmFl'>Naruto Channel</a></b>\n"
-    "<b>🔸 <a href='https://t.me/Anime_single'>Anime Lover's</a></b>"
-━━━━━━━━━━━━━━━━━━━━
-
-<b>⚠️ COPYRIGHT WARNING ⚠️</b>
+<b>⚠️ COPYRIGHT WARNING ⚠️</b>\n
 <blockquote><i>This message will <b>AUTO-DELETE</b> in <b>1 Minute</b> to prevent copyright strikes! ⏳
 <b>Please forward or save this file immediately!</i></b></blockquote>"""
 
