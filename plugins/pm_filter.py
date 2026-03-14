@@ -489,6 +489,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
             ]
         ]
+        # Start menu last la Owner Panel add aagum (Admin ku mattum)
+        if query.from_user.id in ADMINS:
+            buttons.append([InlineKeyboardButton("👑 𝐎𝐰𝐧𝐞𝐫 𝐏𝐚𝐧𝐞𝐥 (𝐋𝐢𝐯𝐞 𝐒𝐭𝐚𝐭𝐬) 👑", callback_data="owner_panel")])
         
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -524,9 +527,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
-        
-        if query.from_user.id in ADMINS:
-            buttons.append([InlineKeyboardButton("👑 𝐎𝐰𝐧𝐞𝐫 𝐏𝐚𝐧𝐞𝐥 (𝐋𝐢𝐯𝐞 𝐒𝐭𝐚𝐭𝐬) 👑", callback_data="owner_panel")])
 
         reply_markup = InlineKeyboardMarkup(buttons)
         await query.message.edit_text(
