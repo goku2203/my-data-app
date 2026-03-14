@@ -482,6 +482,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             [
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot"),
                 InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
+            ],
+            [
+                InlineKeyboardButton("⚙️ ᴄᴏɴᴛʀᴏʟ ᴘᴀɴᴇʟ", callback_data="admin") # Last la control panel add panniyachu 👇
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
