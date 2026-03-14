@@ -178,10 +178,10 @@ async def send_batched_post(client, clean_name):
 
     # --- CAPTION SETUP ---
     caption = (
-        f"🎬 <b>{clean_name}</b>\n"
-        f"🗓️ <b>Year:</b> {first_file['year']}\n"
-        f"🔊 <b>Audio:</b> {final_audio_str}\n"
-        f"📀 <b>Quality:</b> {final_print_str}\n"
+        f"🎬 <b>{clean_name}</b>\n\n"
+        f"🗓️ <blockquote><b><i>Year: {first_file['year']}</i></b>\n"
+        f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
+        f"📀 <b><i>Quality: {final_print_str}</i></b>\n"</blockquote>
         f"━━━━━━━━━━━━━━━━━━━\n"
     )
 
@@ -202,7 +202,8 @@ async def send_batched_post(client, clean_name):
 
     caption += "━━━━━━━━━━━━━━━━━━━\n"
     caption += "<i>(Click the file size to download)</i>\n\n"
-    caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>"
+    caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>\n\n"
+    caption += "<b><a href='https://t.me/Anime_single'>❤️ Anime Love</a></b>"
 
     try:
         await client.send_message(
