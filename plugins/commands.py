@@ -179,7 +179,8 @@ async def start(client, message):
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
-        if message.from_user.id in ADMINS:
+        # Intha line-a apdiye copy panni podu
+        if message.from_user.id in ADMINS or str(message.from_user.id) in ADMINS:
             buttons.append([InlineKeyboardButton("👑 𝐎𝐰𝐧𝐞𝐫 𝐏𝐚𝐧𝐞𝐥 (𝐋𝐢𝐯𝐞 𝐒𝐭𝐚𝐭𝐬) 👑", callback_data="owner_panel")])
             
         reply_markup = InlineKeyboardMarkup(buttons)
