@@ -20,6 +20,11 @@ import logging
 import random
 from info import PICS
 import difflib
+import psutil
+import time
+from utils import get_size
+from info import BOT_START_TIME
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -31,10 +36,13 @@ MISSING_LOG_CHANNEL = -1003555146843
 LOG_COOLDOWN = 600
 RECENT_REQUESTS = {}
 
+# 👇 FIX: Search & Button Name Cleaner 👇
 def clean_filename(name):
     if not name: return ""
+    # Remove all variations of goku stark
     pattern = r"(?i)(@goku_stark|@goku\s?stark|@gokustark|goku\s?stark|gokustark|@goku|goku|stark)"
     cleaned = re.sub(pattern, "", name)
+    # Remove leftover brackets, hyphens or spaces at the start/end
     return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
 
 @Client.on_message((filters.group | filters.private) & filters.text)
@@ -81,7 +89,7 @@ async def next_page(bot, query):
         cap_lines = []
         for file in files:
             file_link = f"https://t.me/{temp.U_NAME}?start=file_{file.file_id}"
-            disp_name = clean_filename(file.file_name) 
+            disp_name = clean_filename(file.file_name) # Cleaned Name for Button
             cap_lines.append(f"📁 {get_size(file.file_size)} - [{disp_name}]({file_link})")
         cap_text = "\n".join(cap_lines)
         btn = []
@@ -89,7 +97,7 @@ async def next_page(bot, query):
         if settings['button']:
             btn = []
             for file in files:
-                disp_name = clean_filename(file.file_name)
+                disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                 btn.append([
                     InlineKeyboardButton(
                         text=f"📂[{get_size(file.file_size)}] ➵ {disp_name}", callback_data=f'files#{file.file_id}'
@@ -98,7 +106,7 @@ async def next_page(bot, query):
         else:
             btn = []
             for file in files:
-                disp_name = clean_filename(file.file_name) 
+                disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                 btn.append([
                     InlineKeyboardButton(
                         text=f"{disp_name}", callback_data=f'files#{file.file_id}'
@@ -405,6 +413,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             return await query.answer('No such file exist.')
         files = files_[0]
         
+        # 👇 FIX: Cleaned filename only for this query answer
         title = clean_filename(files.file_name)
         size = get_size(files.file_size)
         f_caption = clean_filename(files.caption)
@@ -452,6 +461,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             return await query.answer('No such file exist.')
             
         await query.answer()
+        # Note: Sending is now fully handled in commands.py
         await client.send_message(query.from_user.id, "Please request from Bot PM.")
 
     elif query.data == "pages":
@@ -484,14 +494,19 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
             ]
         ]
+        
         reply_markup = InlineKeyboardMarkup(buttons)
+        
         try:
             txt = script.START_TXT.format(query.from_user.mention, temp.U_NAME, temp.B_NAME)
         except:
             txt = script.START_TXT.format(query.from_user.mention)
 
         await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=txt),
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=txt
+            ),
             reply_markup=reply_markup
         )
         await query.answer()
@@ -514,27 +529,106 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
-        if query.from_user.id in ADMINS or str(query.from_user.id) in ADMINS:
+        if query.from_user.id in ADMINS:
             buttons.append([InlineKeyboardButton("👑 𝐎𝐰𝐧𝐞𝐫 𝐏𝐚𝐧𝐞𝐥 (𝐋𝐢𝐯𝐞 𝐒𝐭𝐚𝐭𝐬) 👑", callback_data="owner_panel")])
-            
+        
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.HELP_TXT.format(query.from_user.mention), parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        await query.message.edit_text(
+            text=script.HELP_TXT.format(query.from_user.mention),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
+
+    elif query.data == "owner_panel":
+        if query.from_user.id not in ADMINS:
+            return await query.answer("Kuthu Vangiruva! Ithu Owner ku mattum thaan! 😠", show_alert=True)
+        
+        await query.answer("Fetching Advanced Live Stats... ⏳")
+        
+        # Ping and Uptime Setup
+        start_t = time.time()
+        st_msg = await query.message.reply("📡 Checking server connection...")
+        ping_time = round((time.time() - start_t) * 1000, 2)
+        await st_msg.delete()
+        
+        uptime_sec = int(time.time() - BOT_START_TIME)
+        uptime = f"{uptime_sec // 86400}d {(uptime_sec % 86400) // 3600}h {(uptime_sec % 3600) // 60}m"
+        
+        # User & File Stats
+        total_users = await db.total_users_count()
+        total_chats = await db.total_chat_count()
+        total_files = await Media.count_documents()
+        
+        # 🟢 MONTHLY VERIFIED & ACTIVE USERS LOGIC 🟢
+        now = datetime.now()
+        # Intha maasam 1st date-a edukkurom (Reset aagurathuku)
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        # Active today (Innikku verify panni bot use panravanga)
+        daily_active = await db.col.count_documents({"verify_status_v2.verify_until": {"$gt": now}})
+        
+        # Monthly verified (Intha maasam verify pannavanga - Automatic Reset)
+        monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
+        
+        # DB & Server Size
+        monsize = await db.get_db_size()
+        free_db = 536870912 - monsize
+        db_percent = round((monsize / 536870912) * 100, 2)
+
+        # 👇 INTHA VARIGALAI PUTHUSA SERTHURUKKEN 👇
+        db_size_mb = monsize / (1024 * 1024)
+        mongo_percent = (db_size_mb / 512) * 100
+        free = get_size(free_db)
+        monsize_str = get_size(monsize)
+        # 👆 ITHU THAAN MISS AAGIRUNTHATHU 👆
+        
+        cpu = psutil.cpu_percent(interval=0.5)
+        ram = psutil.virtual_memory().percent
+        disk = psutil.disk_usage('/').percent
+        
+        text = (
+            "<b>👑 <u>𝐎𝐖𝐍𝐄𝐑 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 𝐏𝐀𝐍𝐄𝐋</u> 👑</b>\n\n"
+            f"<i>Welcome back {query.from_user.mention}!</i>\n\n"
+            "<b>🤖 <u>𝐁𝐨𝐭 𝐏𝐞𝐫𝐟𝐨𝐫𝐦𝐚𝐧𝐜𝐞</u>:</b>\n"
+            f"⏱️ <b>Uptime:</b> <code>{uptime}</code>\n"
+            f"🚀 <b>Ping:</b> <code>{ping_time} ms</code>\n\n"
+            "<b>📊 <u>𝐓𝐫𝐚𝐟𝐟𝐢𝐜 & 𝐔𝐬𝐞𝐫𝐬</u>:</b>\n"
+            f"👤 <b>Total Users (DB):</b> <code>{total_users}</code>\n"
+            f"👥 <b>Total Groups:</b> <code>{total_chats}</code>\n"
+            f"🟢 <b>Active Users (Today):</b> <code>{daily_active}</code>\n"
+            f"📅 <b>Monthly Verified:</b> <code>{monthly_verified}</code>\n\n"
+            "<b>📂 <u>𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞 𝐒𝐭𝐚𝐭𝐬</u>:</b>\n"
+            f"🗂️ <b>Total Files:</b> <code>{total_files}</code>\n"
+            f"💾 <b>DB Used:</b> <code>{db_percent}%</code> | <b>Free:</b> <code>{get_size(free_db)}</code>\n\n"
+            "<b>🖥️ <u>𝐒𝐞𝐫𝐯𝐞𝐫 𝐇𝐚𝐫𝐝𝐰𝐚𝐫𝐞</u>:</b>\n"
+            f"⚡ <b>CPU:</b> <code>{cpu}%</code> | 💽 <b>RAM:</b> <code>{ram}%</code>\n\n"
+            "<b>📂 <u>𝐌𝐨𝐧𝐠𝐨𝐃𝐁 (𝐅𝐫𝐞𝐞 𝟓𝟏𝟐𝐌𝐁)</u>:</b>\n"
+            f"💾 <b>Storage Used:</b> <code>{monsize_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
+            f"💾 <b>Free Space:</b> <code>{free}</code>\n"
+        )
+        
+        buttons = [
+            [InlineKeyboardButton("♻️ Refresh Stats", callback_data="owner_panel")],
+            [InlineKeyboardButton("🔙 Back to Help", callback_data="help")]
+        ]
+        
+        await query.message.edit_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=enums.ParseMode.HTML
+        )
 
     elif query.data == "about":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='start_data'),
+            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='start'),
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.ABOUT_TXT.format(temp.B_NAME), parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        await query.message.edit_text(
+            text=script.ABOUT_TXT.format(temp.B_NAME),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
 
     elif query.data == "source":
         buttons = [[
@@ -542,11 +636,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.SOURCE_TXT, parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        await query.message.edit_text(
+            text=script.SOURCE_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
 
     elif query.data == "manual_filter":
         buttons = [[
@@ -555,11 +649,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('ʙᴜᴛᴛᴏɴ', callback_data='button')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.MANUALFILTER_TXT, parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        await query.message.edit_text(
+            text=script.MANUALFILTER_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
 
     elif query.data == "button":
         buttons = [[
@@ -567,11 +661,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.BUTTON_TXT, parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        await query.message.edit_text(
+            text=script.BUTTON_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
 
     elif query.data == "auto_filter":
         buttons = [[
@@ -579,11 +673,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.AUTOFILTER_TXT, parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        await query.message.edit_text(
+            text=script.AUTOFILTER_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
 
     elif query.data == "connection":
         buttons = [[
@@ -591,11 +685,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.CONNECTION_TXT, parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        await query.message.edit_text(
+            text=script.CONNECTION_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
 
     elif query.data == "extras":
         buttons = [[
@@ -604,11 +698,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.EXTRAMOD_TXT, parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        await query.message.edit_text(
+            text=script.EXTRAMOD_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
     
     elif query.data == "admin":
         buttons = [[
@@ -616,13 +710,41 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.ADMIN_TXT, parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        await query.message.edit_text(
+            text=script.ADMIN_TXT,
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
 
-    elif query.data == "stats" or query.data == "rfrsh":
+    elif query.data == "stats":
+        buttons = [[
+            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
+            InlineKeyboardButton('♻️', callback_data='rfrsh'),
+            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        total = await Media.count_documents()
+        users = await db.total_users_count()
+        chats = await db.total_chat_count()
+        monsize = await db.get_db_size()
+        free = 536870912 - monsize
+        monsize = get_size(monsize)
+        free = get_size(free)
+        
+        # Mongo DB Size calculation
+        db_size_bytes = await db.get_db_size()
+        db_size_mb = db_size_bytes / (1024 * 1024)
+        mongo_percent = (db_size_mb / 512) * 100
+        
+        monsize = get_size(db_size_bytes)
+        free = get_size(536870912 - db_size_bytes)
+        await query.message.edit_text(
+            text=script.STATUS_TXT.format(total, users, chats, monsize, free),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )
+
+    elif query.data == "rfrsh":
         await query.answer("Fetching MongoDb DataBase")
         buttons = [[
             InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
@@ -633,15 +755,22 @@ async def cb_handler(client: Client, query: CallbackQuery):
         total = await Media.count_documents()
         users = await db.total_users_count()
         chats = await db.total_chat_count()
-        monsize_bytes = await db.get_db_size()
-        monsize = get_size(monsize_bytes)
-        free = get_size(536870912 - monsize_bytes)
+        monsize = await db.get_db_size()
+        free = 536870912 - monsize
+        monsize = get_size(monsize)
+        free = get_size(free)
+        # Mongo DB Size calculation
+        db_size_bytes = await db.get_db_size()
+        db_size_mb = db_size_bytes / (1024 * 1024)
+        mongo_percent = (db_size_mb / 512) * 100
         
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=random.choice(PICS), caption=script.STATUS_TXT.format(total, users, chats, monsize, free), parse_mode=enums.ParseMode.HTML),
-            reply_markup=reply_markup
+        monsize = get_size(db_size_bytes)
+        free = get_size(536870912 - db_size_bytes)
+        await query.message.edit_text(
+            text=script.STATUS_TXT.format(total, users, chats, monsize, free),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
         )
-        await query.answer()
 
     elif query.data.startswith("setgs"):
         ident, set_type, status, grp_id = query.data.split("#")
@@ -806,7 +935,7 @@ async def auto_filter(client, msg, spoll=False):
         if HYPER_MODE:
             cap_lines = []
             for file in files:
-                disp_name = clean_filename(file.file_name)
+                disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                 file_link = f"https://t.me/{temp.U_NAME}?start={pre}_{file.file_id}"
                 cap_lines.append(f"📁 {get_size(file.file_size)} - [{disp_name}]({file_link})")
             cap_text = "\n".join(cap_lines)
@@ -827,7 +956,7 @@ async def auto_filter(client, msg, spoll=False):
             if settings["button"]:
                 btn = []
                 for file in files:
-                    disp_name = clean_filename(file.file_name)
+                    disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                     btn.append([
                         InlineKeyboardButton(
                             text=f"📂[{get_size(file.file_size)}]--{disp_name}", 
@@ -837,7 +966,7 @@ async def auto_filter(client, msg, spoll=False):
             else:
                 btn = []
                 for file in files:
-                    disp_name = clean_filename(file.file_name)
+                    disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                     btn.append([
                         InlineKeyboardButton(
                             text=f"{disp_name}",
