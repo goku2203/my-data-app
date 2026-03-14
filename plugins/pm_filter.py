@@ -482,9 +482,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             [
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot"),
                 InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
-            ],
-            [
-                InlineKeyboardButton("⚙️ ᴄᴏɴᴛʀᴏʟ ᴘᴀɴᴇʟ", callback_data="admin") # Last la control panel add panniyachu 👇
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
@@ -517,6 +514,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
+        if query.from_user.id in ADMINS or str(query.from_user.id) in ADMINS:
+            buttons.append([InlineKeyboardButton("👑 𝐎𝐰𝐧𝐞𝐫 𝐏𝐚𝐧𝐞𝐥 (𝐋𝐢𝐯𝐞 𝐒𝐭𝐚𝐭𝐬) 👑", callback_data="owner_panel")])
+            
         reply_markup = InlineKeyboardMarkup(buttons)
         await query.message.edit_media(
             media=InputMediaPhoto(media=random.choice(PICS), caption=script.HELP_TXT.format(query.from_user.mention), parse_mode=enums.ParseMode.HTML),
