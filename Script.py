@@ -130,7 +130,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>🔢 Members:</b> <code>{}</code>
 <b>👤 Added By:</b> {}"""
 
-    LOG_TEXT_P = """<b> 🆕 User 👤</b>
+    LOG_TEXT_P = """<b>New User 👤</b>
     
 <b>🆔 ID:</b> <code>{}</code>
 <b>🏷 Name:</b> {}"""
