@@ -511,7 +511,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
         await query.answer()
 
-    elif query.data == "help":
+elif query.data == "help":
         buttons = [
             [
                 InlineKeyboardButton("🛠️ ᴍᴀɴᴜᴀʟ ғɪʟᴛᴇʀ", callback_data="manual_filter"),
@@ -533,10 +533,15 @@ async def cb_handler(client: Client, query: CallbackQuery):
             buttons.append([InlineKeyboardButton("👑 𝐎𝐰𝐧𝐞𝐫 𝐏𝐚𝐧𝐞𝐥 (𝐋𝐢𝐯𝐞 𝐒𝐭𝐚𝐭𝐬) 👑", callback_data="owner_panel")])
         
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.HELP_TXT.format(query.from_user.mention),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        # Inga thaan photo maarura mathiri maathi irukken
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.HELP_TXT.format(query.from_user.mention),
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data == "owner_panel":
@@ -545,7 +550,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
         await query.answer("Fetching Advanced Live Stats... ⏳")
         
-        # Ping and Uptime Setup
         start_t = time.time()
         st_msg = await query.message.reply("📡 Checking server connection...")
         ping_time = round((time.time() - start_t) * 1000, 2)
@@ -554,37 +558,27 @@ async def cb_handler(client: Client, query: CallbackQuery):
         uptime_sec = int(time.time() - BOT_START_TIME)
         uptime = f"{uptime_sec // 86400}d {(uptime_sec % 86400) // 3600}h {(uptime_sec % 3600) // 60}m"
         
-        # User & File Stats
         total_users = await db.total_users_count()
         total_chats = await db.total_chat_count()
         total_files = await Media.count_documents()
         
-        # 🟢 MONTHLY VERIFIED & ACTIVE USERS LOGIC 🟢
         now = datetime.now()
-        # Intha maasam 1st date-a edukkurom (Reset aagurathuku)
         start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         
-        # Active today (Innikku verify panni bot use panravanga)
         daily_active = await db.col.count_documents({"verify_status_v2.verify_until": {"$gt": now}})
-        
-        # Monthly verified (Intha maasam verify pannavanga - Automatic Reset)
         monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
         
-        # DB & Server Size
         monsize = await db.get_db_size()
         free_db = 536870912 - monsize
         db_percent = round((monsize / 536870912) * 100, 2)
 
-        # 👇 INTHA VARIGALAI PUTHUSA SERTHURUKKEN 👇
         db_size_mb = monsize / (1024 * 1024)
         mongo_percent = (db_size_mb / 512) * 100
         free = get_size(free_db)
         monsize_str = get_size(monsize)
-        # 👆 ITHU THAAN MISS AAGIRUNTHATHU 👆
         
         cpu = psutil.cpu_percent(interval=0.5)
         ram = psutil.virtual_memory().percent
-        disk = psutil.disk_usage('/').percent
         
         text = (
             "<b>👑 <u>𝐎𝐖𝐍𝐄𝐑 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 𝐏𝐀𝐍𝐄𝐋</u> 👑</b>\n\n"
@@ -612,10 +606,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             [InlineKeyboardButton("🔙 Back to Help", callback_data="help")]
         ]
         
-        await query.message.edit_text(
-            text=text,
-            reply_markup=InlineKeyboardMarkup(buttons),
-            parse_mode=enums.ParseMode.HTML
+        # Photo maara vaika update
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=text,
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=InlineKeyboardMarkup(buttons)
         )
 
     elif query.data == "about":
@@ -624,10 +622,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.ABOUT_TXT.format(temp.B_NAME),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.ABOUT_TXT.format(temp.B_NAME),
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data == "source":
@@ -636,10 +638,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.SOURCE_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.SOURCE_TXT,
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data == "manual_filter":
@@ -649,10 +655,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('ʙᴜᴛᴛᴏɴ', callback_data='button')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.MANUALFILTER_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.MANUALFILTER_TXT,
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data == "button":
@@ -661,10 +671,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.BUTTON_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.BUTTON_TXT,
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data == "auto_filter":
@@ -673,10 +687,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.AUTOFILTER_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.AUTOFILTER_TXT,
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data == "connection":
@@ -685,10 +703,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.CONNECTION_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.CONNECTION_TXT,
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data == "extras":
@@ -698,10 +720,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.EXTRAMOD_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.EXTRAMOD_TXT,
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
     
     elif query.data == "admin":
@@ -710,10 +736,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.edit_text(
-            text=script.ADMIN_TXT,
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.ADMIN_TXT,
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data == "stats":
@@ -731,17 +761,20 @@ async def cb_handler(client: Client, query: CallbackQuery):
         monsize = get_size(monsize)
         free = get_size(free)
         
-        # Mongo DB Size calculation
         db_size_bytes = await db.get_db_size()
         db_size_mb = db_size_bytes / (1024 * 1024)
         mongo_percent = (db_size_mb / 512) * 100
         
         monsize = get_size(db_size_bytes)
         free = get_size(536870912 - db_size_bytes)
-        await query.message.edit_text(
-            text=script.STATUS_TXT.format(total, users, chats, monsize, free),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.STATUS_TXT.format(total, users, chats, monsize, free),
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data == "rfrsh":
@@ -759,17 +792,21 @@ async def cb_handler(client: Client, query: CallbackQuery):
         free = 536870912 - monsize
         monsize = get_size(monsize)
         free = get_size(free)
-        # Mongo DB Size calculation
+        
         db_size_bytes = await db.get_db_size()
         db_size_mb = db_size_bytes / (1024 * 1024)
         mongo_percent = (db_size_mb / 512) * 100
         
         monsize = get_size(db_size_bytes)
         free = get_size(536870912 - db_size_bytes)
-        await query.message.edit_text(
-            text=script.STATUS_TXT.format(total, users, chats, monsize, free),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
+        
+        await query.message.edit_media(
+            media=InputMediaPhoto(
+                media=random.choice(PICS),
+                caption=script.STATUS_TXT.format(total, users, chats, monsize, free),
+                parse_mode=enums.ParseMode.HTML
+            ),
+            reply_markup=reply_markup
         )
 
     elif query.data.startswith("setgs"):
