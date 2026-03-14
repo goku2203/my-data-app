@@ -567,10 +567,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         
         # Active today (Innikku verify panni bot use panravanga)
-        daily_active = await db.col.count_documents({"verify_status.verify_until": {"$gt": now}})
+        daily_active = await db.col.count_documents({"verify_status_v2.verify_until": {"$gt": now}})
         
         # Monthly verified (Intha maasam verify pannavanga - Automatic Reset)
-        monthly_verified = await db.col.count_documents({"verify_status.verify_until": {"$gte": start_of_month}})
+        monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
         
         # DB & Server Size
         monsize = await db.get_db_size()
