@@ -130,7 +130,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>🔢 Members:</b> <code>{}</code>
 <b>👤 Added By:</b> {}"""
 
-    LOG_TEXT_P = """<b>#NewUserDetected 👤</b>
+    LOG_TEXT_P = """<b> 🆕 User 👤</b>
     
 <b>🆔 ID:</b> <code>{}</code>
 <b>🏷 Name:</b> {}"""
@@ -142,9 +142,9 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>💾 Size:</b> <b>{file_size}</b>
 ━━━━━━━━━━━━━━━━━━
 <b>📢 Join Our Channels :</b>\n
-    <b>🔸 <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single File</a></b>\n
-    <b>🔸 <a href='https://t.me/+LxPgPQsF7tExZmFl'>Naruto Channel</a></b>\n
-    <b>🔸 <a href='https://t.me/Anime_single'>Anime Lover's</a></b>
+    <b>➠ <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single File</a></b>
+    <b>➠ <a href='https://t.me/+LxPgPQsF7tExZmFl'>Naruto Channel</a></b>
+    <b>➠ <a href='https://t.me/Anime_single'>Anime Lover's</a></b>
 ━━━━━━━━━━━━━━━━━━
 <b>⚠️ COPYRIGHT WARNING ⚠️</b>\n
 <blockquote><i>This message will</i> <b>AUTO-DELETE</b> <i>in</i> <b>10 Minute</b> <i>to prevent copyright strikes! ⏳</i>\n
