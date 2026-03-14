@@ -82,7 +82,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 caption = CUSTOM_FILE_CAPTION.format(
                     file_name=safe_file_name,
                     file_size=safe_file_size,
-                    file_caption=html.escape(file_caption) if file_caption else ""
+                    file_caption=file_caption if file_caption else ""
                 )
             except Exception as e:
                 logger.error(f"Error formatting caption: {e}")
@@ -359,7 +359,7 @@ async def start(client, message):
             
             if BATCH_FILE_CAPTION:
                 try:
-                    f_caption=BATCH_FILE_CAPTION.format(file_name=safe_title, file_size=size, file_caption=html.escape(f_caption))
+                    f_caption=BATCH_FILE_CAPTION.format(file_name=safe_title, file_size=size, file_caption=f_caption)
                 except Exception as e:
                     logger.exception(e)
                     f_caption=safe_title
@@ -406,7 +406,7 @@ async def start(client, message):
                 f_caption = clean_filename(getattr(msg, 'caption', file_name))
                 if BATCH_FILE_CAPTION:
                     try:
-                        f_caption=BATCH_FILE_CAPTION.format(file_name=safe_file_name, file_size=get_size(getattr(media, 'file_size', 0)), file_caption=html.escape(f_caption))
+                        f_caption=BATCH_FILE_CAPTION.format(file_name=safe_file_name, file_size=get_size(getattr(media, 'file_size', 0)), file_caption=f_caption)
                     except Exception as e:
                         logger.exception(e)
                 try:
