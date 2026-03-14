@@ -602,10 +602,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"🗂️ <b>Total Files:</b> <code>{total_files}</code>\n"
             f"💾 <b>DB Used:</b> <code>{db_percent}%</code> | <b>Free:</b> <code>{get_size(free_db)}</code>\n\n"
             "<b>🖥️ <u>𝐒𝐞𝐫𝐯𝐞𝐫 𝐇𝐚𝐫𝐝𝐰𝐚𝐫𝐞</u>:</b>\n"
-            f"⚡ <b>CPU:</b> <code>{cpu}%</code> | 💽 <b>RAM:</b> <code>{ram}%</code>"
+            f"⚡ <b>CPU:</b> <code>{cpu}%</code> | 💽 <b>RAM:</b> <code>{ram}%</code>\n\n"
             "<b>📂 <u>𝐌𝐨𝐧𝐠𝐨𝐃𝐁 (𝐅𝐫𝐞𝐞 𝟓𝟏𝟐𝐌𝐁)</u>:</b>\n"
-            f"Storage Used: <code>{monsize_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
-            f"Free Space: <code>{free}</code>\n"
+            f"💾 <b>Storage Used:</b> <code>{monsize_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
+            f"💾 <b>Free Space:</b> <code>{free}</code>"
         )
         
         buttons = [
