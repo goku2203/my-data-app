@@ -597,6 +597,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f"💾 <b>DB Used:</b> <code>{db_percent}%</code> | <b>Free:</b> <code>{get_size(free_db)}</code>\n\n"
             "<b>🖥️ <u>𝐒𝐞𝐫𝐯𝐞𝐫 𝐇𝐚𝐫𝐝𝐰𝐚𝐫𝐞</u>:</b>\n"
             f"⚡ <b>CPU:</b> <code>{cpu}%</code> | 💽 <b>RAM:</b> <code>{ram}%</code>"
+            "<b>📂 <u>𝐌𝐨𝐧𝐠𝐨𝐃𝐁 (𝐅𝐫𝐞𝐞 𝟓𝟏𝟐𝐌𝐁)</u>:</b>\n"
+            f"Storage Used: `{monsize}` (`{mongo_percent:.2f}%`)\n"
+            f"Free Space: `{free}`\n"
         )
         
         buttons = [
@@ -722,6 +725,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
         free = 536870912 - monsize
         monsize = get_size(monsize)
         free = get_size(free)
+        
+        # Mongo DB Size calculation
+        db_size_bytes = await db.get_db_size()
+        db_size_mb = db_size_bytes / (1024 * 1024)
+        mongo_percent = (db_size_mb / 512) * 100
+        
+        monsize = get_size(db_size_bytes)
+        free = get_size(536870912 - db_size_bytes)
         await query.message.edit_text(
             text=script.STATUS_TXT.format(total, users, chats, monsize, free),
             reply_markup=reply_markup,
@@ -743,6 +754,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         free = 536870912 - monsize
         monsize = get_size(monsize)
         free = get_size(free)
+        # Mongo DB Size calculation
+        db_size_bytes = await db.get_db_size()
+        db_size_mb = db_size_bytes / (1024 * 1024)
+        mongo_percent = (db_size_mb / 512) * 100
+        
+        monsize = get_size(db_size_bytes)
+        free = get_size(536870912 - db_size_bytes)
         await query.message.edit_text(
             text=script.STATUS_TXT.format(total, users, chats, monsize, free),
             reply_markup=reply_markup,
