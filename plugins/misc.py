@@ -9,6 +9,9 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
+from database.users_chats_db import db
+from info import ADMINS
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 @Client.on_message(filters.command('id'))
 async def showid(client, message):
@@ -209,6 +212,33 @@ async def imdb_callback(bot: Client, quer_y: CallbackQuery):
     else:
         await quer_y.message.edit(caption, reply_markup=InlineKeyboardMarkup(btn), disable_web_page_preview=False)
     await quer_y.answer()
-        
 
+@Client.on_message(filters.command("stats") & filters.user(ADMINS))
+async def bot_usage_stats(client, message):
+    sts = await message.reply("Stats eduthutu iruken, konjam wait pannunga... ⏳")
+    
+    # Mongo DB Size calculation
+    try:
+        db_size_bytes = await db.get_db_size()
+        db_size_mb = db_size_bytes / (1024 * 1024)
+        total_mongo_mb = 512 # Mongo Free Tier Limit
+        mongo_percent = (db_size_mb / total_mongo_mb) * 100
+        
+        mongo_text = f"🍃 **MongoDB (Free 512MB):**\n"
+        mongo_text += f"Storage: `{db_size_mb:.2f} MB` / `512 MB`\n"
+        mongo_text += f"Usage: `{mongo_percent:.2f}%`\n"
+    except Exception as e:
+        mongo_text = f"🍃 **MongoDB:** Details edukka mudiyala.\n"
+
+    text = f"📊 **Bot Control Panel Stats** 📊\n\n"
+    text += mongo_text + "\n"
+    text += f"☁️ **Render (Free Tier):**\n"
+    text += f"Render free tier (750 Hours & 100GB Bandwidth) stats ah code moolama edukka mudiyathu. Keezha irukkura button ah click panni dashboard la paathukonga.\n"
+
+    buttons = [
+        [InlineKeyboardButton("☁️ Check Render Usage", url="https://dashboard.render.com")],
+        [InlineKeyboardButton("🍃 Check Mongo Usage", url="https://cloud.mongodb.com")]
+    ]
+    
+    await sts.edit_text(text, reply_markup=InlineKeyboardMarkup(buttons))
         
