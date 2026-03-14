@@ -20,6 +20,11 @@ import logging
 import random
 from info import PICS
 import difflib
+import psutil
+import time
+from utils import get_size
+from info import BOT_START_TIME
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -538,12 +543,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "owner_panel":
         if query.from_user.id not in ADMINS:
             return await query.answer("Kuthu Vangiruva! Ithu Owner ku mattum thaan! 😠", show_alert=True)
-            
-        import psutil
-        import time
-        from utils import get_size
-        from info import BOT_START_TIME
-        from datetime import datetime
         
         await query.answer("Fetching Advanced Live Stats... ⏳")
         
@@ -576,6 +575,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
         monsize = await db.get_db_size()
         free_db = 536870912 - monsize
         db_percent = round((monsize / 536870912) * 100, 2)
+
+        # 👇 INTHA VARIGALAI PUTHUSA SERTHURUKKEN 👇
+        db_size_mb = monsize / (1024 * 1024)
+        mongo_percent = (db_size_mb / 512) * 100
+        free = get_size(free_db)
+        monsize_str = get_size(monsize)
+        # 👆 ITHU THAAN MISS AAGIRUNTHATHU 👆
         
         cpu = psutil.cpu_percent(interval=0.5)
         ram = psutil.virtual_memory().percent
