@@ -181,7 +181,7 @@ async def send_batched_post(client, clean_name):
         f"🎬 <b>{clean_name}</b>\n\n"
         f"🗓️ <blockquote><b><i>Year: {first_file['year']}</i></b>\n"
         f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
-        f"📀 <b><i>Quality: {final_print_str}</i></b>\n"</blockquote>
+        f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n"
         f"━━━━━━━━━━━━━━━━━━━\n"
     )
 
