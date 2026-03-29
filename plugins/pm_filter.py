@@ -52,6 +52,19 @@ async def give_filter(client, message):
     except Exception as e:
         pass 
 
+    # 👇 INGA PUTHA FSUB CHECK ADD PANNU 👇
+    if message.chat.type == enums.ChatType.PRIVATE:
+        if not await is_subscribed(message.from_user.id, client):
+            links = await create_invite_links(client)
+            btn = [[InlineKeyboardButton("🤖 Join Updates Channel", url=url)] for url in links.values()]
+            await message.reply_text(
+                "**Please Join My Updates Channel to use this Bot!**",
+                reply_markup=InlineKeyboardMarkup(btn),
+                parse_mode=enums.ParseMode.MARKDOWN
+            )
+            return
+    # 👆 ITHUVARAI 👆
+
     k = await manual_filters(client, message)
     if k == False:
         await auto_filter(client, message)
