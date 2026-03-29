@@ -172,6 +172,7 @@ async def checksub_callback(client, callback_query):
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+        # unga palaya group check block appdiye irukattum...
         buttons = [
             [
                 InlineKeyboardButton("⛩️ ᴀɴɪᴍᴇ ᴡᴏʀʟᴅ", url="https://t.me/Anime_single"),
@@ -193,6 +194,29 @@ async def start(client, message):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
 
+    # 👇 INGA THAAN FSUB CHECK FIRST VARANUM 👇
+    if not await is_subscribed(message.from_user.id, client):
+        links = await create_invite_links(client)
+        btn = [[InlineKeyboardButton("🤖 Join Updates Channel", url=url)] for url in links.values()]
+        if len(message.command) == 2:
+            try:
+                kk, file_id = message.command[1].split("_", 1)
+                pre = 'checksubp' if kk == 'filep' else 'checksub'
+                btn.append([InlineKeyboardButton("🔄 Try Again", callback_data=f"{pre}#{file_id}")])
+            except (IndexError, ValueError):
+                btn.append([InlineKeyboardButton("🔄 Try Again", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
+        else:
+            btn.append([InlineKeyboardButton("🔄 Try Again", url=f"https://t.me/{temp.U_NAME}?start")])
+        
+        await client.send_message(
+            chat_id=message.from_user.id,
+            text="**Please Join My Updates Channel to use this Bot!**",
+            reply_markup=InlineKeyboardMarkup(btn),
+            parse_mode=enums.ParseMode.MARKDOWN
+        )
+        return
+
+    # 👇 ITHUKU KEEZHA THAN NORMAL START VARANUM 👇
     if len(message.command) != 2:
         buttons = [
             [
@@ -227,6 +251,8 @@ async def start(client, message):
             parse_mode=enums.ParseMode.HTML
         )
         return
+
+    # ... Inga irunthu unga palaya code commands.py la thodaralam
 
     if not await is_subscribed(message.from_user.id, client):
         links = await create_invite_links(client)
