@@ -496,3 +496,31 @@ async def check_verification(client, user_id):
     return False # Illana False (Verify Button Varum)
 
 # ----- END -----
+
+async def get_missing_channels(user_id: int, client) -> list:
+    auth_channels = await db.get_auth_channels()
+    if not auth_channels:
+        return []
+
+    missing = []
+    # FSUB mode on la iruntha request check pannum
+    from info import REQUEST_FSUB_MODE
+    from utils import JOIN_REQUEST_USERS
+    requested_channels = JOIN_REQUEST_USERS.get(user_id, set()) if REQUEST_FSUB_MODE else set()
+
+    for channel in auth_channels:
+        if channel in requested_channels:
+            continue
+        try:
+            from pyrogram.enums import ChatMemberStatus
+            member = await client.get_chat_member(channel, user_id)
+            if member.status not in [
+                ChatMemberStatus.MEMBER,
+                ChatMemberStatus.ADMINISTRATOR,
+                ChatMemberStatus.OWNER,
+            ]:
+                missing.append(channel)
+        except Exception:
+            missing.append(channel)
+
+    return missing
