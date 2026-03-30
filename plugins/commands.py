@@ -193,19 +193,26 @@ async def start(client, message):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
 
-    # 👇 PUTHIYA FSUB CHECK LOGIC (Attractive & Auto-Remove Missing Channels) 👇
+    # 👇 FORCE SUB CHECK (Auto Remove Missing Channels & Try Again Fix) 👇
     if not await is_subscribed(message.from_user.id, client):
-        from utils import get_missing_channels
-        missing_channels = await get_missing_channels(message.from_user.id, client)
-        links = await create_invite_links(client)
-        
-        btn = []
-        for index, channel_id in enumerate(missing_channels, start=1):
-            url = links.get(channel_id)
-            if url:
-                btn.append([InlineKeyboardButton(f"✨ Join Channel {index} ✨", url=url)])
+        try:
+            from utils import get_missing_channels
+            missing_channels = await get_missing_channels(message.from_user.id, client)
+        except Exception:
+            missing_channels = []
 
-        # URL button for Try Again so it triggers Verification & Start Page correctly!
+        links = await create_invite_links(client)
+        btn = []
+        
+        if missing_channels:
+            for index, channel_id in enumerate(missing_channels, start=1):
+                url = links.get(channel_id)
+                if url:
+                    btn.append([InlineKeyboardButton(f"✨ Join Channel {index} ✨", url=url)])
+        else:
+            for url in links.values():
+                btn.append([InlineKeyboardButton("🤖 Join Updates Channel", url=url)])
+
         if len(message.command) == 2:
             payload = message.command[1]
         else:
@@ -266,81 +273,7 @@ async def start(client, message):
         )
         return
     
-    # Inga irunthu ungaloda mntgx and verify logic continue aagum...
-    if len(message.command) == 2 and message.command[1].startswith('mntgx'):
-
-    # 👇 ITHUKU KEEZHA THAN NORMAL START VARANUM 👇
-    if len(message.command) != 2:
-        buttons = [
-            [
-                InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴠɪʟʟᴀɢᴇ ➕", url=f"http://t.me/{BOT_USERNAME}?startgroup=true")
-            ],
-            [
-                InlineKeyboardButton("📜 ᴊᴜᴛsᴜ (ʜᴇʟᴘ)", callback_data="help"),
-                InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ ᴍᴇ", callback_data="about")
-            ],
-            [
-                InlineKeyboardButton("⛩️ ᴀɴɪᴍᴇ ᴡᴏʀʟᴅ", url="https://t.me/Anime_single"), 
-                InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇs", url="https://t.me/super_goku_god")
-            ],
-            [
-                InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot"),
-                InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        
-        m = await message.reply_text(
-            text="<b>🌀 𝐆𝐚𝐭𝐡𝐞𝐫𝐢𝐧𝐠 𝐂𝐡𝐚𝐤𝐫𝐚... ⏳</b>",
-            parse_mode=enums.ParseMode.HTML
-        )
-        await asyncio.sleep(1.5)
-        await m.delete()
-
-        await message.reply_photo(
-            photo=random.choice(PICS),
-            caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        return
-
-    # ... Inga irunthu unga palaya code commands.py la thodaralam
-
-    if not await is_subscribed(message.from_user.id, client):
-        links = await create_invite_links(client)
-        btn = [[InlineKeyboardButton("🤖 Join Updates Channel", url=url)] for url in links.values()]
-        if len(message.command) == 2:
-            try:
-                kk, file_id = message.command[1].split("_", 1)
-                pre = 'checksubp' if kk == 'filep' else 'checksub'
-                btn.append([InlineKeyboardButton("🔄 Try Again", callback_data=f"{pre}#{file_id}")])
-            except (IndexError, ValueError):
-                btn.append([InlineKeyboardButton("🔄 Try Again", url=f"https://t.me/{temp.U_NAME}?start={message.command[1]}")])
-        
-        await client.send_message(
-            chat_id=message.from_user.id,
-            text="**Please Join My Updates Channel to use this Bot!**",
-            reply_markup=InlineKeyboardMarkup(btn),
-            parse_mode=enums.ParseMode.MARKDOWN
-        )
-        return
-
-    if len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help"]:
-        buttons = [
-            [InlineKeyboardButton('ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜroups', url=f'http://t.me/{temp.U_NAME}?startgroup=true')],
-            [InlineKeyboardButton('ʜᴇʟᴘ', callback_data='help'), InlineKeyboardButton('ᴀʙᴏᴜᴛ', callback_data='about')],
-            [InlineKeyboardButton(f'Anime Channel​', url='https://t.me/Anime_single'), InlineKeyboardButton(f'ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url='https://t.me/super_goku_god')]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await message.reply_photo(
-            photo=random.choice(PICS),
-            caption=script.START_TXT.format(message.from_user.mention, temp.U_NAME, temp.B_NAME),
-            reply_markup=reply_markup,
-            parse_mode=enums.ParseMode.HTML
-        )
-        return
-    
+    # 👇 MNTGX FILTER LOGIC 👇
     if len(message.command) == 2 and message.command[1].startswith('mntgx'):
         searches = message.command[1].split("-", 1)[1] 
         search = searches.replace('-', ' ')
@@ -349,6 +282,7 @@ async def start(client, message):
         await auto_filter(client, message) 
         return
 
+    # 👇 VERIFY LOGIC 👇
     if len(message.command) == 2 and message.command[1].startswith('verify_'):
         try:
             link_parts = message.command[1].split("_", 2)
