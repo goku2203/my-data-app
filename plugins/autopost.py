@@ -5,6 +5,7 @@ from pyrogram import Client, filters
 from info import CHANNELS, UPDATES_CHANNEL
 from database.ia_filterdb import save_file, unpack_new_file_id
 from utils import temp, get_size
+from pyrogram.enums import ParseMode
 
 logger = logging.getLogger(__name__)
 
@@ -209,6 +210,7 @@ async def send_batched_post(client, clean_name):
         await client.send_message(
             chat_id=UPDATES_CHANNEL,
             text=caption
+            parse_mode=ParseMode.HTML # <--- Itha add pannanum
         )
         logger.info(f"✅ Post Sent: {clean_name}")
     except Exception as e:
