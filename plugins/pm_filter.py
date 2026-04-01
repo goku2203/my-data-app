@@ -254,12 +254,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
                     chat = await client.get_chat(grpid)
                     title = chat.title
                 except:
-                    await query.message.edit_text("Make sure I'm present in your group!!", quote=True)
+                    await query.message.edit_text("Make sure I'm present in your group!!")
                     return await query.answer('Processing...')
             else:
                 await query.message.edit_text(
-                    "I'm not connected to any groups!\nCheck /connections or connect to any groups",
-                    quote=True
+                    "I'm not connected to any groups!\nCheck /connections or connect to any groups"
                 )
                 return await query.answer('Action Failed!', show_alert=True)
 
