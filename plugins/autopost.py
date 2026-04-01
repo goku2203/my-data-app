@@ -209,7 +209,7 @@ async def send_batched_post(client, clean_name):
     try:
         await client.send_message(
             chat_id=UPDATES_CHANNEL,
-            text=caption
+            text=caption,
             parse_mode=ParseMode.HTML # <--- Itha add pannanum
         )
         logger.info(f"✅ Post Sent: {clean_name}")
