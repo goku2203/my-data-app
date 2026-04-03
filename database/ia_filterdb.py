@@ -14,7 +14,6 @@ from info import DATABASE_URI, DATABASE_NAME, COLLECTION_NAME, USE_CAPTION_FILTE
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-
 client = AsyncIOMotorClient(DATABASE_URI)
 db = client[DATABASE_NAME]
 instance = Instance.from_db(db)
@@ -70,45 +69,37 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
     """For given query return (results, next_offset)"""
 
     query = query.strip()
-    
-    # 1. Thevai illatha words (Junk words) remove pandrom
-    junk_words = r"\b(movie|movies|download|tamil|telugu|malayalam|hindi|english|dubbed|hd|hq|1080p|720p|4k|print|full|file|link|send|give|please|plz)\b"
-    clean_query = re.sub(junk_words, "", query, flags=re.IGNORECASE).strip()
-    
-    # User verum 'tamil movie' nu type panna empty aagidum, so appo pazhaya query a edukkurom
-    if not clean_query:
-        clean_query = query 
-
-    # 2. Advanced Regex - Lookahead pattern (Words order maari irunthalum kandupudikum)
-    keywords = re.split(r'[\s\.\+\-_]+', clean_query)
-    
-    lookahead_pattern = ""
-    for word in keywords:
-        if word:
-            # Entha edathula antha word irunthalum match aagum
-            lookahead_pattern += f"(?=.*{word})"
-            
-    try:
-        regex = re.compile(lookahead_pattern, flags=re.IGNORECASE)
-    except:
-        return [], '', 0
-
-    # 3. Database filter apply pandrom
-    if USE_CAPTION_FILTER:
-        filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]}
+    #if filter:
+        #better ?
+        #query = query.replace(' ', r'(\s|\.|\+|\-|_)')
+        #raw_pattern = r'(\s|_|\-|\.|\+)' + query + r'(\s|_|\-|\.|\+)'
+    if not query:
+        raw_pattern = '.'
+    elif ' ' not in query:
+        raw_pattern = r'(\b|[\.\+\-_])' + query + r'(\b|[\.\+\-_])'
     else:
-        filter_db = {'file_name': regex}
+        raw_pattern = query.replace(' ', r'.*[\s\.\+\-_]')
+    
+    try:
+        regex = re.compile(raw_pattern, flags=re.IGNORECASE)
+    except:
+        return []
+
+    if USE_CAPTION_FILTER:
+        filter = {'$or': [{'file_name': regex}, {'caption': regex}]}
+    else:
+        filter = {'file_name': regex}
 
     if file_type:
-        filter_db['file_type'] = file_type
+        filter['file_type'] = file_type
 
-    total_results = await Media.count_documents(filter_db)
+    total_results = await Media.count_documents(filter)
     next_offset = offset + max_results
 
     if next_offset > total_results:
         next_offset = ''
 
-    cursor = Media.find(filter_db)
+    cursor = Media.find(filter)
     # Sort by recent
     cursor.sort('$natural', -1)
     # Slice files according to offset and max results
@@ -117,6 +108,8 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
     files = await cursor.to_list(length=max_results)
 
     return files, next_offset, total_results
+
+
 
 async def get_file_details(query):
     filter = {'file_id': query}
