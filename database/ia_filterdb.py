@@ -69,37 +69,44 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
     """For given query return (results, next_offset)"""
 
     query = query.strip()
-    #if filter:
-        #better ?
-        #query = query.replace(' ', r'(\s|\.|\+|\-|_)')
-        #raw_pattern = r'(\s|_|\-|\.|\+)' + query + r'(\s|_|\-|\.|\+)'
-    if not query:
-        raw_pattern = '.'
-    elif ' ' not in query:
-        raw_pattern = r'(\b|[\.\+\-_])' + query + r'(\b|[\.\+\-_])'
-    else:
-        raw_pattern = query.replace(' ', r'.*[\s\.\+\-_]')
     
+    # 1. User type pandrathula irukkura thevai illatha junk words-a thookiduvom
+    junk_words = r"\b(movie|movies|download|tamil|telugu|malayalam|hindi|english|dubbed|hd|hq|1080p|720p|4k|print|full|file|link|send|give|please|plz)\b"
+    clean_query = re.sub(junk_words, "", query, flags=re.IGNORECASE).strip()
+    
+    # User verum "tamil movie" nu mattum type panniruntha empty aagidum, appo pazhaya query-a use pannikalam
+    if not clean_query:
+        clean_query = query 
+
+    # 2. Words-a thani thaniya pirichu Lookahead Regex create pandrom (Words maari maari irunthalum kandupudikka)
+    keywords = clean_query.split()
+    
+    if not keywords:
+        raw_pattern = '.'
+    else:
+        # Ithu yentha order la per irunthalum exact aaga unga DB la thedi edukkum
+        raw_pattern = "".join([f"(?=.*{re.escape(word)})" for word in keywords])
+            
     try:
         regex = re.compile(raw_pattern, flags=re.IGNORECASE)
     except:
-        return []
+        return [], '', 0
 
     if USE_CAPTION_FILTER:
-        filter = {'$or': [{'file_name': regex}, {'caption': regex}]}
+        filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]}
     else:
-        filter = {'file_name': regex}
+        filter_db = {'file_name': regex}
 
     if file_type:
-        filter['file_type'] = file_type
+        filter_db['file_type'] = file_type
 
-    total_results = await Media.count_documents(filter)
+    total_results = await Media.count_documents(filter_db)
     next_offset = offset + max_results
 
     if next_offset > total_results:
         next_offset = ''
 
-    cursor = Media.find(filter)
+    cursor = Media.find(filter_db)
     # Sort by recent
     cursor.sort('$natural', -1)
     # Slice files according to offset and max results
@@ -108,8 +115,6 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
     files = await cursor.to_list(length=max_results)
 
     return files, next_offset, total_results
-
-
 
 async def get_file_details(query):
     filter = {'file_id': query}
