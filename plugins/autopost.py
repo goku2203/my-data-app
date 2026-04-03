@@ -180,7 +180,7 @@ async def send_batched_post(client, clean_name):
     # --- CAPTION SETUP ---
     caption = (
         f"🎬 <b>{clean_name}</b>\n\n"
-        f"🗓️ <blockquote><b><i>Year: {first_file['year']}</i></b>\n"
+        f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
         f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
         f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n"
         f"━━━━━━━━━━━━━━━━━━━\n"
@@ -202,7 +202,7 @@ async def send_batched_post(client, clean_name):
         return
 
     caption += "━━━━━━━━━━━━━━━━━━━\n"
-    caption += "<i>(Click the file size to download)</i>\n\n"
+    caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
     caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>\n\n"
     caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
 
