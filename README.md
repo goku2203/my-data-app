@@ -1,6 +1,6 @@
 
 <h1 align="center">
-  <b>Shobana Filter Bot</b>
+  <b>Goku Stark Filter Bot</b>
 </h1>
 
 <p align="center">
