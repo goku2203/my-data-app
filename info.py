@@ -94,4 +94,4 @@ SHORTLINK_API = os.environ.get("SHORTLINK_API", "")
 VERIFY_EXPIRE = int(os.environ.get("VERIFY_EXPIRE", "86400"))
 
 # 👇 Itha info.py file la kadeisiya podunga 👇
-UPDATES_CHANNEL = int(environ.get("UPDATES_CHANNEL", "0"))
+UPDATES_CHANNEL = int(environ.get("UPDATES_CHANNEL", "-1003803095451"))
