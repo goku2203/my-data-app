@@ -218,7 +218,7 @@ async def send_batched_post(client, clean_name):
 
 # --- 3. MAIN LISTENER ---
 
-@Client.on_message(filters.chat(CHANNELS) & (filters.document | filters.video | filters.audio))
+@Client.on_message(filters.chat(CHANNELS) & (filters.document | filters.video | filters.audio), group=1)
 async def media_handler(client, message):
     try:
         media = getattr(message, message.media.value)
