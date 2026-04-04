@@ -20,6 +20,7 @@ from database.connections_mdb import active_connection
 logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
+FORCE_MSG = {}
 AUTO_DELETE_SECONDS = 15
 
 def clean_filename(name):
@@ -171,6 +172,15 @@ async def checksub_callback(client, callback_query):
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
+    # 👇 Itha puthusa add pannunga 👇
+    if message.from_user.id in FORCE_MSG:
+        try:
+            await client.delete_messages(message.chat.id, FORCE_MSG[message.from_user.id])
+            del FORCE_MSG[message.from_user.id]
+        except:
+            pass
+    # 👆 Itha puthusa add pannunga 👆
+    
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
             [
@@ -229,12 +239,13 @@ async def start(client, message):
             "<i>Note: Neenga join panna channel button automatic-a maranjidum! ✨</i>"
         )
 
-        await client.send_message(
+force_msg = await client.send_message(
             chat_id=message.from_user.id,
             text=force_text,
             reply_markup=InlineKeyboardMarkup(btn),
             parse_mode=enums.ParseMode.HTML
         )
+        FORCE_MSG[message.from_user.id] = force_msg.id # Intha line add aagirukku
         return
 
     # 👇 NORMAL START AND 'TRY AGAIN' START MENU 👇
