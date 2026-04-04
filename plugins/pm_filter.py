@@ -952,12 +952,8 @@ async def auto_filter(client, msg, spoll=False):
                     else:
                         req_btn = [[InlineKeyboardButton("📝 Request Movie", url="https://t.me/Tamilmovieslink_bot")]]
                         await search_msg.edit(
-                            f"<b>⚠️ MISSION FAILED ⚠️</b>\n\n"
-                            f"🎬 <b>Movie:</b> <code>{search}</code>\n"
-                            f"🤖 <b>Status:</b> <i>Database la intha padam illa thalaiva! 🥺</i>\n\n"
-                            f"<b>💡 Smart Tips:</b>\n"
-                            f"👉 Spelling correct ah irukka nu check pannunga.\n"
-                            f"👉 Year illama verum title mattum thedi paarunga.\n"
+                            text=script.SPOLL_NOT_FND.format(search=search),
+                            reply_markup=InlineKeyboardMarkup(req_btn)
                         )
                         await asyncio.sleep(15)
                         await search_msg.delete()
