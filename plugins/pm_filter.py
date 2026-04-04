@@ -957,7 +957,7 @@ async def auto_filter(client, msg, spoll=False):
                             f"🤖 <b>Status:</b> <i>Database la intha padam illa thalaiva! 🥺</i>\n\n"
                             f"<b>💡 Smart Tips:</b>\n"
                             f"👉 Spelling correct ah irukka nu check pannunga.\n"
-                            f"👉 Year illama verum title mattum thedi paarunga.
+                            f"👉 Year illama verum title mattum thedi paarunga.\n"
                         )
                         await asyncio.sleep(15)
                         await search_msg.delete()
