@@ -238,14 +238,13 @@ async def start(client, message):
             "2️⃣ Apram <b>'🔄 Try Again'</b> button-a click pannunga.\n\n"
             "<i>Note: Neenga join panna channel button automatic-a maranjidum! ✨</i>"
         )
-
-force_msg = await client.send_message(
+        force_msg = await client.send_message(
             chat_id=message.from_user.id,
             text=force_text,
             reply_markup=InlineKeyboardMarkup(btn),
             parse_mode=enums.ParseMode.HTML
         )
-        FORCE_MSG[message.from_user.id] = force_msg.id # Intha line add aagirukku
+        FORCE_MSG[message.from_user.id] = force_msg.id
         return
 
     # 👇 NORMAL START AND 'TRY AGAIN' START MENU 👇
