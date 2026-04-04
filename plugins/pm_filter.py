@@ -939,32 +939,25 @@ async def auto_filter(client, msg, spoll=False):
                                 print(f"Missing Log Error: {e}")
                     
                     if settings["spell_check"]:
-                        await search_msg.edit("<b>⚠️ Analyzing Database...</b>\n<code>[======>   ] 60%</code>")
-                        await asyncio.sleep(0.5)
+                        await search_msg.edit("<b><i>🕵️‍♂️ Searching .</i></b>")
+                        await asyncio.sleep(0.4)
+                        await search_msg.edit("<b><i>🕵️‍♂️ Searching . .</i></b>")
+                        await asyncio.sleep(0.4)
+                        await search_msg.edit("<b><i>🕵️‍♂️ Searching . . .</i></b>")
+                        await asyncio.sleep(0.4)
                         
-                        await search_msg.edit("<b>🔴 ERROR 404: Movie Not Found!</b>\n<code>[==========] 100%</code>")
-                        await asyncio.sleep(0.8)
-                        
-                        await search_msg.edit(
-                            f"<b>🤖 System Alert:</b>\n"
-                            f"<i>En kitta '<b>{search}</b>' illa thalaiva! 🥺\n"
-                            f"Wait... Google kitta spelling thedi paakuren... 🕵️‍♂️🌍</i>"
-                        )
-                        await asyncio.sleep(1.5) 
                         await search_msg.delete() 
                         return await advantage_spell_chok(client, msg)
                         
                     else:
                         req_btn = [[InlineKeyboardButton("📝 Request Movie", url="https://t.me/Tamilmovieslink_bot")]]
                         await search_msg.edit(
-                            f"<b>🚫 MISSION FAILED!</b>\n\n"
+                            f"<b>⚠️ MISSION FAILED ⚠️</b>\n\n"
                             f"🎬 <b>Movie:</b> <code>{search}</code>\n"
-                            f"🤖 <b>Status:</b> <i>En kitta intha padam illa thalaiva! 🥺</i>\n\n"
-                            f"💡 <b>Tips:</b>\n"
-                            f"👉 Spelling correct-a check pannu.\n"
-                            f"👉 Year illama verum pera mattum potu thedu.\n"
-                            f"👉 Illana keezha irukka button click panni Admin kitta kelu!",
-                            reply_markup=InlineKeyboardMarkup(req_btn)
+                            f"🤖 <b>Status:</b> <i>Database la intha padam illa thalaiva! 🥺</i>\n\n"
+                            f"<b>💡 Smart Tips:</b>\n"
+                            f"👉 Spelling correct ah irukka nu check pannunga.\n"
+                            f"👉 Year illama verum title mattum thedi paarunga.
                         )
                         await asyncio.sleep(15)
                         await search_msg.delete()
