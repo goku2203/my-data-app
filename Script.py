@@ -157,16 +157,19 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>🌐 Zone:</b> <code>Asia/Kolkata</code>
 <b>🛠️ Version:</b> <code>v2.0 [Stable]</code>"""
 
-    SPOLL_NOT_FND = """<b>❌ No Results Found</b>
+    SPOLL_NOT_FND = """<b>⚠️ MISSION FAILED ⚠️</b>
 
 <i>I couldn't find what you are looking for.</i> ☹️
+<i>Neenga search pannadhu enakku kandupidikka mudiyala.</i>☹️
 
 <b>💡 Search Tips:</b>
 1️⃣ Check your spelling.
 2️⃣ Use format: <code>[Movie Name] [Year]</code>
 3️⃣ Don't ask for unreleased movies.
 
-<i>If you think this is an error, report to Admin using /bugs.</i>"""
+<b>💡 Tamil Search Tips:</b>
+👉 Spelling correct ah irukka nu check pannunga.
+👉 Year illama verum Movie Name mattum thedi paarunga."""
 
     # SPELL CHECK LANGUAGES
     ENG_SPELL = """<b>💡 Spelling Check (English)</b>
