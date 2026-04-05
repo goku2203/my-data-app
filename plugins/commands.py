@@ -947,7 +947,6 @@ async def goku_menu_callbacks(client, callback_query):
             
     # 4. Control Panel Button Click Panna
     elif data == "goku_panel":
-        global MAINTENANCE_MODE
         status = "ON 🔴 (Blocked)" if MAINTENANCE_MODE else "OFF 🟢 (Normal)"
         panel_text = (
             "<b>👑 𝐀𝐃𝐌𝐈𝐍 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 𝐏𝐀𝐍𝐄𝐋 👑</b>\n\n"
