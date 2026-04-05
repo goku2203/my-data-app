@@ -17,6 +17,9 @@ from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM
 from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user
 from database.connections_mdb import active_connection
 
+# Maintenance mode switch
+MAINTENANCE_MODE = False
+
 logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
@@ -180,6 +183,9 @@ async def start(client, message):
         except:
             pass
     # 👆 Itha puthusa add pannunga 👆
+    
+    if MAINTENANCE_MODE and message.from_user.id not in ADMINS:
+        return await message.reply_text("⚙️ Bot ippo update aagittu irukku nanba! Konja neram kazhichu try pannunga. 🙏")
     
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
@@ -819,3 +825,56 @@ async def auto_delete_helper(msg, delay):
         await msg.delete()
     except:
         pass
+
+# Mela irukka imports kooda itha add pannikka marakkathinga (already irunthaa vitrunga)
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+# Maintenance mode switch
+MAINTENANCE_MODE = False
+
+# Ithu command pottu menu open panrathukku
+@Client.on_message(filters.command("maintenance") & filters.user(ADMINS))
+async def maintenance_menu(client, message):
+    buttons = [
+        [
+            InlineKeyboardButton("🟢 Turn ON", callback_data="maint_on"),
+            InlineKeyboardButton("🔴 Turn OFF", callback_data="maint_off")
+        ]
+    ]
+    status = "ON 🔴" if MAINTENANCE_MODE else "OFF 🟢"
+    await message.reply_text(
+        f"⚙️ **Maintenance Control Menu**\n\n🔧 Current Status: **{status}**\n\nKeezha irukka buttons use panni maathikkonga 👇",
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+# Ithu buttons click pannum pothu work aagurathukku
+@Client.on_callback_query(filters.regex(r'^maint_') & filters.user(ADMINS))
+async def maintenance_callback(client, callback_query):
+    global MAINTENANCE_MODE
+    data = callback_query.data
+    
+    if data == "maint_on":
+        if MAINTENANCE_MODE:
+            return await callback_query.answer("Already ON la thaan irukku bro! 😅", show_alert=True)
+        MAINTENANCE_MODE = True
+        status = "ON 🔴"
+        alert_text = "✅ Maintenance Mode ON aagiduchu! Normal users-ku bot work aagathu."
+    elif data == "maint_off":
+        if not MAINTENANCE_MODE:
+            return await callback_query.answer("Already OFF la thaan irukku bro! 😅", show_alert=True)
+        MAINTENANCE_MODE = False
+        status = "OFF 🟢"
+        alert_text = "❌ Maintenance Mode OFF aagiduchu! Bot ellarkum pazhaya mathiri work aagum."
+        
+    buttons = [
+        [
+            InlineKeyboardButton("🟢 Turn ON", callback_data="maint_on"),
+            InlineKeyboardButton("🔴 Turn OFF", callback_data="maint_off")
+        ]
+    ]
+    
+    await callback_query.message.edit_text(
+        f"⚙️ **Maintenance Control Menu**\n\n🔧 Current Status: **{status}**\n\nKeezha irukka buttons use panni maathikkonga 👇",
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+    await callback_query.answer(alert_text, show_alert=True)
