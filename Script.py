@@ -24,6 +24,13 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
 <b>👇 Choose a category below:</b>"""
 
+    MAINT_TXT = (
+        "<b>🛠 𝐁𝐨𝐭 𝐔𝐧𝐝𝐞𝐫 𝐌𝐚𝐢𝐧𝐭𝐞𝐧𝐚𝐧𝐜𝐞 🛠</b>\n\n"
+        "<i>Hey nanba! Bot ippo chinna update-la irukku... ⚙️</i>\n\n"
+        "<blockquote>🚀 <b>New features loading! & Bugs Fixing!</b>\n"
+        "Konjam wait pannunga, seekiram mass-a thirumba varuvom. ✨</blockquote>"
+    )
+
     ABOUT_TXT = """<b>✯ 𝙼𝚈 𝙿𝚁𝙾𝙵𝙸𝙻𝙴 ✯</b>
 
 <b>🤖 𝐍𝐚𝐦𝐞: {}</b>
