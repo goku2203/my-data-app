@@ -21,68 +21,6 @@ def get_clean_name(name):
     return clean.lower()
 
 # ====================================================
-# 👇👇 THIS IS THE MAIN AUTO INDEX & POST FUNCTION 👇👇
-# ====================================================
-
-@Client.on_message(filters.chat(CHANNELS) & (filters.document | filters.video | filters.audio))
-async def media(client, message):
-    """
-    Automatic-a File-a Save pannum & Updates Channel-la Post podum.
-    """
-    try:
-        # 1. Save to Database
-        # -------------------
-        for file_type in ("document", "video", "audio"):
-            media = getattr(message, file_type, None)
-            if media is not None:
-                break
-        else:
-            return
-
-        media.file_type = file_type
-        media.caption = message.caption
-
-        # Save File
-        await save_file(media)
-        logger.info(f"✅ Auto Index: File Saved -> {media.file_name}")
-
-        # 2. Post to Updates Channel
-        # --------------------------
-        if not UPDATES_CHANNEL:
-            return
-
-        file_name = media.file_name
-        clean_name = get_clean_name(file_name)
-        file_size = get_size(media.file_size)
-        file_id = media.file_id
-
-        # Simple Caption
-        caption = (
-            f"<b>📂 New File Uploaded!</b>\n\n"
-            f"<b>🎬 Name:</b> {clean_name.upper()}\n"
-            f"<b>💾 Size:</b> {file_size}\n"
-            f"<b>📁 Original Name:</b> <code>{file_name}</code>\n\n"
-            f"<i>Get this file from the bot! 👇</i>"
-        )
-
-        # Button
-        btn = [[InlineKeyboardButton("📥 Get File", url=f"https://t.me/{temp.U_NAME}?start=filep_{file_id}")]]
-
-        # Send Message
-        try:
-            await client.send_message(
-                chat_id=UPDATES_CHANNEL,
-                text=caption,
-                reply_markup=InlineKeyboardMarkup(btn)
-            )
-            logger.info(f"✅ Auto Post Sent: {clean_name}")
-        except Exception as e:
-            logger.error(f"❌ Auto Post Failed: {e}")
-
-    except Exception as e:
-        logger.error(f"❌ Auto Index Error: {e}")
-
-# ====================================================
 # 👇👇 MANUAL INDEXING CODE (Optimized for No Lag) 👇👇
 # ====================================================
 
