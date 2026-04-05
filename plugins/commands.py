@@ -18,6 +18,7 @@ from utils import get_settings, get_size, is_subscribed, save_group_settings, te
 from database.connections_mdb import active_connection
 # Mela irukka imports kooda itha add pannikka marakkathinga (already irunthaa vitrunga)
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import BotCommand, BotCommandScopeDefault, BotCommandScopeChat
 
 # Maintenance mode switch
 MAINTENANCE_MODE = False
@@ -871,6 +872,150 @@ async def maintenance_callback(client, callback_query):
     
     await callback_query.message.edit_text(
         f"⚙️ **Maintenance Control Menu**\n\n🔧 Current Status: **{status}**\n\nKeezha irukka buttons use panni maathikkonga 👇",
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+    await callback_query.answer(alert_text, show_alert=True)
+
+# 👇 GOKU MASTER MENU 👇
+@Client.on_message(filters.command("goku") & filters.user(ADMINS))
+async def goku_master_menu(client, message):
+    buttons = [
+        [
+            InlineKeyboardButton("📢 Force Sub", callback_data="goku_fsub"),
+            InlineKeyboardButton("🛠 Maintenance", callback_data="goku_maint")
+        ],
+        [
+            InlineKeyboardButton("📄 Logs", callback_data="goku_logs"),
+            InlineKeyboardButton("⚙️ Control Panel", callback_data="goku_panel")
+        ],
+        [
+            InlineKeyboardButton("✖️ Close", callback_data="close_data")
+        ]
+    ]
+    
+    await message.reply_text(
+        "<b>👑 𝐆𝐎𝐊𝐔 𝐌𝐀𝐒𝐓𝐄𝐑 𝐌𝐄𝐍𝐔 👑</b>\n\n"
+        "<i>Enna pannanum nu keezha irukka buttons-la select pannunga Boss!</i> 👇",
+        reply_markup=InlineKeyboardMarkup(buttons),
+        parse_mode=enums.ParseMode.HTML
+    )
+
+@Client.on_callback_query(filters.regex(r'^goku_') & filters.user(ADMINS))
+async def goku_menu_callbacks(client, callback_query):
+    data = callback_query.data
+    
+    # 1. Force Sub Button Click Panna
+    if data == "goku_fsub":
+        buttons = [[InlineKeyboardButton("🔙 Back to Menu", callback_data="goku_back")]]
+        await callback_query.message.edit_text(
+            "<b>📢 𝐅𝐨𝐫𝐜𝐞 𝐒𝐮𝐛 𝐔𝐩𝐝𝐚𝐭𝐞</b>\n\n"
+            "Puthu channel-a Force Sub la add pannanumna, chat-la keezha irukka mathiri command type pannunga:\n\n"
+            "👉 <code>/fsub -1001234567890</code>\n\n"
+            "<i>(Idhula -100... irukka idathula unga channel ID-a podunga)</i>",
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=enums.ParseMode.HTML
+        )
+        
+    # 2. Maintenance Button Click Panna
+    elif data == "goku_maint":
+        global MAINTENANCE_MODE
+        status = "ON 🔴" if MAINTENANCE_MODE else "OFF 🟢"
+        buttons = [
+            [
+                InlineKeyboardButton("🟢 Turn ON", callback_data="maint_on"),
+                InlineKeyboardButton("🔴 Turn OFF", callback_data="maint_off")
+            ],
+            [InlineKeyboardButton("🔙 Back to Menu", callback_data="goku_back")]
+        ]
+        await callback_query.message.edit_text(
+            f"⚙️ **Maintenance Control**\n\n🔧 Current Status: **{status}**\n\nKeezha irukka buttons use panni maathikkonga 👇",
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+        
+    # 3. Logs Button Click Panna
+    elif data == "goku_logs":
+        await callback_query.answer("Logs file edukkuren... ⏳")
+        try:
+            await client.send_document(
+                chat_id=callback_query.message.chat.id,
+                document='TelegramBot.txt',
+                caption="<b>📄 Itho unga Bot Logs!</b>",
+                parse_mode=enums.ParseMode.HTML
+            )
+        except Exception as e:
+            await callback_query.message.reply_text(f"Logs file kedaikkala: {str(e)}")
+            
+    # 4. Control Panel Button Click Panna
+    elif data == "goku_panel":
+        global MAINTENANCE_MODE
+        status = "ON 🔴 (Blocked)" if MAINTENANCE_MODE else "OFF 🟢 (Normal)"
+        panel_text = (
+            "<b>👑 𝐀𝐃𝐌𝐈𝐍 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 𝐏𝐀𝐍𝐄𝐋 👑</b>\n\n"
+            f"🔧 <b>Maintenance Status:</b> <b>{status}</b>\n\n"
+            "<b>🛠️ 𝐒𝐞𝐜𝐫𝐞𝐭 𝐂𝐨𝐦𝐦𝐚𝐧𝐝𝐬:</b>\n"
+            "🔸 <code>/channel</code> - Indexed Channels paakka\n"
+            "🔸 <code>/delete</code> - Oru file-a delete panna\n"
+            "🔸 <code>/deleteall</code> - Motha DB azhikka\n"
+            "🔸 <code>/broadcast</code> - Ellarkum message anuppa\n"
+        )
+        buttons = [[InlineKeyboardButton("🔙 Back to Menu", callback_data="goku_back")]]
+        await callback_query.message.edit_text(
+            text=panel_text,
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=enums.ParseMode.HTML
+        )
+        
+    # 5. Back Button Click Panna (Thirumba Main Menu Vara)
+    elif data == "goku_back":
+        buttons = [
+            [
+                InlineKeyboardButton("📢 Force Sub", callback_data="goku_fsub"),
+                InlineKeyboardButton("🛠 Maintenance", callback_data="goku_maint")
+            ],
+            [
+                InlineKeyboardButton("📄 Logs", callback_data="goku_logs"),
+                InlineKeyboardButton("⚙️ Control Panel", callback_data="goku_panel")
+            ],
+            [
+                InlineKeyboardButton("✖️ Close", callback_data="close_data")
+            ]
+        ]
+        await callback_query.message.edit_text(
+            "<b>👑 𝐆𝐎𝐊𝐔 𝐌𝐀𝐒𝐓𝐄𝐑 𝐌𝐄𝐍𝐔 👑</b>\n\n"
+            "<i>Enna pannanum nu keezha irukka buttons-la select pannunga Boss!</i> 👇",
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=enums.ParseMode.HTML
+        )
+
+# 👇 ON/OFF Buttons-a handle panra code (Pazhaya code-ku pathila itha podunga) 👇
+@Client.on_callback_query(filters.regex(r'^maint_') & filters.user(ADMINS))
+async def maintenance_callback(client, callback_query):
+    global MAINTENANCE_MODE
+    data = callback_query.data
+    
+    if data == "maint_on":
+        if MAINTENANCE_MODE:
+            return await callback_query.answer("Already ON la thaan irukku bro! 😅", show_alert=True)
+        MAINTENANCE_MODE = True
+        alert_text = "✅ Maintenance Mode ON aagiduchu!"
+    elif data == "maint_off":
+        if not MAINTENANCE_MODE:
+            return await callback_query.answer("Already OFF la thaan irukku bro! 😅", show_alert=True)
+        MAINTENANCE_MODE = False
+        alert_text = "❌ Maintenance Mode OFF aagiduchu!"
+        
+    status = "ON 🔴" if MAINTENANCE_MODE else "OFF 🟢"
+    
+    buttons = [
+        [
+            InlineKeyboardButton("🟢 Turn ON", callback_data="maint_on"),
+            InlineKeyboardButton("🔴 Turn OFF", callback_data="maint_off")
+        ],
+        [InlineKeyboardButton("🔙 Back to Menu", callback_data="goku_back")]
+    ]
+    
+    await callback_query.message.edit_text(
+        f"⚙️ **Maintenance Control**\n\n🔧 Current Status: **{status}**\n\nKeezha irukka buttons use panni maathikkonga 👇",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
     await callback_query.answer(alert_text, show_alert=True)
