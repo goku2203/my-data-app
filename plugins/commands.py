@@ -16,6 +16,8 @@ from database.users_chats_db import db
 from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY, UPDATES_CHANNEL, BOT_USERNAME
 from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user
 from database.connections_mdb import active_connection
+# Mela irukka imports kooda itha add pannikka marakkathinga (already irunthaa vitrunga)
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # Maintenance mode switch
 MAINTENANCE_MODE = False
@@ -825,12 +827,6 @@ async def auto_delete_helper(msg, delay):
         await msg.delete()
     except:
         pass
-
-# Mela irukka imports kooda itha add pannikka marakkathinga (already irunthaa vitrunga)
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-# Maintenance mode switch
-MAINTENANCE_MODE = False
 
 # Ithu command pottu menu open panrathukku
 @Client.on_message(filters.command("maintenance") & filters.user(ADMINS))
