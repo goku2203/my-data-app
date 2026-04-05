@@ -47,11 +47,7 @@ def clean_filename(name):
 
 @Client.on_message((filters.group | filters.private) & filters.text)
 async def give_filter(client, message):
-    try:
-        await message.delete()
-    except Exception as e:
-        pass 
-
+    
     # 👇 INGA PUTHA FSUB CHECK ADD PANNU 👇
     if message.chat.type == enums.ChatType.PRIVATE:
         if not await is_subscribed(message.from_user.id, client):
