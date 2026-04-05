@@ -187,7 +187,7 @@ async def start(client, message):
     # 👆 Itha puthusa add pannunga 👆
     
     if MAINTENANCE_MODE and message.from_user.id not in ADMINS:
-        return await message.reply_text("⚙️ Bot ippo update aagittu irukku nanba! Konja neram kazhichu try pannunga. 🙏")
+        return await message.reply_text(script.MAINT_TXT, parse_mode=enums.ParseMode.HTML)
     
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
