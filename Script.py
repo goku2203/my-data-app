@@ -25,7 +25,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>👇 Choose a category below:</b>"""
 
     MAINT_TXT = (
-        <b>⚠️ Bot is Under Maintenance! 🛠️</b>\n\n<i>5 to 10 minutes wait pannunga. Work nadanthutu irukku!</i>
+        "<b>⚠️ Bot is Under Maintenance! 🛠️</b>\n\n<i>5 to 10 minutes wait pannunga. Work nadanthutu irukku!</i>"
     )
 
     ABOUT_TXT = """<b>✯ 𝙼𝚈 𝙿𝚁𝙾𝙵𝙸𝙻𝙴 ✯</b>
