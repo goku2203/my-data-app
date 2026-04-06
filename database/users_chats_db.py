@@ -2,11 +2,8 @@
 #  @MrMNTG @MusammilN
 #please give credits https://github.com/MN-BOTS/ShobanaFilterBot
 import motor.motor_asyncio
-import datetime # Ithu namma smart counter-kaga add panniyachu
+import datetime
 from info import DATABASE_NAME, DATABASE_URI, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, P_TTI_SHOW_OFF, SINGLE_BUTTON, SPELL_CHECK_REPLY, PROTECT_CONTENT
-
-#  @MrMNTG @MusammilN
-#please give credits https://github.com/MN-BOTS/ShobanaFilterBot
 
 class Database:
     
@@ -17,7 +14,6 @@ class Database:
         self.grp = self.db.groups
         self.config = self.db.config
 
-
     def new_user(self, id, name):
         return dict(
             id = id,
@@ -27,7 +23,6 @@ class Database:
                 ban_reason="",
             ),
         )
-
 
     def new_group(self, id, title):
         return dict(
@@ -78,10 +73,8 @@ class Database:
     async def get_all_users(self):
         return self.col.find({})
     
-
     async def delete_user(self, user_id):
         await self.col.delete_many({'id': int(user_id)})
-
 
     async def get_banned(self):
         users = self.col.find({'ban_status.is_banned': True})
@@ -90,18 +83,14 @@ class Database:
         b_users = [user['id'] async for user in users]
         return b_users, b_chats
     
-
-
     async def add_chat(self, chat, title):
         chat = self.new_group(chat, title)
         await self.grp.insert_one(chat)
     
-
     async def get_chat(self, chat):
         chat = await self.grp.find_one({'id':int(chat)})
         return False if not chat else chat.get('chat_status')
     
-
     async def re_enable_chat(self, id):
         chat_status=dict(
             is_disabled=False,
@@ -112,7 +101,6 @@ class Database:
     async def update_settings(self, id, settings):
         await self.grp.update_one({'id': int(id)}, {'$set': {'settings': settings}})
         
-    
     async def get_settings(self, id):
         default = {
             'button': SINGLE_BUTTON,
@@ -128,7 +116,6 @@ class Database:
             return chat.get('settings', default)
         return default
     
-
     async def disable_chat(self, chat, reason="No Reason"):
         chat_status=dict(
             is_disabled=True,
@@ -136,12 +123,10 @@ class Database:
             )
         await self.grp.update_one({'id': int(chat)}, {'$set': {'chat_status': chat_status}})
     
-
     async def total_chat_count(self):
         count = await self.grp.count_documents({})
         return count
     
-
     async def get_all_chats(self):
         return self.grp.find({})
 
@@ -184,12 +169,10 @@ class Database:
         return 0
     # ==========================================
 
-db = Database(DATABASE_URI, DATABASE_NAME)
-
-#  @MrMNTG @MusammilN
-#please give credits https://github.com/MN-BOTS/ShobanaFilterBot
-
-async def set_maintenance(self, status: bool):
+    # ==========================================
+    # 👇 MAINTENANCE DB FUNCTIONS 👇
+    # ==========================================
+    async def set_maintenance(self, status: bool):
         await self.col.update_one({'id': 'bot_settings'}, {'$set': {'maintenance': status}}, upsert=True)
 
     async def get_maintenance(self):
@@ -197,3 +180,7 @@ async def set_maintenance(self, status: bool):
         if config:
             return config.get('maintenance', False)
         return False
+    # ==========================================
+
+# Ithu file kadeisila thaan varanum
+db = Database(DATABASE_URI, DATABASE_NAME)
