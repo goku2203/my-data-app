@@ -36,6 +36,18 @@ MISSING_LOG_CHANNEL = -1003555146843
 LOG_COOLDOWN = 600
 RECENT_REQUESTS = {}
 
+async def auto_delete_msgs(bot_msg, user_msg, delay):
+    await asyncio.sleep(delay)
+    try:
+        await bot_msg.delete()
+    except:
+        pass
+    try:
+        if user_msg:
+            await user_msg.delete()
+    except:
+        pass
+
 # 👇 FIX: Search & Button Name Cleaner 👇
 def clean_filename(name):
     if not name: return ""
@@ -1066,14 +1078,12 @@ async def auto_filter(client, msg, spoll=False):
         if imdb and imdb.get('poster'):
             try:
                 if not spoll: await search_msg.delete()
-                
                 delauto = await message.reply_photo(
                     photo=imdb.get('poster'),
                     caption=cap[:1024],
                     reply_markup=InlineKeyboardMarkup(btn)
                 )
-                await asyncio.sleep(60)
-                await delauto.delete()
+                asyncio.create_task(auto_delete_msgs(delauto, message, 60))
             except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
                 if not spoll: await search_msg.delete()
                 pic = imdb.get('poster')
@@ -1083,13 +1093,11 @@ async def auto_filter(client, msg, spoll=False):
                     caption=cap[:1024],
                     reply_markup=InlineKeyboardMarkup(btn)
                 )
-                await asyncio.sleep(60)
-                await delau.delete()
+                asyncio.create_task(auto_delete_msgs(delau, message, 60))
             except Exception as e:
                 if not spoll: await search_msg.delete()
                 audel = await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(btn))
-                await asyncio.sleep(60)
-                await audel.delete()
+                asyncio.create_task(auto_delete_msgs(audel, message, 60))
         else:
             if not spoll: await search_msg.delete()
             
@@ -1103,8 +1111,7 @@ async def auto_filter(client, msg, spoll=False):
             else:
                 autodel = await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(btn))
 
-            await asyncio.sleep(60)
-            await autodel.delete()
+            asyncio.create_task(auto_delete_msgs(autodel, message, 60))
 
         if spoll:
             await msg.message.delete()
