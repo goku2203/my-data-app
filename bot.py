@@ -91,6 +91,8 @@ class Bot(Client):
             os.execl(sys.executable, sys.executable, *sys.argv)
 
     async def start(self, **kwargs):
+        # Bot start aagum pothu maintenance status edukka
+        temp.MAINT_MODE = await db.get_maintenance()
         try:
             app = webserver.AppRunner(await web_server())
             await app.setup()
