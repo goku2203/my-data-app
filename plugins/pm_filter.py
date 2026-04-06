@@ -25,6 +25,7 @@ import time
 from utils import get_size
 from info import BOT_START_TIME
 from datetime import datetime
+from utils import temp
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -875,6 +876,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
     await query.answer()
 
 async def auto_filter(client, msg, spoll=False):
+    # Maintenance Check for Groups & Bot PM
+    if temp.MAINT_MODE and msg.from_user.id not in ADMINS:
+        k = await msg.reply_text(script.MAINT_TXT, parse_mode=enums.ParseMode.HTML)
+        asyncio.create_task(auto_delete_msgs(k, msg, 30))
+        return
     try:
         if not spoll:
             message = msg
