@@ -49,6 +49,7 @@ class temp(object):
     U_NAME = None
     B_NAME = None
     SETTINGS = {}
+    MAINT_MODE = False  # Itha puthusa add pannunga
 
 #  @MrMNTG @MusammilN
 #please give credits https://github.com/MN-BOTS/ShobanaFilterBot
