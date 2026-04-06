@@ -19,6 +19,7 @@ from database.connections_mdb import active_connection
 # Mela irukka imports kooda itha add pannikka marakkathinga (already irunthaa vitrunga)
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.types import BotCommand, BotCommandScopeDefault, BotCommandScopeChat
+from utils import temp
 
 # Maintenance mode switch
 MAINTENANCE_MODE = False
@@ -28,6 +29,13 @@ logger = logging.getLogger(__name__)
 BATCH_FILES = {}
 FORCE_MSG = {}
 AUTO_DELETE_SECONDS = 15
+
+async def delete_maint_msg(bot_msg, user_msg):
+    await asyncio.sleep(30)
+    try: await bot_msg.delete()
+    except: pass
+    try: await user_msg.delete()
+    except: pass
 
 def clean_filename(name):
     if not name: return ""
@@ -186,9 +194,12 @@ async def start(client, message):
         except:
             pass
     # 👆 Itha puthusa add pannunga 👆
-    
-    if MAINTENANCE_MODE and message.from_user.id not in ADMINS:
-        return await message.reply_text(script.MAINT_TXT, parse_mode=enums.ParseMode.HTML)
+
+    # Maintence Check for Start Command
+    if temp.MAINT_MODE and message.from_user.id not in ADMINS:
+        k = await message.reply_text(script.MAINT_TXT, parse_mode=enums.ParseMode.HTML)
+        asyncio.create_task(delete_maint_msg(k, message))
+        return
     
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
@@ -989,22 +1000,23 @@ async def goku_menu_callbacks(client, callback_query):
 # 👇 ON/OFF Buttons-a handle panra code (Pazhaya code-ku pathila itha podunga) 👇
 @Client.on_callback_query(filters.regex(r'^maint_') & filters.user(ADMINS))
 async def maintenance_callback(client, callback_query):
-    global MAINTENANCE_MODE
     data = callback_query.data
     
     if data == "maint_on":
-        if MAINTENANCE_MODE:
+        if temp.MAINT_MODE:
             return await callback_query.answer("Already ON la thaan irukku bro! 😅", show_alert=True)
-        MAINTENANCE_MODE = True
+        temp.MAINT_MODE = True
+        await db.set_maintenance(True) # DB Update aagum
         alert_text = "✅ Maintenance Mode ON aagiduchu!"
+        status = "ON 🔴"
     elif data == "maint_off":
-        if not MAINTENANCE_MODE:
+        if not temp.MAINT_MODE:
             return await callback_query.answer("Already OFF la thaan irukku bro! 😅", show_alert=True)
-        MAINTENANCE_MODE = False
+        temp.MAINT_MODE = False
+        await db.set_maintenance(False) # DB Update aagum
         alert_text = "❌ Maintenance Mode OFF aagiduchu!"
+        status = "OFF 🟢"
         
-    status = "ON 🔴" if MAINTENANCE_MODE else "OFF 🟢"
-    
     buttons = [
         [
             InlineKeyboardButton("🟢 Turn ON", callback_data="maint_on"),
