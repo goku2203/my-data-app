@@ -206,8 +206,7 @@ async def advantage_spoll_choker(bot, query):
             await auto_filter(bot, query, k)
         else:
             k = await query.message.edit(script.MOV_NT_FND)
-            await asyncio.sleep(10)
-            await k.delete()
+            asyncio.create_task(auto_delete_msgs(k, query.message.reply_to_message, 10))
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -963,8 +962,7 @@ async def auto_filter(client, msg, spoll=False):
                             text=script.SPOLL_NOT_FND.format(search=search),
                             reply_markup=InlineKeyboardMarkup(req_btn)
                         )
-                        await asyncio.sleep(15)
-                        await search_msg.delete()
+                        asyncio.create_task(auto_delete_msgs(search_msg, msg, 15))
                         return
                 else:
                     await search_msg.delete() 
@@ -1167,18 +1165,17 @@ async def advantage_spell_chok(client, msg):
             logger.error(f"Fuzzy Error: {e}")
 
     if not movielist:
-        reqst_gle = mv_rqst.replace(" ", "+")
-        google_btn = [
-            [InlineKeyboardButton('🔍 Check on Google 🔎', url=f"https://www.google.com/search?q={reqst_gle}")]
-        ]
-        k = await msg.reply_text(
-            text=script.SPOLL_NOT_FND, 
-            reply_markup=InlineKeyboardMarkup(google_btn),
-            reply_to_message_id=msg.id
-        )
-        await asyncio.sleep(60)
-        await k.delete()
-        return
+            reqst_gle = mv_rqst.replace(" ", "+")
+            google_btn = [
+                [InlineKeyboardButton('🔍 Check on Google 🔎', url=f"https://www.google.com/search?q={reqst_gle}")]
+            ]
+            k = await msg.reply_text(
+                text=script.SPOLL_NOT_FND, 
+                reply_markup=InlineKeyboardMarkup(google_btn),
+                reply_to_message_id=msg.id
+            )
+            asyncio.create_task(auto_delete_msgs(k, msg, 60))
+            return
 
     movielist = list(dict.fromkeys(movielist)) 
     
@@ -1202,8 +1199,7 @@ async def advantage_spell_chok(client, msg):
         reply_to_message_id=msg.id
     )
     
-    await asyncio.sleep(180)
-    await spell_check_del.delete()
+    asyncio.create_task(auto_delete_msgs(spell_check_del, msg, 180))
 
 async def manual_filters(client, message, text=False):
     group_id = message.chat.id
