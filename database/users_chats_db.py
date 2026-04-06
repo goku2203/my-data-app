@@ -188,3 +188,12 @@ db = Database(DATABASE_URI, DATABASE_NAME)
 
 #  @MrMNTG @MusammilN
 #please give credits https://github.com/MN-BOTS/ShobanaFilterBot
+
+async def set_maintenance(self, status: bool):
+        await self.col.update_one({'id': 'bot_settings'}, {'$set': {'maintenance': status}}, upsert=True)
+
+    async def get_maintenance(self):
+        config = await self.col.find_one({'id': 'bot_settings'})
+        if config:
+            return config.get('maintenance', False)
+        return False
