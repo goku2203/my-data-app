@@ -62,7 +62,7 @@ def clean_filename(name):
     # Remove leftover brackets, hyphens or spaces at the start/end
     return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
 
-@Client.on_message((filters.group | filters.private) & filters.text & ~filters.command(["start", "help", "about", "plan", "settings", "maintenance", "fsub", "channel", "delete", "deleteall", "set_template"]))
+@Client.on_message((filters.group | filters.private) & filters.text & ~filters.command(["start", "help", "about", "plan", "settings", "maintenance", "fsub", "channel", "delete", "deleteall", "set_template", "goku"]))
 async def give_filter(client, message):
     
     # 👇 INGA PUTHA FSUB CHECK ADD PANNU 👇
