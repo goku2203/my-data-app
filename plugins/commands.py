@@ -856,7 +856,7 @@ async def maintenance_menu(client, message):
     )
 
 # Ithu buttons click pannum pothu work aagurathukku
-@Client.on_callback_query(filters.regex(r'^maint_') & filters.user(ADMINS))
+@Client.on_callback_query(filters.regex(r'^maint_') & filters.user(ADMINS), group=1)
 async def maintenance_callback(client, callback_query):
     global MAINTENANCE_MODE
     data = callback_query.data
@@ -911,7 +911,7 @@ async def goku_master_menu(client, message):
         parse_mode=enums.ParseMode.HTML
     )
 
-@Client.on_callback_query(filters.regex(r'^goku_') & filters.user(ADMINS))
+@Client.on_callback_query(filters.regex(r'^goku_') & filters.user(ADMINS), group=1)
 async def goku_menu_callbacks(client, callback_query):
     data = callback_query.data
     
@@ -998,7 +998,7 @@ async def goku_menu_callbacks(client, callback_query):
         )
 
 # 👇 ON/OFF Buttons-a handle panra code (Pazhaya code-ku pathila itha podunga) 👇
-@Client.on_callback_query(filters.regex(r'^maint_') & filters.user(ADMINS))
+@Client.on_callback_query(filters.regex(r'^maint_') & filters.user(ADMINS), group=1)
 async def maintenance_callback(client, callback_query):
     data = callback_query.data
     
