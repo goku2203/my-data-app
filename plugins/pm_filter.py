@@ -39,15 +39,19 @@ RECENT_REQUESTS = {}
 
 async def auto_delete_msgs(bot_msg, user_msg, delay):
     await asyncio.sleep(delay)
-    try:
-        await bot_msg.delete()
-    except:
-        pass
-    try:
-        if user_msg:
-            await user_msg.delete()
-    except:
-        pass
+    
+    async def delete_msg(msg):
+        try:
+            if msg:
+                await msg.delete()
+        except:
+            pass
+            
+    # Rendu message-um exact-a ore nerathula delete aaga idhu help pannum
+    await asyncio.gather(
+        delete_msg(bot_msg),
+        delete_msg(user_msg)
+    )
 
 # 👇 FIX: Search & Button Name Cleaner 👇
 def clean_filename(name):
