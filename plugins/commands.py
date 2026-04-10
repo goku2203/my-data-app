@@ -288,10 +288,10 @@ async def start(client, message):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
         
-        m = await message.reply_text(
-            text="<b>🌀 𝐆𝐚𝐭𝐡𝐞𝐫𝐢𝐧𝐠 𝐂𝐡𝐚𝐤𝐫𝐚... ⏳</b>",
-            parse_mode=enums.ParseMode.HTML
-        )
+        # Ungaluku pudicha animated sticker oda ID ah inga podunga
+        STICKER_ID = "CAACAgIAAxkBAAFGz4Vp14TkEDwLXzANxjQxctqfYSDePgAC0wUAAj-VzAqfWrvSXUfHMTsE"
+
+        m = await message.reply_sticker(sticker=STICKER_ID)
         await asyncio.sleep(1.5)
         await m.delete()
 
