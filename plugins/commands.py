@@ -295,7 +295,7 @@ async def start(client, message):
         STICKER_ID = "CAACAgIAAxkBAAFGz4Vp14TkEDwLXzANxjQxctqfYSDePgAC0wUAAj-VzAqfWrvSXUfHMTsE"
 
         m = await message.reply_sticker(sticker=STICKER_ID)
-        await asyncio.sleep(1.5)
+        await asyncio.sleep(2)
         await m.delete()
 
         await message.reply_photo(
