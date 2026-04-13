@@ -162,18 +162,18 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>🛠️ Version:</b> <code>v2.0 [Stable]</code>"""
 
     SPOLL_NOT_FND = """<b>🎬 Movie Not Found! 😕</b>
-
+    
 🔍 <b>Eng:</b> I couldn’t find your movie  
-🔍 <b>Tanglish:</b> Nee thedina movie kidaikala bro  
+🔍 <b>Tanglish:</b> Nee thedina movie kidaikala bro
 
 ⚠️ <b>Reason irukkalam:</b>  
 <blockquote>• 🔤 Spelling konjam wrong ah irukkalam  
-• 📂 My Database la file illa</blockquote>  
+• 📂 My Database la file illa</blockquote>
 
 ✨ <b>Quick Fix:</b>  
 <blockquote>• ✅ Correct ah type pannunga  
 • 🎯 Movie name mattum podunga  
-• 🚫 Release aagala movie avoid pannunga</blockquote>  
+• 🚫 Release aagala movie avoid pannunga</blockquote>
 
 🌐 <b>Still miss aagudha?</b>  
 👉 <b>Google la search pannunga bro 👇</b>"""
