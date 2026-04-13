@@ -11,13 +11,40 @@ from utils import get_settings, temp
 WELCOME_STICKER_ID = "CAACAgIAAxkBAAFGz4Vp14TkEDwLXzANxjQxctqfYSDePgAC0wUAAj-VzAqfWrvSXUfHMTsE"
 LEAVE_STICKER_ID = "CAACAgIAAxkBAAFGz6Jp14akiWmHaqkF73vgliEtijxcSQACOQcAAkb7rATRJ-6r0eDcKzsE"
 
-WELCOME_MSG_TANGLISH = "Vanakam {mention}! Namma group-ku unnai varaverkirom. Rules-a marakkama padippa!"
-WELCOME_MSG_ENGLISH = "Hello {mention}! Welcome to our group. Please make sure to read the rules!"
+# Blockquote (>), Bold (**), Italic (__) and Emojis added
+WELCOME_MSG_TANGLISH = """
+> **Vanakam {mention}!** 🎉
+> __Namma group-ku unnai anbudan varaverkirom!__ 🤝
 
-LEAVE_MSG_TANGLISH = "Poitu vaa {name}, unnai romba miss pannuvom nanba!"
-LEAVE_MSG_ENGLISH = "Goodbye {name}, we will miss you!"
+**Group Rules:**
+🔹 **Mariyal-ah nadanthukko**
+🔹 **Spam panna koodathu** 🚫
 
-STICKER_DELETE_TIME = 5
+*Nalla enjoy pannu nanba!* 🥳
+"""
+
+WELCOME_MSG_ENGLISH = """
+> **Hello {mention}!** 🎉
+> __Welcome to our awesome group!__ 🤝
+
+**Group Rules:**
+🔹 **Be respectful to everyone**
+🔹 **No spamming allowed** 🚫
+
+*Have a great time here!* 🥳
+"""
+
+LEAVE_MSG_TANGLISH = """
+> **Poitu vaa {name}!** 👋
+> __Unnai romba miss pannuvom nanba!__ 😢
+"""
+
+LEAVE_MSG_ENGLISH = """
+> **Goodbye {name}!** 👋
+> __We will miss you!__ 😢
+"""
+
+STICKER_DELETE_TIME = 4
 MSG_DELETE_TIME = 30
 
 async def auto_delete(msg, delay):
@@ -49,7 +76,7 @@ async def welcome_leave_handler(client: Client, update: ChatMemberUpdated):
     if new and new.status == ChatMemberStatus.MEMBER and (not old or old.status in [ChatMemberStatus.LEFT, ChatMemberStatus.BANNED, ChatMemberStatus.RESTRICTED]):
         
         if new.user.id == temp.ME:
-            return # Bot-kku anuppa koodathu
+            return 
             
         try:
             sticker_msg = await client.send_sticker(chat_id, WELCOME_STICKER_ID)
@@ -58,7 +85,7 @@ async def welcome_leave_handler(client: Client, update: ChatMemberUpdated):
             print(f"Welcome Sticker anuppa mudiyala: {e}")
             
         try:
-            welcome_text = f"{WELCOME_MSG_TANGLISH}\n\n{WELCOME_MSG_ENGLISH}".format(mention=new.user.mention)
+            welcome_text = f"{WELCOME_MSG_TANGLISH}\n{WELCOME_MSG_ENGLISH}".format(mention=new.user.mention)
             welcome_msg = await client.send_message(chat_id, text=welcome_text)
             asyncio.create_task(auto_delete(welcome_msg, MSG_DELETE_TIME))
         except Exception as e:
@@ -67,12 +94,13 @@ async def welcome_leave_handler(client: Client, update: ChatMemberUpdated):
     # ==========================
     # 2. User Leave Aagumbothu
     # ==========================
-    elif new and new.status in [ChatMemberStatus.LEFT, ChatMemberStatus.BANNED] and old and old.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+    elif new and new.status in [ChatMemberStatus.LEFT, ChatMemberStatus.BANNED]:
         
         if new.user.id == temp.ME:
             return
             
-        user_name = old.user.first_name if old.user else "Nanba"
+        # Old user data illana kooda pudhusula irundhu per edukka try pannuvom
+        user_name = old.user.first_name if (old and old.user) else (new.user.first_name if (new and new.user) else "Nanba")
         
         try:
             sticker_msg = await client.send_sticker(chat_id, LEAVE_STICKER_ID)
@@ -81,8 +109,8 @@ async def welcome_leave_handler(client: Client, update: ChatMemberUpdated):
             pass
             
         try:
-            leave_text = f"{LEAVE_MSG_TANGLISH}\n\n{LEAVE_MSG_ENGLISH}".format(name=user_name)
+            leave_text = f"{LEAVE_MSG_TANGLISH}\n{LEAVE_MSG_ENGLISH}".format(name=user_name)
             leave_msg = await client.send_message(chat_id, text=leave_text)
             asyncio.create_task(auto_delete(leave_msg, MSG_DELETE_TIME))
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Leave Text anuppa mudiyala: {e}")
