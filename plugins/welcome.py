@@ -1,31 +1,25 @@
 import asyncio
 from pyrogram import Client, filters
-from pyrogram.types import Message
-from utils import get_settings
+from pyrogram.types import ChatMemberUpdated
+from pyrogram.enums import ChatMemberStatus
+from utils import get_settings, temp
 
 # ==========================================
 # EDIT PANRA AREA
 # ==========================================
 
-# 1. Sticker Setup
 WELCOME_STICKER_ID = "CAACAgIAAxkBAAFGz4Vp14TkEDwLXzANxjQxctqfYSDePgAC0wUAAj-VzAqfWrvSXUfHMTsE"
 LEAVE_STICKER_ID = "CAACAgIAAxkBAAFGz6Jp14akiWmHaqkF73vgliEtijxcSQACOQcAAkb7rATRJ-6r0eDcKzsE"
 
-# 2. Welcome Messages 
 WELCOME_MSG_TANGLISH = "Vanakam {mention}! Namma group-ku unnai varaverkirom. Rules-a marakkama padippa!"
 WELCOME_MSG_ENGLISH = "Hello {mention}! Welcome to our group. Please make sure to read the rules!"
 
-# 3. Leave Messages 
 LEAVE_MSG_TANGLISH = "Poitu vaa {name}, unnai romba miss pannuvom nanba!"
 LEAVE_MSG_ENGLISH = "Goodbye {name}, we will miss you!"
 
-# 4. Auto Delete Timings (Seconds la)
-STICKER_DELETE_TIME = 5  # Sticker 5 second la azhinjidum
-MSG_DELETE_TIME = 30     # Message 30 second la azhinjidum
+STICKER_DELETE_TIME = 5
+MSG_DELETE_TIME = 30
 
-# ==========================================
-# HELPER FUNCTION (Delete panrathukku)
-# ==========================================
 async def auto_delete(msg, delay):
     await asyncio.sleep(delay)
     try:
@@ -34,47 +28,61 @@ async def auto_delete(msg, delay):
         pass
 
 # ==========================================
-# MAIN SCRIPT 
+# MAIN SCRIPT (Chat Member Updated)
 # ==========================================
 
-# Puthu user join aagumbothu
-@Client.on_message(filters.new_chat_members)
-async def welcome_member(client: Client, message: Message):
-    # Settings check panrathu
-    settings = await get_settings(message.chat.id)
+@Client.on_chat_member_updated(filters.group, group=10)
+async def welcome_leave_handler(client: Client, update: ChatMemberUpdated):
+    chat_id = update.chat.id
+    settings = await get_settings(chat_id)
+    
+    # Settings off aagi iruntha vela seiyathu
     if settings and not settings.get("welcome", True):
-        return 
-
-    for member in message.new_chat_members:
-        if member.id == client.me.id:
-            continue # Bot aaga iruntha skip pannidum
+        return
+        
+    old = update.old_chat_member
+    new = update.new_chat_member
+    
+    # ==========================
+    # 1. Puthu User Join Aagumbothu
+    # ==========================
+    if new and new.status == ChatMemberStatus.MEMBER and (not old or old.status in [ChatMemberStatus.LEFT, ChatMemberStatus.BANNED, ChatMemberStatus.RESTRICTED]):
+        
+        if new.user.id == temp.ME:
+            return # Bot-kku anuppa koodathu
             
-        # Sticker anuppa
-        sticker_msg = await message.reply_sticker(WELCOME_STICKER_ID)
-        
-        # Message anuppa
-        welcome_text = f"{WELCOME_MSG_TANGLISH}\n\n{WELCOME_MSG_ENGLISH}".format(mention=member.mention)
-        welcome_msg = await message.reply_text(text=welcome_text)
-        
-        # Thani thaniya delete aaga task create panrom (Unnoda style la 😉)
-        asyncio.create_task(auto_delete(sticker_msg, STICKER_DELETE_TIME))
-        asyncio.create_task(auto_delete(welcome_msg, MSG_DELETE_TIME))
+        try:
+            sticker_msg = await client.send_sticker(chat_id, WELCOME_STICKER_ID)
+            asyncio.create_task(auto_delete(sticker_msg, STICKER_DELETE_TIME))
+        except Exception as e:
+            print(f"Welcome Sticker anuppa mudiyala: {e}")
+            
+        try:
+            welcome_text = f"{WELCOME_MSG_TANGLISH}\n\n{WELCOME_MSG_ENGLISH}".format(mention=new.user.mention)
+            welcome_msg = await client.send_message(chat_id, text=welcome_text)
+            asyncio.create_task(auto_delete(welcome_msg, MSG_DELETE_TIME))
+        except Exception as e:
+            print(f"Welcome Text anuppa mudiyala: {e}")
 
-# User group vittu pogumbothu
-@Client.on_message(filters.left_chat_member)
-async def leave_member(client: Client, message: Message):
-    left_user = message.left_chat_member.first_name
-    
-    if message.left_chat_member.id == client.me.id:
-        return # Bot leave aana athukku anuppathu
+    # ==========================
+    # 2. User Leave Aagumbothu
+    # ==========================
+    elif new and new.status in [ChatMemberStatus.LEFT, ChatMemberStatus.BANNED] and old and old.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
         
-    # Sticker anuppa
-    sticker_msg = await message.reply_sticker(LEAVE_STICKER_ID)
-    
-    # Message anuppa
-    leave_text = f"{LEAVE_MSG_TANGLISH}\n\n{LEAVE_MSG_ENGLISH}".format(name=left_user)
-    leave_msg = await message.reply_text(text=leave_text)
-    
-    # Thani thaniya delete aaga task create panrom
-    asyncio.create_task(auto_delete(sticker_msg, STICKER_DELETE_TIME))
-    asyncio.create_task(auto_delete(leave_msg, MSG_DELETE_TIME))
+        if new.user.id == temp.ME:
+            return
+            
+        user_name = old.user.first_name if old.user else "Nanba"
+        
+        try:
+            sticker_msg = await client.send_sticker(chat_id, LEAVE_STICKER_ID)
+            asyncio.create_task(auto_delete(sticker_msg, STICKER_DELETE_TIME))
+        except Exception:
+            pass
+            
+        try:
+            leave_text = f"{LEAVE_MSG_TANGLISH}\n\n{LEAVE_MSG_ENGLISH}".format(name=user_name)
+            leave_msg = await client.send_message(chat_id, text=leave_text)
+            asyncio.create_task(auto_delete(leave_msg, MSG_DELETE_TIME))
+        except Exception:
+            pass
