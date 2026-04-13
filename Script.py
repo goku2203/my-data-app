@@ -161,22 +161,22 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>🌐 Zone:</b> <code>Asia/Kolkata</code>
 <b>🛠️ Version:</b> <code>v2.0 [Stable]</code>"""
 
-    SPOLL_NOT_FND = """<b>⚠️ MISSION FAILED ⚠️</b>
+    SPOLL_NOT_FND = """<b>🎬 Movie Not Found! 😕</b>
 
-<blockquote><b>Eng: </b><i>I couldn't find what you are looking for.</i> ☹️</blockquote>
+🔍 <b>Eng:</b> I couldn’t find your movie  
+🔍 <b>Tanglish:</b> Nee thedina movie kidaikala bro  
 
-<blockquote><b>Tam: </b><i>Neenga search pannadhu enakku kandupidikka mudiyala.</i>☹️</blockquote>
+⚠️ <b>Reason irukkalam:</b>  
+<blockquote>• 🔤 Spelling konjam wrong ah irukkalam  
+• 📂 My Database la file illa</blockquote>  
 
-<b>💡 Search Tips:</b>
+✨ <b>Quick Fix:</b>  
+<blockquote>• ✅ Correct ah type pannunga  
+• 🎯 Movie name mattum podunga  
+• 🚫 Release aagala movie avoid pannunga</blockquote>  
 
-1️⃣ Check your spelling.
-2️⃣ Use format: <code>[Movie Name] [Year]</code>
-3️⃣ Don't ask for unreleased movies.
-
-<b>💡 Tamil Search Tips:</b>
-
-<blockquote><i>👉 Spelling correct ah irukka nu check pannunga.</i>
-<i>👉 Year illama verum Movie Name mattum thedi paarunga.</i></blockquote>"""
+🌐 <b>Still miss aagudha?</b>  
+👉 <b>Google la search pannunga bro 👇</b>"""
 
     # SPELL CHECK LANGUAGES
     ENG_SPELL = """<b>💡 Spelling Check (English)</b>
