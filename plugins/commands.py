@@ -284,6 +284,9 @@ async def start(client, message):
             [
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot"),
                 InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
+            ],
+            [
+                InlineKeyboardButton("🔥 Weekly Top Search 🔥", callback_data="top_search")
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
