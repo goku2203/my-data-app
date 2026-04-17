@@ -12,26 +12,24 @@ WELCOME_STICKER_ID = "CAACAgIAAxkBAAFGz4Vp14TkEDwLXzANxjQxctqfYSDePgAC0wUAAj-VzA
 LEAVE_STICKER_ID = "CAACAgIAAxkBAAFGz6Jp14akiWmHaqkF73vgliEtijxcSQACOQcAAkb7rATRJ-6r0eDcKzsE"
 
 # Blockquote (>), Bold (**), Italic (__) and Emojis added
-WELCOME_MSG_TANGLISH = """
-> **Vanakam {mention}!** 🎉
-> __Namma group-ku unnai anbudan varaverkirom!__ 🤝
-
-**Group Rules:**
-🔹 **Mariyal-ah nadanthukko**
-🔹 **Spam panna koodathu** 🚫
-
-*Nalla enjoy pannu nanba!* 🥳
-"""
 
 WELCOME_MSG_ENGLISH = """
-> **Hello {mention}!** 🎉
-> __Welcome to our awesome group!__ 🤝
+> **🌟 Hello {mention}! 👋** 🎉
+> __✨ Welcome to our awesome group! 🎬🔥__
 
-**Group Rules:**
-🔹 **Be respectful to everyone**
-🔹 **No spamming allowed** 🚫
+📜 **GROUP RULES**
 
-*Have a great time here!* 🥳
+🚫 No Spam / Ads
+💬 Respect Everyone
+📵 No 18+ Content
+📢 Stay On Topic
+🔁 No Reposting
+👤 No Fake Info
+🔒 No Personal Info
+
+⚠️ Break rules = Mute / Ban
+
+✨ Stay active & enjoy 💙
 """
 
 LEAVE_MSG_TANGLISH = """
@@ -85,7 +83,7 @@ async def welcome_leave_handler(client: Client, update: ChatMemberUpdated):
             print(f"Welcome Sticker anuppa mudiyala: {e}")
             
         try:
-            welcome_text = f"{WELCOME_MSG_TANGLISH}\n{WELCOME_MSG_ENGLISH}".format(mention=new.user.mention)
+            welcome_text = f"{WELCOME_MSG_ENGLISH}".format(mention=new.user.mention)
             welcome_msg = await client.send_message(chat_id, text=welcome_text)
             asyncio.create_task(auto_delete(welcome_msg, MSG_DELETE_TIME))
         except Exception as e:
