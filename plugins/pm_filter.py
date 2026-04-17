@@ -899,31 +899,15 @@ async def auto_filter(client, msg, spoll=False):
             if 2 < len(message.text) < 100:
                 search = message.text
                 
-                search_msg = await message.reply_text(
-                    f"<b>🔍 Searching...</b>\n"
-                    f"<code>[⬛⬛⬜⬜⬜⬜⬜⬜⬜⬜] 20%</code>"
+                # GIF animation add pandrathu
+                search_msg = await message.reply_animation(
+                    animation="BAACAgUAAxkBAAFHcAxp4makIQmAeLkGJkdf3G9hNiaHHgACuRwAAphVGFdiUoHB70uuoTsE", # Inga ungalukku pudicha GIF link illa Telegram file ID podunga
+                    caption="<b>🔍 Please wait ⏳...</b>",
+                    parse_mode=enums.ParseMode.HTML
                 )
-                await asyncio.sleep(0.3)
-                await search_msg.edit(
-                    f"<b>🔍 Searching...</b>\n"
-                    f"<code>[⬛⬛⬛⬛⬜⬜⬜⬜⬜⬜] 40%</code>"
-                )
-                await asyncio.sleep(0.3)
-                await search_msg.edit(
-                    f"<b>🔍 Searching...</b>\n"
-                    f"<code>[⬛⬛⬛⬛⬛⬛⬜⬜⬜⬜] 60%</code>"
-                )
-                await asyncio.sleep(0.3)
-                await search_msg.edit(
-                    f"<b>🔍 Searching...</b>\n"
-                    f"<code>[⬛⬛⬛⬛⬛⬛⬛⬛⬜⬜] 80%</code>"
-                )
-                await asyncio.sleep(0.3)
-                await search_msg.edit(
-                    f"<b>✅ Completed!</b>\n"
-                    f"<code>[⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛] 100%</code>\n\n"
-                    f"<i>Here is your result 👇</i>"
-                )
+                
+                # GIF paakka oru 1.5 seconds wait panna vaikkalam
+                await asyncio.sleep(1.5)
                 
                 files, offset, total_results = await get_search_results(search.lower(), offset=0, filter=True)
                 
@@ -956,14 +940,11 @@ async def auto_filter(client, msg, spoll=False):
                                 print(f"Missing Log Error: {e}")
                     
                     if settings["spell_check"]:
-                        await search_msg.edit("<b><i>🕵️‍♂️ Searching .</i></b>")
-                        await asyncio.sleep(0.4)
-                        await search_msg.edit("<b><i>🕵️‍♂️ Searching . .</i></b>")
-                        await asyncio.sleep(0.4)
-                        await search_msg.edit("<b><i>🕵️‍♂️ Searching . . .</i></b>")
-                        await asyncio.sleep(0.4)
+                        await search_msg.delete() # Mudhalla GIF ah delete panniduvom
                         
-                        await search_msg.delete() 
+                        # Apram pudhusa message anuppuvom
+                        spell_msg = await message.reply_text("<b><i>🕵️‍♂️ Spell Check Searching...</i></b>")
+                        # ... baaki irukka unga code ...
                         return await advantage_spell_chok(client, msg)
                         
                     else:
