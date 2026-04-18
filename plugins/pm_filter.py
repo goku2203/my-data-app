@@ -938,17 +938,15 @@ async def auto_filter(client, msg, spoll=False):
                                 print(f"Missing Log Error: {e}")
                     
                     if settings["spell_check"]:
-                        await search_msg.delete() # Mudhalla GIF ah delete panniduvom
+                        await search_msg.delete() # Mudhalla sticker ah delete panniduvom
                         
-                        # Apram pudhusa message anuppuvom
-                        spell_msg = await message.reply_text("<b><i>🕵️‍♂️ Spell Check Searching...</i></b>")
-                        # ... baaki irukka unga code ...
+                        # Direct ah spell check function ku poyidum, searching text varathu
                         return await advantage_spell_chok(client, msg)
                         
                     else:
                         req_btn = [[InlineKeyboardButton("📝 Request Movie", url="https://t.me/Tamilmovieslink_bot")]]
                         
-                        await search_msg.delete() # Mudhalla GIF ah delete panniduvom
+                        await search_msg.delete() # Mudhalla sticker ah delete panniduvom
                         
                         # Apram pudhusa message anuppuvom
                         not_found_msg = await message.reply_text(
