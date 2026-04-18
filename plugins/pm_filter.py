@@ -901,7 +901,7 @@ async def auto_filter(client, msg, spoll=False):
                 
                 # GIF animation add pandrathu
                 search_msg = await message.reply_animation(
-                    animation="BAACAgUAAxkBAAFHcAxp4makIQmAeLkGJkdf3G9hNiaHHgACuRwAAphVGFdiUoHB70uuoTsE", # Inga ungalukku pudicha GIF link illa Telegram file ID podunga
+                    animation="CAACAgUAAxkBAAFHdmhp4u2qHd7nMQnPWsgKNGc5nv6uogACPR0AArb0GFe5EjJNJRqswjsE", # Inga ungalukku pudicha GIF link illa Telegram file ID podunga
                     caption="<b>🔍 Please wait ⏳...</b>",
                     parse_mode=enums.ParseMode.HTML
                 )
