@@ -899,14 +899,12 @@ async def auto_filter(client, msg, spoll=False):
             if 2 < len(message.text) < 100:
                 search = message.text
                 
-                # GIF animation add pandrathu
-                search_msg = await message.reply_animation(
-                    animation="https://tenor.com/view/uhulll-very-nice-gif-12178826700720726191", # Inga ungalukku pudicha GIF link illa Telegram file ID podunga
-                    caption="<b>🔍 Please wait ⏳...</b>",
-                    parse_mode=enums.ParseMode.HTML
+                # Video Sticker animation add pandrathu
+                search_msg = await message.reply_sticker(
+                    sticker="CAACAgUAAxkBAAFHdmhp4u2qHd7nMQnPWsgKNGc5nv6uogACPR0AArb0GFe5EjJNJRqswjsE"
                 )
                 
-                # GIF paakka oru 1.5 seconds wait panna vaikkalam
+                # Sticker paakka oru 1.5 seconds wait panna vaikkalam
                 await asyncio.sleep(1.5)
                 
                 files, offset, total_results = await get_search_results(search.lower(), offset=0, filter=True)
