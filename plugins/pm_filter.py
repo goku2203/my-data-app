@@ -949,11 +949,15 @@ async def auto_filter(client, msg, spoll=False):
                         
                     else:
                         req_btn = [[InlineKeyboardButton("📝 Request Movie", url="https://t.me/Tamilmovieslink_bot")]]
-                        await search_msg.edit(
+                        
+                        await search_msg.delete() # Mudhalla GIF ah delete panniduvom
+                        
+                        # Apram pudhusa message anuppuvom
+                        not_found_msg = await message.reply_text(
                             text=script.SPOLL_NOT_FND.format(search=search),
                             reply_markup=InlineKeyboardMarkup(req_btn)
                         )
-                        asyncio.create_task(auto_delete_msgs(search_msg, msg, 15))
+                        asyncio.create_task(auto_delete_msgs(not_found_msg, msg, 15))
                         return
                 else:
                     await search_msg.delete() 
