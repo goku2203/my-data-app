@@ -32,8 +32,9 @@ WELCOME_MSG_ENGLISH = """
 ✨ Stay active & enjoy 💙
 """
 
+# Inga {mention} ku badhila {name} nu maathi irukken
 LEAVE_MSG_ENGLISH = """
-> **👋 Goodbye {mention}** 👋
+> **👋 Goodbye {name}** 👋
 We’ll miss you! 😢 Come back anytime 💙
 """
 
@@ -78,7 +79,8 @@ async def welcome_leave_handler(client: Client, update: ChatMemberUpdated):
             print(f"Welcome Sticker anuppa mudiyala: {e}")
             
         try:
-            welcome_text = {WELCOME_MSG_ENGLISH}.format(mention=new.user.mention)
+            # Inga iruntha theva illatha {} brackets ah eduthutten
+            welcome_text = WELCOME_MSG_ENGLISH.format(mention=new.user.mention)
             welcome_msg = await client.send_message(chat_id, text=welcome_text)
             asyncio.create_task(auto_delete(welcome_msg, MSG_DELETE_TIME))
         except Exception as e:
@@ -102,6 +104,7 @@ async def welcome_leave_handler(client: Client, update: ChatMemberUpdated):
             pass
             
         try:
+            # Inga {name} nalla vela seiyum ippo
             leave_text = LEAVE_MSG_ENGLISH.format(name=user_name)
             leave_msg = await client.send_message(chat_id, text=leave_text)
             asyncio.create_task(auto_delete(leave_msg, MSG_DELETE_TIME))
