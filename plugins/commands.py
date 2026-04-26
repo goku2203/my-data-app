@@ -363,13 +363,25 @@ async def start(client, message):
                 print(f"Error getting file details: {e}")
 
             buttons = [
-                [InlineKeyboardButton("Click Here To Verify 🟢", url=verify_url)],
-                [InlineKeyboardButton("How to Download 📥", url="https://t.me/howtoo1/7")]
+                [InlineKeyboardButton("✨ Click Here To Verify ✨", url=verify_url)],
+                [InlineKeyboardButton("❓ How to Download ❓", url="https://t.me/howtoo1/7")]
             ]
+            
+            verify_text = (
+                "<b>🔒 Access Denied : Verification Required!</b>\n\n"
+                "<blockquote><b>📂 File Details:</b>\n"
+                f"<b>🏷 Name :</b> <code>{file_name}</code>\n"
+                f"<b>💾 Size :</b> <code>{file_size}</code></blockquote>\n\n"
+                "<b>Eng :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed.</i>\n\n"
+                "<b>Tanglish :</b> <i>Indha file venumna neenga verify pannanum. Kela irukka verify button-a click panni thodarunga.</i>\n\n"
+                "<b>⏳ Time Limit : 10 Minutes!</b>"
+            )
+
             verify_msg = await message.reply_text(
-                text=f"<b>⚠️ நீங்க இன்னும் Verify பண்ணல!</b>\n\n<b>📂 File: {file_name}</b>\n<b>💾 Size: {file_size}</b>\n\n<i>கீழே உள்ள பட்டனை கிளிக் செய்து Verify பண்ணுங்க.</i>\n\n<b>⏳ Time Limit: 10 Minutes!</b>",
+                text=verify_text,
                 reply_markup=InlineKeyboardMarkup(buttons),
-                protect_content=True
+                protect_content=True,
+                parse_mode=enums.ParseMode.HTML
             )
             asyncio.create_task(auto_delete_message(client, verify_msg, 600))
             return
