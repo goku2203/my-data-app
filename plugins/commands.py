@@ -369,11 +369,10 @@ async def start(client, message):
             
             verify_text = (
                 "<b>🔒 Access Denied : Verification Required!</b>\n\n"
-                "<blockquote><b>📂 File Details:</b>\n"
+                "<blockquote><b>📂 File Details:</b>\n\n"
                 f"<b>🏷 Name :</b> <code>{file_name}</code>\n"
                 f"<b>💾 Size :</b> <code>{file_size}</code></blockquote>\n\n"
-                "<b>Eng :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed.</i>\n\n"
-                "<b>Tanglish :</b> <i>Indha file venumna neenga verify pannanum. Kela irukka verify button-a click panni thodarunga.</i>\n\n"
+                "<b>🎯 Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed.👇</i>\n\n"
                 "<b>⏳ Time Limit : 10 Minutes!</b>"
             )
 
