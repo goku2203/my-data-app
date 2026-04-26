@@ -193,10 +193,10 @@ async def send_batched_post(client, clean_name):
         files = categorized[category]
         if files:
             has_files = True
-            caption += f"<b>{category}</b>\n"
+            # Inga iruntha heading line (caption += f"<b>{category}</b>\n") delete panniyachu
             for f in files:
-                caption += f"📂 <a href='{f['link']}'><b>{f['short_q']} - {f['size']}</b></a>\n"
-            caption += "\n"
+                # Folder icon ku pathila premium arrow add pannirukken
+                caption += f" ➪ <a href='{f['link']}'><b>{f['short_q']} - {f['size']}</b></a>\n"
 
     if not has_files:
         return
