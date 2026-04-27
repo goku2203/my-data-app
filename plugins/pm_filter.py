@@ -899,6 +899,17 @@ async def auto_filter(client, msg, spoll=False):
             if 2 < len(message.text) < 100:
                 search = message.text
 
+                # 👇 JUNK WORDS REMOVER 👇
+                junk_words = [
+                    "1080p", "720p", "480p", "tamil dubbed", "tamil", 
+                    "telugu", "hindi", "malayalam", "dubbed", "hq", 
+                    "hd", "print", "download", "movie", "full"
+                ]
+                for word in junk_words:
+                    search = re.sub(r'(?i)\b' + word + r'\b', '', search)
+                search = search.strip()
+                # 👆 ITHU VARAI 👆
+
                 # 👇 PUTHUSA ADD PANNA SPAM FILTER 👇
                 spam_words = [
                     "porn", "p_o_r_n", "slut", "booty", "anal", 
