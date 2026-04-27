@@ -5,7 +5,7 @@ import asyncio
 import re
 import json
 import base64
-import html 
+import html
 from datetime import datetime, timedelta
 from Script import script
 from pyrogram import Client, filters, enums
@@ -282,9 +282,6 @@ async def start(client, message):
             [
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot"),
                 InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
-            ],
-            [
-                InlineKeyboardButton("🔥 Weekly Top Search 🔥", callback_data="top_search")
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
@@ -867,4 +864,3 @@ async def auto_delete_helper(msg, delay):
         await msg.delete()
     except:
         pass
-
