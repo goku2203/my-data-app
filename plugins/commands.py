@@ -20,6 +20,8 @@ from database.connections_mdb import active_connection
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.types import BotCommand, BotCommandScopeDefault, BotCommandScopeChat
 from utils import temp
+from plugins.autopost import get_clean_name, get_year, get_audio, get_print_quality
+from utils import get_clean_size # (Munnadi namma update panna puthu size function)
 
 
 logger = logging.getLogger(__name__)
