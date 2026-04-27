@@ -342,7 +342,7 @@ async def start(client, message):
 
     data = message.command[1]
 
-if IS_VERIFY:
+    if IS_VERIFY:
         if not await check_verification(client, message.from_user.id):
             verify_url = await get_verify_link(message.from_user.id, data)
             
@@ -391,7 +391,7 @@ if IS_VERIFY:
                 f"📀 <b>Quality:</b> <code>{quality}</code>\n"
                 f"💾 <b>Size:</b> <code>{size}</code></blockquote>\n\n"
                 "<b>🎯 Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed.👇</i>\n\n"
-                "<blockquote><b>⏳ Time Limit : 10 Minutes!</b></blockquote>"
+                "<b>⏳ Time Limit : 10 Minutes!</b>"
             )
 
             verify_msg = await message.reply_text(
