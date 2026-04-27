@@ -363,12 +363,13 @@ async def start(client, message):
                 if files_:
                     # 👇 PUTHU EXTRACTOR LOGIC INGA THAAN VARUM 👇
                     raw_filename = files_[0].file_name
+                    raw_caption = files_[0].caption if files_[0].caption else "" # 👈 Itha puthusa add pannirukken
                     raw_filesize = files_[0].file_size
                     
                     movie_name = get_clean_name(raw_filename)
                     year = get_year(raw_filename)
-                    audio = get_audio(raw_filename)
-                    quality = get_print_quality(raw_filename)
+                    audio = get_audio(raw_caption, raw_filename)
+                    quality = get_print_quality(raw_caption, raw_filename)
                     size = get_clean_size(raw_filesize)
             except Exception as e:
                 print(f"Error getting file details: {e}")
