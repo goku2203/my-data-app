@@ -33,21 +33,17 @@ def get_audio(filename):
     
     return " - ".join(audio) if audio else "Original Audio"
 
-# 👇 PUTHUSA ADD PANNA QUALITY & SIZE FORMATTER 👇
 def get_clean_size(size):
     size = float(size)
     if size >= 1024**3:
-        # GB ku oru decimal mattum (eg: 1.4GB)
         return f"{size / 1024**3:.1f}GB".replace(".0", "")
     elif size >= 1024**2:
-        # MB ku decimal venam (eg: 789MB)
         return f"{int(size / 1024**2)}MB"
     elif size >= 1024:
         return f"{int(size / 1024)}KB"
     else:
         return f"{int(size)}B"
 
-# Ithu thaan puthu quality extractor
 def get_print_quality(filename):
     if not filename: return "HD Print"
     clean = filename.lower()
@@ -85,7 +81,6 @@ def get_clean_name(name):
         clean = clean.replace(junk, "")
 
     clean = re.sub(r'[\[\(\{].*?[\]\)\}]', '', clean)
-
     clean = re.sub(r'\b\d{3,4}mb\b', '', clean)
     clean = re.sub(r'\b\d+(\.\d+)?gb\b', '', clean)
 
@@ -130,6 +125,12 @@ def get_quality_short(filename):
     if "1080p" in filename: return "FHD"
     if "720p" in filename: return "HD"
     return "HD-Rip"
+
+# 👇 PUTHUSA ADD PANNA ANTI-COPYRIGHT FUNCTION 👇
+def get_safe_name(name):
+    # This adds an invisible "Zero-Width Space" between every letter.
+    # Users ku normal ah theriyum, aana copyright bots ku atha match panna mudiyathu.
+    return "\u200B".join(list(name))
 
 
 # --- 2. BATCH SENDER ---
@@ -191,9 +192,12 @@ async def send_batched_post(client, clean_name):
         else:
             categorized["HD-Rip"].append(file)
 
+    # 👇 ITHU THAAN NAMMA PUTHOO SAFE NAME 👇
+    safe_title = get_safe_name(clean_name)
+
     # --- CAPTION SETUP ---
     caption = (
-        f"🎬 <b>{clean_name}</b>\n\n"
+        f"🎬 <b>{safe_title}</b>\n\n"
         f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
         f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
         f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n"
@@ -208,7 +212,6 @@ async def send_batched_post(client, clean_name):
         if files:
             has_files = True
             
-            # 👇 INGA THAAN SORTING ADD PANNIRUKKEN (Small to Large) 👇
             files.sort(key=lambda x: x['raw_size'])
             
             for f in files:
@@ -226,7 +229,7 @@ async def send_batched_post(client, clean_name):
         await client.send_message(
             chat_id=UPDATES_CHANNEL,
             text=caption,
-            parse_mode=ParseMode.HTML # <--- Itha add pannanum
+            parse_mode=ParseMode.HTML 
         )
         logger.info(f"✅ Post Sent: {clean_name}")
     except Exception as e:
@@ -267,9 +270,8 @@ async def media_handler(client, message):
             'short_q': get_quality_short(raw_name),
             'audio': get_audio(raw_name),
             'print_q': get_print_quality(raw_name), 
-            # 👇 INGA SIZE FUNCTION MAATHI IRUKKEN & RAW SIZE ADD PANNIRUKKEN 👇
             'size': get_clean_size(media.file_size),
-            'raw_size': media.file_size, # Ithu sorting ku help pannum
+            'raw_size': media.file_size,
             'link': f"https://t.me/{temp.U_NAME}?start=filep_{file_id}"
         }
 
