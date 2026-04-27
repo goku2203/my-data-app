@@ -33,6 +33,20 @@ def get_audio(filename):
     
     return " - ".join(audio) if audio else "Original Audio"
 
+# 👇 PUTHUSA ADD PANNA QUALITY & SIZE FORMATTER 👇
+def get_clean_size(size):
+    size = float(size)
+    if size >= 1024**3:
+        # GB ku oru decimal mattum (eg: 1.4GB)
+        return f"{size / 1024**3:.1f}GB".replace(".0", "")
+    elif size >= 1024**2:
+        # MB ku decimal venam (eg: 789MB)
+        return f"{int(size / 1024**2)}MB"
+    elif size >= 1024:
+        return f"{int(size / 1024)}KB"
+    else:
+        return f"{int(size)}B"
+
 # Ithu thaan puthu quality extractor
 def get_print_quality(filename):
     if not filename: return "HD Print"
@@ -193,9 +207,11 @@ async def send_batched_post(client, clean_name):
         files = categorized[category]
         if files:
             has_files = True
-            # Inga iruntha heading line (caption += f"<b>{category}</b>\n") delete panniyachu
+            
+            # 👇 INGA THAAN SORTING ADD PANNIRUKKEN (Small to Large) 👇
+            files.sort(key=lambda x: x['raw_size'])
+            
             for f in files:
-                # Folder icon ku pathila premium arrow add pannirukken
                 caption += f" ➪ <a href='{f['link']}'><b>{f['short_q']} - {f['size']}</b></a>\n"
 
     if not has_files:
@@ -250,8 +266,10 @@ async def media_handler(client, message):
             'category': get_quality_category(raw_name),
             'short_q': get_quality_short(raw_name),
             'audio': get_audio(raw_name),
-            'print_q': get_print_quality(raw_name), # Inga print quality add aagirukku
-            'size': get_size(media.file_size),
+            'print_q': get_print_quality(raw_name), 
+            # 👇 INGA SIZE FUNCTION MAATHI IRUKKEN & RAW SIZE ADD PANNIRUKKEN 👇
+            'size': get_clean_size(media.file_size),
+            'raw_size': media.file_size, # Ithu sorting ku help pannum
             'link': f"https://t.me/{temp.U_NAME}?start=filep_{file_id}"
         }
 
