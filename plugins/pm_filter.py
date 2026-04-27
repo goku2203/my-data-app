@@ -898,6 +898,27 @@ async def auto_filter(client, msg, spoll=False):
                 return
             if 2 < len(message.text) < 100:
                 search = message.text
+
+                # 👇 PUTHUSA ADD PANNA SPAM FILTER 👇
+                spam_words = [
+                    "porn", "p_o_r_n", "slut", "booty", "anal", 
+                    "pussy", "dick", "boobs", "whore", "cum", 
+                    "cuming", "lesbian", "fettish", "creampie", "sex"
+                ]
+                is_spam = False
+                
+                if "@" in search or "http" in search.lower() or "t.me" in search.lower():
+                    is_spam = True
+                else:
+                    for word in spam_words:
+                        if word in search.lower():
+                            is_spam = True
+                            break
+                            
+                if is_spam:
+                    # Ithu thappaana msg nu therinja, bot ethuvum pannaathu
+                    return
+                # 👆 ITHU VARAI 👆
                 
                 # Video Sticker animation add pandrathu
                 search_msg = await message.reply_sticker(
