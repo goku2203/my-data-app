@@ -327,7 +327,7 @@ async def start(client, message):
                     protect_content=True
                 )
                 
-                asyncio.create_task(auto_delete_helper(v_msg, 10))
+                asyncio.create_task(auto_delete_helper(v_msg, 5))
                 
                 if len(link_parts) > 2:
                     message.command[1] = link_parts[2]
@@ -342,11 +342,16 @@ async def start(client, message):
 
     data = message.command[1]
 
-    if IS_VERIFY:
+if IS_VERIFY:
         if not await check_verification(client, message.from_user.id):
             verify_url = await get_verify_link(message.from_user.id, data)
-            file_name = "Requested File"
-            file_size = "Unknown"
+            
+            # 👇 DEFAULT VALUES 👇
+            movie_name = "Requested File"
+            year = "Unknown"
+            audio = "Unknown"
+            quality = "Unknown"
+            size = "Unknown"
             
             try:
                 if "_" in data:
@@ -359,8 +364,15 @@ async def start(client, message):
 
                 files_ = await get_file_details(temp_file_id)
                 if files_:
-                    file_name = clean_filename(files_[0].file_name)
-                    file_size = get_size(files_[0].file_size)
+                    # 👇 PUTHU EXTRACTOR LOGIC INGA THAAN VARUM 👇
+                    raw_filename = files_[0].file_name
+                    raw_filesize = files_[0].file_size
+                    
+                    movie_name = get_clean_name(raw_filename)
+                    year = get_year(raw_filename)
+                    audio = get_audio(raw_filename)
+                    quality = get_print_quality(raw_filename)
+                    size = get_clean_size(raw_filesize)
             except Exception as e:
                 print(f"Error getting file details: {e}")
 
@@ -369,11 +381,15 @@ async def start(client, message):
                 [InlineKeyboardButton("❓ How to Download ❓", url="https://t.me/howtoo1/7")]
             ]
             
+            # 👇 PUTHU VERIFY TEXT FORMAT 👇
             verify_text = (
                 "<b>🔒 Access Denied : Verification Required!</b>\n\n"
                 "<blockquote><b>📂 File Details:</b>\n\n"
-                f"<b>🏷 Name :</b> <code>{file_name}</code>\n"
-                f"<b>💾 Size :</b> <code>{file_size}</code></blockquote>\n\n"
+                f"🎬 <b>Movie Name:</b> <code>{movie_name}</code>\n"
+                f"🗓️ <b>Year:</b> <code>{year}</code>\n"
+                f"🔊 <b>Audio:</b> <code>{audio}</code>\n"
+                f"📀 <b>Quality:</b> <code>{quality}</code>\n"
+                f"💾 <b>Size:</b> <code>{size}</code></blockquote>\n\n"
                 "<b>🎯 Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed.👇</i>\n\n"
                 "<b>⏳ Time Limit : 10 Minutes!</b>"
             )
