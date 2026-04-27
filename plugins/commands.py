@@ -391,7 +391,7 @@ async def start(client, message):
                 f"📀 <b>Quality:</b> <code>{quality}</code>\n"
                 f"💾 <b>Size:</b> <code>{size}</code></blockquote>\n\n"
                 "<b>🎯 Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed.👇</i>\n\n"
-                "<b>⏳ Time Limit : 10 Minutes!</b>"
+                "<blockquote><b>⏳ Time Limit : 10 Minutes!</b></blockquote>"
             )
 
             verify_msg = await message.reply_text(
