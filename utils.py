@@ -2,28 +2,26 @@
 #please give credits https://github.com/MN-BOTS/ShobanaFilterBot
 
 import logging
-from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
-from info import LONG_IMDB_DESCRIPTION, MAX_LIST_ELM
-from imdb import IMDb
 import asyncio
-from pyrogram.types import Message, InlineKeyboardButton
-from pyrogram import enums
-from typing import Union
 import re
 import os
-from datetime import datetime
-from typing import List
-from database.users_chats_db import db
-from bs4 import BeautifulSoup
-import requests
-from info import VERIFY_EXPIRE, IS_VERIFY, SHORTLINK_URL, SHORTLINK_API
 import aiohttp
+import requests
 import time
-from database.users_chats_db import db
 from datetime import datetime, timedelta
+from typing import Union, List
 
-#  @MrMNTG @MusammilN
-#please give credits https://github.com/MN-BOTS/ShobanaFilterBot
+from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
+from pyrogram.types import Message, InlineKeyboardButton
+from pyrogram import enums
+from pyrogram.enums import ChatMemberStatus
+
+from imdb import IMDb
+from bs4 import BeautifulSoup
+
+from info import LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, VERIFY_EXPIRE, IS_VERIFY, SHORTLINK_URL, SHORTLINK_API, REQUEST_FSUB_MODE
+from database.users_chats_db import db
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -37,6 +35,7 @@ BANNED = {}
 SMART_OPEN = '“'
 SMART_CLOSE = '”'
 START_CHAR = ('\'', '"', SMART_OPEN)
+JOIN_REQUEST_USERS = {}
 
 # temp db for banned 
 class temp(object):
@@ -51,13 +50,6 @@ class temp(object):
     SETTINGS = {}
     MAINT_MODE = False  # Itha puthusa add pannunga
 
-#  @MrMNTG @MusammilN
-#please give credits https://github.com/MN-BOTS/ShobanaFilterBot
-from pyrogram.enums import ChatMemberStatus
-from database.users_chats_db import db
-from info import REQUEST_FSUB_MODE  # Import from your info.py
-
-JOIN_REQUEST_USERS = {}
 
 async def is_subscribed(user_id: int, client) -> bool:
     auth_channels = await db.get_auth_channels()
@@ -106,8 +98,6 @@ async def create_invite_links(client) -> dict:
             continue
     return links
 
-#  @MrMNTG @MusammilN
-#please give credits https://github.com/MN-BOTS/ShobanaFilterBot
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
         # https://t.me/GetTGLink/4183
@@ -186,7 +176,6 @@ async def get_poster(query, bulk=False, id=False, file=None):
         'rating': str(movie.get("rating")),
         'url':f'https://www.imdb.com/title/tt{movieid}'
     }
-# https://github.com/odysseusmax/animated-lamp/blob/2ef4730eb2b5f0596ed6d03e7b05243d93e3415b/bot/utils/broadcast.py#L37
 
 async def broadcast_messages(user_id, message):
     try:
@@ -221,7 +210,6 @@ async def search_gagala(text):
     soup = BeautifulSoup(response.text, 'html.parser')
     titles = soup.find_all( 'h3' )
     return [title.getText() for title in titles]
-
 
 async def get_settings(group_id):
     settings = temp.SETTINGS.get(group_id)
@@ -270,7 +258,6 @@ def get_file_id(msg: Message):
 
 def extract_user(message: Message) -> Union[int, str]:
     """extracts the user from a message"""
-    # https://github.com/SpEcHiDe/PyroGramBot/blob/f30e2cca12002121bad1982f68cd0ff9814ce027/pyrobot/helper_functions/extract_user.py#L7
     user_id = None
     user_first_name = None
     if message.reply_to_message:
@@ -282,13 +269,12 @@ def extract_user(message: Message) -> Union[int, str]:
             len(message.entities) > 1 and
             message.entities[1].type == enums.MessageEntityType.TEXT_MENTION
         ):
-           
+            
             required_entity = message.entities[1]
             user_id = required_entity.user.id
             user_first_name = required_entity.user.first_name
         else:
             user_id = message.command[1]
-            # don't want to make a request -_-
             user_first_name = user_id
         try:
             user_id = int(user_id)
@@ -342,9 +328,7 @@ def split_quotes(text: str) -> List:
     else:
         return text.split(None, 1)
 
-    # 1 to avoid starting quote, and counter is exclusive so avoids ending
     key = remove_escapes(text[1:counter].strip())
-    # index will be in range, or `else` would have been executed and returned
     rest = text[counter + 1:].strip()
     if not key:
         key = text[0] + text[0]
@@ -359,19 +343,16 @@ def parser(text, keyword):
     i = 0
     alerts = []
     for match in BTN_URL_REGEX.finditer(text):
-        # Check if btnurl is escaped
         n_escapes = 0
         to_check = match.start(1) - 1
         while to_check > 0 and text[to_check] == "\\":
             n_escapes += 1
             to_check -= 1
 
-        # if even, not escaped -> create button
         if n_escapes % 2 == 0:
             note_data += text[prev:match.start(1)]
             prev = match.end(1)
             if match.group(3) == "buttonalert":
-                # create a thruple with button label, url, and newline status
                 if bool(match.group(5)) and buttons:
                     buttons[-1].append(InlineKeyboardButton(
                         text=match.group(2),
@@ -431,8 +412,6 @@ def humanbytes(size):
         n += 1
     return str(round(size, 2)) + " " + Dic_powerN[n] + 'B'
 
-import aiohttp
-from info import SHORTLINK_URL, SHORTLINK_API
 
 async def get_short(link):
     # Shortener Website URL connect panrom
@@ -450,8 +429,6 @@ async def get_short(link):
         return link # Error vantha original link return aagirum
 
 # ----- START OF NEW UTILS CODE -----
-
-# utils.py la intha function-a UPDATE pannunga
 
 async def get_verify_link(user_id, file_id=None):
     # File ID iruntha, atha link kulla serthu anuppurom
@@ -471,8 +448,6 @@ async def get_verify_link(user_id, file_id=None):
                     return link
     except:
         return link
-
-# ----- NEW DATABASE RESET CODE (utils.py) -----
 
 async def verify_user(user_id):
     # Time: 2 Minutes (120 seconds)
@@ -496,6 +471,18 @@ async def check_verification(client, user_id):
     
     return False # Illana False (Verify Button Varum)
 
+# ----- PUTHUSA ADD PANNA FUNCTION (get_clean_size) -----
+def get_clean_size(size):
+    if not size:
+        return "Unknown Size"
+    power = 2**10
+    n = 0
+    power_labels = {0: '', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
+    while size > power:
+        size /= power
+        n += 1
+    return f"{round(size, 2)} {power_labels[n]}B"
+
 # ----- END -----
 
 async def get_missing_channels(user_id: int, client) -> list:
@@ -505,15 +492,12 @@ async def get_missing_channels(user_id: int, client) -> list:
 
     missing = []
     # FSUB mode on la iruntha request check pannum
-    from info import REQUEST_FSUB_MODE
-    from utils import JOIN_REQUEST_USERS
     requested_channels = JOIN_REQUEST_USERS.get(user_id, set()) if REQUEST_FSUB_MODE else set()
 
     for channel in auth_channels:
         if channel in requested_channels:
             continue
         try:
-            from pyrogram.enums import ChatMemberStatus
             member = await client.get_chat_member(channel, user_id)
             if member.status not in [
                 ChatMemberStatus.MEMBER,
