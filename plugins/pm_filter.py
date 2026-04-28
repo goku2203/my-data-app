@@ -572,13 +572,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
         if query.from_user.id not in ADMINS:
             return await query.answer("Kuthu Vangiruva! Ithu Owner ku mattum thaan! 😠", show_alert=True)
         
-        await query.answer("Fetching Advanced Live Stats... ⏳")
+        await query.answer("Advanced Live Stats Fetching... ⏳")
         
         start_t = time.time()
-        st_msg = await query.message.reply("📡 Checking server connection...")
-        ping_time = round((time.time() - start_t) * 1000, 2)
-        await st_msg.delete()
-        
         uptime_sec = int(time.time() - BOT_START_TIME)
         uptime = f"{uptime_sec // 86400}d {(uptime_sec % 86400) // 3600}h {(uptime_sec % 3600) // 60}m"
         
@@ -588,41 +584,35 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
         now = datetime.now()
         start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        
-        daily_active = await db.col.count_documents({"verify_status_v2.verify_until": {"$gt": now}})
         monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
         
         monsize = await db.get_db_size()
-        free_db = 536870912 - monsize
-        db_percent = round((monsize / 536870912) * 100, 2)
-
         db_size_mb = monsize / (1024 * 1024)
         mongo_percent = (db_size_mb / 512) * 100
-        free = get_size(free_db)
+        free = get_size(536870912 - monsize)
         monsize_str = get_size(monsize)
         
         cpu = psutil.cpu_percent(interval=0.5)
         ram = psutil.virtual_memory().percent
+        ping_time = round((time.time() - start_t) * 1000, 2)
         
         text = (
-            "<b>👑 <u>𝐎𝐖𝐍𝐄𝐑 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 𝐏𝐀𝐍𝐄𝐋</u> 👑</b>\n\n"
-            f"<i>Welcome back {query.from_user.mention}!</i>\n\n"
-            "<b>🤖 <u>𝐁𝐨𝐭 𝐏𝐞𝐫𝐟𝐨𝐫𝐦𝐚𝐧𝐜𝐞</u>:</b>\n"
-            f"⏱️ <b>Uptime:</b> <code>{uptime}</code>\n"
-            f"🚀 <b>Ping:</b> <code>{ping_time} ms</code>\n\n"
-            "<b>📊 <u>𝐓𝐫𝐚𝐟𝐟𝐢𝐜 & 𝐔𝐬𝐞𝐫𝐬</u>:</b>\n"
-            f"👤 <b>Total Users (DB):</b> <code>{total_users}</code>\n"
-            f"👥 <b>Total Groups:</b> <code>{total_chats}</code>\n"
-            f"🟢 <b>Active Users (Today):</b> <code>{daily_active}</code>\n"
-            f"📅 <b>Monthly Verified:</b> <code>{monthly_verified}</code>\n\n"
-            "<b>📂 <u>𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞 𝐒𝐭𝐚𝐭𝐬</u>:</b>\n"
-            f"🗂️ <b>Total Files:</b> <code>{total_files}</code>\n"
-            f"💾 <b>DB Used:</b> <code>{db_percent}%</code> | <b>Free:</b> <code>{get_size(free_db)}</code>\n\n"
-            "<b>🖥️ <u>𝐒𝐞𝐫𝐯𝐞𝐫 𝐇𝐚𝐫𝐝𝐰𝐚𝐫𝐞</u>:</b>\n"
-            f"⚡ <b>CPU:</b> <code>{cpu}%</code> | 💽 <b>RAM:</b> <code>{ram}%</code>\n\n"
-            "<b>📂 <u>𝐌𝐨𝐧𝐠𝐨𝐃𝐁 (𝐅𝐫𝐞𝐞 𝟓𝟏𝟐𝐌𝐁)</u>:</b>\n"
-            f"💾 <b>Storage Used:</b> <code>{monsize_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
-            f"💾 <b>Free Space:</b> <code>{free}</code>\n"
+            "<blockquote><b>👑 <u>𝐎𝐖𝐍𝐄𝐑 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 𝐏𝐀𝐍𝐄𝐋</u> 👑</b></blockquote>\n\n"
+            f"<i>Vanakam Master {query.from_user.mention}!</i>\n\n"
+            "<b>🤖 <u>𝐒𝐲𝐬𝐭𝐞𝐦 𝐏𝐞𝐫𝐟𝐨𝐫𝐦𝐚𝐧𝐜𝐞</u></b>\n"
+            f"┣ ⏱️ <b>Uptime:</b> <code>{uptime}</code>\n"
+            f"┗ 🚀 <b>Ping:</b> <code>{ping_time} ms</code>\n\n"
+            "<b>📊 <u>𝐔𝐬𝐞𝐫 𝐒𝐭𝐚𝐭𝐢𝐬𝐭𝐢𝐜𝐬</u></b>\n"
+            f"┣ 👤 <b>Total Users:</b> <code>{total_users}</code>\n"
+            f"┣ 👥 <b>Total Groups:</b> <code>{total_chats}</code>\n"
+            f"┗ 📅 <b>Monthly Verified:</b> <code>{monthly_verified}</code>\n\n"
+            "<b>📂 <u>𝐒𝐭𝐨𝐫𝐚𝐠𝐞 & 𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞</u></b>\n"
+            f"┣ 🗂️ <b>Total Files:</b> <code>{total_files}</code>\n"
+            f"┣ 💾 <b>Used:</b> <code>{monsize_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
+            f"┗ 🟢 <b>Free DB:</b> <code>{free}</code>\n\n"
+            "<b>🖥️ <u>𝐒𝐞𝐫𝐯𝐞𝐫 𝐇𝐚𝐫𝐝𝐰𝐚𝐫𝐞</u></b>\n"
+            f"┣ ⚡ <b>CPU Usage:</b> <code>{cpu}%</code>\n"
+            f"┗ 💽 <b>RAM Usage:</b> <code>{ram}%</code>"
         )
         
         buttons = [
@@ -630,7 +620,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             [InlineKeyboardButton("🔙 Back to Help", callback_data="help")]
         ]
         
-        # Photo maara vaika update
         await query.message.edit_media(
             media=InputMediaPhoto(
                 media=random.choice(PICS),
