@@ -19,6 +19,9 @@ from database.connections_mdb import active_connection
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.types import BotCommand, BotCommandScopeDefault, BotCommandScopeChat
 from utils import temp
+import psutil
+import time
+from info import BOT_START_TIME
 
 logger = logging.getLogger(__name__)
 
@@ -846,3 +849,62 @@ async def auto_delete_helper(msg, delay):
         await msg.delete()
     except:
         pass
+
+@Client.on_message(filters.command("stats") & filters.user(ADMINS))
+async def stats_command(client, message):
+    # Sticker oru chinna animation ku
+    tmp_msg = await message.reply_text("<b>📡 Server details check pandren... ⏳</b>")
+    
+    start_t = time.time()
+    ping_time = round((time.time() - start_t) * 1000, 2)
+    
+    uptime_sec = int(time.time() - BOT_START_TIME)
+    uptime = f"{uptime_sec // 86400}d {(uptime_sec % 86400) // 3600}h {(uptime_sec % 3600) // 60}m"
+    
+    total_users = await db.total_users_count()
+    total_chats = await db.total_chat_count()
+    total_files = await Media.count_documents()
+    
+    now = datetime.now()
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
+    
+    monsize = await db.get_db_size()
+    db_size_mb = monsize / (1024 * 1024)
+    mongo_percent = (db_size_mb / 512) * 100
+    free = get_size(536870912 - monsize)
+    monsize_str = get_size(monsize)
+    
+    cpu = psutil.cpu_percent(interval=0.5)
+    ram = psutil.virtual_memory().percent
+    
+    stats_text = (
+        "<blockquote><b>👑 <u>𝐎𝐖𝐍𝐄𝐑 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 𝐏𝐀𝐍𝐄𝐋</u> 👑</b></blockquote>\n\n"
+        f"<i>Vanakam Master {message.from_user.mention}!</i>\n\n"
+        "<b>🤖 <u>𝐒𝐲𝐬𝐭𝐞𝐦 𝐏𝐞𝐫𝐟𝐨𝐫𝐦𝐚𝐧𝐜𝐞</u></b>\n"
+        f"┣ ⏱️ <b>Uptime:</b> <code>{uptime}</code>\n"
+        f"┗ 🚀 <b>Ping:</b> <code>{ping_time} ms</code>\n\n"
+        "<b>📊 <u>𝐔𝐬𝐞𝐫 𝐒𝐭𝐚𝐭𝐢𝐬𝐭𝐢𝐜𝐬</u></b>\n"
+        f"┣ 👤 <b>Total Users:</b> <code>{total_users}</code>\n"
+        f"┣ 👥 <b>Total Groups:</b> <code>{total_chats}</code>\n"
+        f"┗ 📅 <b>Monthly Verified:</b> <code>{monthly_verified}</code>\n\n"
+        "<b>📂 <u>𝐒𝐭𝐨𝐫𝐚𝐠𝐞 & 𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞</u></b>\n"
+        f"┣ 🗂️ <b>Total Files:</b> <code>{total_files}</code>\n"
+        f"┣ 💾 <b>Used:</b> <code>{monsize_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
+        f"┗ 🟢 <b>Free DB:</b> <code>{free}</code>\n\n"
+        "<b>🖥️ <u>𝐒𝐞𝐫𝐯𝐞𝐫 𝐇𝐚𝐫𝐝𝐰𝐚𝐫𝐞</u></b>\n"
+        f"┣ ⚡ <b>CPU:</b> <code>{cpu}%</code>\n"
+        f"┗ 💽 <b>RAM:</b> <code>{ram}%</code>"
+    )
+    
+    await tmp_msg.delete()
+    # PICS la irundhu oru random photo oda anuppalam
+    sent_stats = await message.reply_photo(
+        photo=random.choice(PICS),
+        caption=stats_text,
+        parse_mode=enums.ParseMode.HTML
+    )
+    
+    # Auto delete 60 seconds (Bot message & User command renduமே)
+    asyncio.create_task(auto_delete_message(client, sent_stats, 60))
+    asyncio.create_task(auto_delete_message(client, message, 60))
