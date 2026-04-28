@@ -16,13 +16,9 @@ from database.users_chats_db import db
 from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY, UPDATES_CHANNEL, BOT_USERNAME
 from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user
 from database.connections_mdb import active_connection
-# Mela irukka imports kooda itha add pannikka marakkathinga (already irunthaa vitrunga)
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram.types import BotCommand, BotCommandScopeDefault, BotCommandScopeChat
 from utils import temp
-from plugins.autopost import get_clean_name, get_year, get_audio, get_print_quality
-from utils import get_clean_size # (Munnadi namma update panna puthu size function)
-
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +127,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 file_id=file_id,
                 caption=caption,
                 parse_mode=enums.ParseMode.HTML,
-                protect_content=protect_content_flag,
+                protect_content=False, # Puthusa maathiyachu, ippo forward pannalam
             )
             asyncio.create_task(auto_delete_file(client, msg, 120)) 
             
@@ -144,7 +140,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 file_id=file_id,
                 caption=safe_fallback_caption,
                 parse_mode=enums.ParseMode.DEFAULT, 
-                protect_content=protect_content_flag,
+                protect_content=False, # Ingeyuum False potaachu
             )
             asyncio.create_task(auto_delete_file(client, msg, 120))
         except:
@@ -186,14 +182,12 @@ async def checksub_callback(client, callback_query):
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
-    # 👇 Itha puthusa add pannunga 👇
     if message.from_user.id in FORCE_MSG:
         try:
             await client.delete_messages(message.chat.id, FORCE_MSG[message.from_user.id])
             del FORCE_MSG[message.from_user.id]
         except:
             pass
-    # 👆 Itha puthusa add pannunga 👆
     
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
@@ -221,7 +215,6 @@ async def start(client, message):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
 
-    # 👇 FORCE SUB CHECK (Auto Remove Missing Channels & Try Again Fix) 👇
     if not await is_subscribed(message.from_user.id, client):
         try:
             from utils import get_missing_channels
@@ -265,7 +258,6 @@ async def start(client, message):
         FORCE_MSG[message.from_user.id] = force_msg.id
         return
 
-    # 👇 NORMAL START AND 'TRY AGAIN' START MENU 👇
     if len(message.command) != 2 or (len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help", "start"]):
         buttons = [
             [
@@ -286,7 +278,6 @@ async def start(client, message):
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
         
-        # Ungaluku pudicha animated sticker oda ID ah inga podunga
         STICKER_ID = "CAACAgIAAxkBAAFGz4Vp14TkEDwLXzANxjQxctqfYSDePgAC0wUAAj-VzAqfWrvSXUfHMTsE"
 
         m = await message.reply_sticker(sticker=STICKER_ID)
@@ -301,7 +292,6 @@ async def start(client, message):
         )
         return
     
-    # 👇 MNTGX FILTER LOGIC 👇
     if len(message.command) == 2 and message.command[1].startswith('mntgx'):
         searches = message.command[1].split("-", 1)[1] 
         search = searches.replace('-', ' ')
@@ -310,7 +300,6 @@ async def start(client, message):
         await auto_filter(client, message) 
         return
 
-    # 👇 VERIFY LOGIC 👇
     if len(message.command) == 2 and message.command[1].startswith('verify_'):
         try:
             link_parts = message.command[1].split("_", 2)
@@ -342,7 +331,6 @@ async def start(client, message):
     if IS_VERIFY:
         if not await check_verification(client, message.from_user.id):
 
-            # 👇 SINGLE LINE PROGRESS BAR ANIMATION 👇
             try:
                 anim_msg = await message.reply_text("<b>⏳ Processing ▒▒▒▒▒▒▒▒▒▒ 0%</b>", parse_mode=enums.ParseMode.HTML)
                 await asyncio.sleep(0.5)
@@ -353,16 +341,10 @@ async def start(client, message):
                 await anim_msg.delete()
             except Exception as e:
                 pass 
-            # 👆 ANIMATION MUDINJITHU 👆
             
             verify_url = await get_verify_link(message.from_user.id, data)
             
-            # 👇 DEFAULT VALUES 👇
-            movie_name = "Requested File"
-            year = "Unknown"
-            audio = "Unknown"
-            quality = "Unknown"
-            size = "Unknown"
+            raw_caption = "Unknown Filename"
             
             try:
                 if "_" in data:
@@ -375,16 +357,7 @@ async def start(client, message):
 
                 files_ = await get_file_details(temp_file_id)
                 if files_:
-                    # 👇 PUTHU EXTRACTOR LOGIC INGA THAAN VARUM 👇
-                    raw_filename = files_[0].file_name
-                    raw_caption = files_[0].caption if files_[0].caption else "" # 👈 Itha puthusa add pannirukken
-                    raw_filesize = files_[0].file_size
-                    
-                    movie_name = get_clean_name(raw_filename)
-                    year = get_year(raw_filename)
-                    audio = get_audio(raw_caption, raw_filename)
-                    quality = get_print_quality(raw_caption, raw_filename)
-                    size = get_clean_size(raw_filesize)
+                    raw_caption = files_[0].caption if files_[0].caption else files_[0].file_name 
             except Exception as e:
                 print(f"Error getting file details: {e}")
 
@@ -393,15 +366,10 @@ async def start(client, message):
                 [InlineKeyboardButton("❓ How to Download ❓", url="https://t.me/howtoo1/7")]
             ]
             
-            # 👇 PUTHU VERIFY TEXT FORMAT 👇
             verify_text = (
                 "<b>🔒 Access Denied : Verification Required!</b>\n\n"
                 "<blockquote><b>📂 File Details:</b>\n\n"
-                f"🎬 <b>Movie Name:</b> <code>{movie_name}</code>\n"
-                f"🗓️ <b>Year:</b> <code>{year}</code>\n"
-                f"🔊 <b>Audio:</b> <code>{audio}</code>\n"
-                f"📀 <b>Quality:</b> <code>{quality}</code>\n"
-                f"💾 <b>Size:</b> <code>{size}</code></blockquote>\n\n"
+                f"<b>Filename:</b> <code>{raw_caption}</code></blockquote>\n\n"
                 "<b>🎯 Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed.👇</i>\n\n"
                 "<blockquote><b>⏳ Time Limit : 10 Minutes!</b></blockquote>"
             )
@@ -455,7 +423,7 @@ async def start(client, message):
                     file_id=msg.get("file_id"),
                     caption=f_caption,
                     parse_mode=enums.ParseMode.HTML, 
-                    protect_content=msg.get('protect', False),
+                    protect_content=False, # Ithu Forward aaga false potaachu
                     )
             except FloodWait as e:
                 await asyncio.sleep(e.x)
@@ -464,7 +432,7 @@ async def start(client, message):
                     file_id=msg.get("file_id"),
                     caption=f_caption,
                     parse_mode=enums.ParseMode.HTML,
-                    protect_content=msg.get('protect', False),
+                    protect_content=False, # Ithu Forward aaga false potaachu
                     )
             except Exception as e:
                 logger.warning(e, exc_info=True)
@@ -494,10 +462,10 @@ async def start(client, message):
                     except Exception as e:
                         logger.exception(e)
                 try:
-                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=True if protect == "/pbatch" else False)
+                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=False) # Ithu Forward aaga false potaachu
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
-                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=True if protect == "/pbatch" else False)
+                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=False) # Ithu Forward aaga false potaachu
                 except Exception as e:
                     logger.exception(e)
                     continue
@@ -505,10 +473,10 @@ async def start(client, message):
                 continue
             else:
                 try:
-                    await msg.copy(message.chat.id, protect_content=True if protect == "/pbatch" else False)
+                    await msg.copy(message.chat.id, protect_content=False) # Ithu Forward aaga false potaachu
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
-                    await msg.copy(message.chat.id, protect_content=True if protect == "/pbatch" else False)
+                    await msg.copy(message.chat.id, protect_content=False) # Ithu Forward aaga false potaachu
                 except Exception as e:
                     logger.exception(e)
                     continue
@@ -670,7 +638,6 @@ async def delete_all_index(bot, message):
         ),
         quote=True,
     )
-
 
 @Client.on_callback_query(filters.regex(r'^autofilter_delete'))
 async def delete_all_index_confirm(bot, message):
