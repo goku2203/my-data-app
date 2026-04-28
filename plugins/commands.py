@@ -852,10 +852,9 @@ async def auto_delete_helper(msg, delay):
 
 @Client.on_message(filters.command("stats") & filters.user(ADMINS))
 async def stats_command(client, message):
-    # Sticker oru chinna animation ku
-    tmp_msg = await message.reply_text("<b>📡 Server details check pandren... ⏳</b>")
-    
+    # Ping time fix: Message anuppurathuku munnadi start_t set panrom
     start_t = time.time()
+    tmp_msg = await message.reply_text("<b>📡 Server details check pandren... ⏳</b>")
     ping_time = round((time.time() - start_t) * 1000, 2)
     
     uptime_sec = int(time.time() - BOT_START_TIME)
@@ -863,7 +862,9 @@ async def stats_command(client, message):
     
     total_users = await db.total_users_count()
     total_chats = await db.total_chat_count()
-    total_files = await Media.count_documents()
+    
+    # DB Count fix: .collection.count_documents({}) nu maathiyachu
+    total_files = await Media.collection.count_documents({})
     
     now = datetime.now()
     start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -898,13 +899,11 @@ async def stats_command(client, message):
     )
     
     await tmp_msg.delete()
-    # PICS la irundhu oru random photo oda anuppalam
     sent_stats = await message.reply_photo(
         photo=random.choice(PICS),
         caption=stats_text,
         parse_mode=enums.ParseMode.HTML
     )
     
-    # Auto delete 60 seconds (Bot message & User command renduமே)
     asyncio.create_task(auto_delete_message(client, sent_stats, 60))
     asyncio.create_task(auto_delete_message(client, message, 60))
