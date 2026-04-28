@@ -143,7 +143,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <i>Check the results below:</i>"""
 
     CUSTOM_FILE_CAPTION = """<b>📂 Filename:</b> <b><i>{file_caption}</i></b>\n
-<b>💾 Size:</b> <b>{file_size}</b>\n\n
+<b>💾 Size:</b> <b>{file_size}</b>\n
 
 <blockquote><b>📢 Join Our Channels : 👇</b>\n
     <b>➠ <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single File</a></b>
