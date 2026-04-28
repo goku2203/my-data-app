@@ -142,13 +142,13 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     RESULT_TXT = """<blockquote><b>⚡ Found something for you!</b></blockquote>
 <i>Check the results below:</i>"""
 
-    CUSTOM_FILE_CAPTION = """<b>📂 File:</b> <b><i>{file_caption}</i></b>\n
-<b>💾 Size:</b> <b>{file_size}</b>
-━━━━━━━━━━━━━━━━━━
-<b>📢 Join Our Channels :</b>\n
+    CUSTOM_FILE_CAPTION = """<b>📂 Filename:</b> <b><i>{file_caption}</i></b>\n
+<b>💾 Size:</b> <b>{file_size}</b>\n\n
+
+<blockquote><b>📢 Join Our Channels : 👇</b>\n
     <b>➠ <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single File</a></b>
     <b>➠ <a href='https://t.me/+LxPgPQsF7tExZmFl'>Naruto Channel</a></b>
-    <b>➠ <a href='https://t.me/Anime_single'>Anime Lover's</a></b>
+    <b>➠ <a href='https://t.me/Anime_single'>Anime Lover's</a></b></blockquote>
 ━━━━━━━━━━━━━━━━━━
 <b>⚠️ COPYRIGHT WARNING ⚠️</b>\n
 <blockquote><i>This message will</i> <b>AUTO-DELETE</b> <i>in</i> <b>10 Minute</b> <i>to prevent copyright strikes! ⏳</i>\n
