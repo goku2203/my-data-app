@@ -84,14 +84,8 @@ LOG_STR += f"Your current IMDB template is {IMDB_TEMPLATE}"
 # Render la irunthu value edukka
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "arolinks.com")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "9142b3e52913166ef75d3b8ad05bc2e8460e9e3b")
-IS_VERIFY = os.environ.get("IS_VERIFY", "True")
-
-# ... vera variables irukkum ...
-
-IS_VERIFY = os.environ.get("IS_VERIFY", "False") == "True"
-SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "")
-SHORTLINK_API = os.environ.get("SHORTLINK_API", "")
-VERIFY_EXPIRE = int(os.environ.get("VERIFY_EXPIRE", "86400"))
+IS_VERIFY = is_enabled(os.environ.get("IS_VERIFY", "True"), True)
+VERIFY_EXPIRE = int(os.environ.get("VERIFY_EXPIRE", "600")) # 600 seconds = 10 Minutes
 
 # 👇 Itha info.py file la kadeisiya podunga 👇
 UPDATES_CHANNEL = int(environ.get("UPDATES_CHANNEL", "-1003803095451"))
