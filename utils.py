@@ -431,11 +431,14 @@ async def get_short(link):
 # ----- START OF NEW UTILS CODE -----
 
 async def get_verify_link(user_id, file_id=None):
+    # Dynamic bot username fix
+    bot_username = temp.U_NAME if temp.U_NAME else "Mikasa_Lovely_bot"
+    
     # File ID iruntha, atha link kulla serthu anuppurom
     if file_id:
-        link = f"https://telegram.me/Mikasa_Lovely_bot?start=verify_{user_id}_{file_id}"
+        link = f"https://telegram.me/{bot_username}?start=verify_{user_id}_{file_id}"
     else:
-        link = f"https://telegram.me/Mikasa_Lovely_bot?start=verify_{user_id}"
+        link = f"https://telegram.me/{bot_username}?start=verify_{user_id}"
         
     api_url = f"https://{SHORTLINK_URL}/api?api={SHORTLINK_API}&url={link}&format=text"
     
@@ -446,14 +449,15 @@ async def get_verify_link(user_id, file_id=None):
                     return await response.text()
                 else:
                     return link
-    except:
+    except Exception as e:
+        print(f"Shortener URL Error: {e}")
         return link
 
 async def verify_user(user_id):
-    # Time: 2 Minutes (120 seconds)
-    expiry = datetime.now() + timedelta(seconds=120)
+    # Time: 10 Minutes (600 seconds - from info.py)
+    expiry = datetime.now() + timedelta(seconds=VERIFY_EXPIRE)
     
-    # Inga 'verify_status_v2' nu mathi irukken. So pazhaya data ellam invalid aagidum.
+    # Verify status update
     await db.col.update_one({'id': user_id}, {'$set': {'verify_status_v2': {'is_verified': True, 'verify_until': expiry}}}, upsert=True)
 
 async def check_verification(client, user_id):
