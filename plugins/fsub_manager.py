@@ -7,19 +7,14 @@ from info import ADMINS, PICS
 import random
 
 # --- Auto Delete Helper Function ---
-# Ithu user message matrum bot message rendaiyum automatic-a delete pannidum
 async def auto_delete_helper(bot_msg, user_msg, delay=30):
     await asyncio.sleep(delay)
     try:
-        if bot_msg:
-            await bot_msg.delete()
-    except:
-        pass
+        if bot_msg: await bot_msg.delete()
+    except: pass
     try:
-        if user_msg:
-            await user_msg.delete()
-    except:
-        pass
+        if user_msg: await user_msg.delete()
+    except: pass
 
 # --- Core Function to Send the Force Sub Prompt ---
 async def send_fsub_prompt(client, message, payload="start"):
@@ -36,7 +31,8 @@ async def send_fsub_prompt(client, message, payload="start"):
         for url in links.values():
             buttons.append([InlineKeyboardButton("🤖 Join Updates Channel", url=url)])
 
-    bot_username = (await client.get_me()).username
+    # 🔥 OPTIMIZATION: Faster way to get bot username without API call
+    bot_username = client.me.username
     buttons.append([InlineKeyboardButton("🔄 Try Again", url=f"https://t.me/{bot_username}?start={payload}")])
 
     text = (
@@ -47,17 +43,28 @@ async def send_fsub_prompt(client, message, payload="start"):
         "2️⃣ Click the <b>'🔄 Try Again'</b> button."
     )
 
-# Tenor link-kku bathila unga Telegram GIF oda file_id-a inga podunga
+    # Note: ibb.co direct image link aaga irunthaal innum fast aaga work aagum (e.g., https://i.ibb.co/...)
     TELEGRAM_IMG_ID = "https://ibb.co/ZRxjR05T" 
 
-    force_msg = await message.reply_animation(
-        animation=TELEGRAM_IMG_ID, 
-        caption=text,
-        reply_markup=InlineKeyboardMarkup(buttons),
-        parse_mode=enums.ParseMode.HTML
-    )
+    try:
+        # 🔥 FIX: Animation kku bathila reply_photo use panniyachu
+        force_msg = await message.reply_photo(
+            photo=TELEGRAM_IMG_ID, 
+            caption=text,
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=enums.ParseMode.HTML
+        )
+    except Exception as e:
+        # Oruvela link work aagalana, automatic ah random pic eduthukkum! (Safe mode)
+        print(f"Force Sub Image Error: {e}")
+        force_msg = await message.reply_photo(
+            photo=random.choice(PICS), 
+            caption=text,
+            reply_markup=InlineKeyboardMarkup(buttons),
+            parse_mode=enums.ParseMode.HTML
+        )
     
-    # Force sub prompt-um 60 seconds-la auto delete aaganum na itha use pannikkalam
+    # 60 seconds-la auto delete
     asyncio.create_task(auto_delete_helper(force_msg, message, 60))
     
     return force_msg
@@ -138,5 +145,4 @@ async def list_fsub_channels(client, message):
         text += f"▪️ {name} (`{ch}`)\n"
 
     k = await message.reply(text)
-    # List konjam perusa irukkum, so padikka time venum nu ithukku 60 seconds vechirukken
     asyncio.create_task(auto_delete_helper(k, message, 60))
