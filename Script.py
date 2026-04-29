@@ -141,7 +141,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
     RESULT_TXT = (
     "<blockquote><b>⚡ Found something for you!</b></blockquote>\n"
-    "<b><i>⌛ Only 1 minute left! Hurry!</i></b>\n\n"
+    "<i>⌛ Only 1 minute left! Hurry!</i>\n\n"
     "<i>Check the results below:</i>"
 )
 
