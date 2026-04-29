@@ -23,6 +23,7 @@ import psutil
 import time
 from info import BOT_START_TIME
 from plugins.fsub_manager import send_fsub_prompt
+from utils import clean_filename
 
 logger = logging.getLogger(__name__)
 
