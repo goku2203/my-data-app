@@ -1,5 +1,3 @@
-# plugins/fsub_manager.py
-
 import asyncio
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -8,8 +6,22 @@ from database.users_chats_db import db
 from info import ADMINS, PICS
 import random
 
+# --- Auto Delete Helper Function ---
+# Ithu user message matrum bot message rendaiyum automatic-a delete pannidum
+async def auto_delete_helper(bot_msg, user_msg, delay=30):
+    await asyncio.sleep(delay)
+    try:
+        if bot_msg:
+            await bot_msg.delete()
+    except:
+        pass
+    try:
+        if user_msg:
+            await user_msg.delete()
+    except:
+        pass
+
 # --- Core Function to Send the Force Sub Prompt ---
-# You can easily change the photo or text here in the future
 async def send_fsub_prompt(client, message, payload="start"):
     missing_channels = await get_missing_channels(message.from_user.id, client)
     links = await create_invite_links(client)
@@ -24,7 +36,6 @@ async def send_fsub_prompt(client, message, payload="start"):
         for url in links.values():
             buttons.append([InlineKeyboardButton("🤖 Join Updates Channel", url=url)])
 
-    # Try Again button carries the payload (like verify_xxx or file_xxx)
     bot_username = (await client.get_me()).username
     buttons.append([InlineKeyboardButton("🔄 Try Again", url=f"https://t.me/{bot_username}?start={payload}")])
 
@@ -36,14 +47,16 @@ async def send_fsub_prompt(client, message, payload="start"):
         "2️⃣ Click the <b>'🔄 Try Again'</b> button."
     )
 
-    # Sending with a random photo. 
-    # To use a sticker later, change this to message.reply_sticker(sticker="YOUR_STICKER_ID")
     force_msg = await message.reply_photo(
         photo=random.choice(PICS), 
         caption=text,
         reply_markup=InlineKeyboardMarkup(buttons),
         parse_mode=enums.ParseMode.HTML
     )
+    
+    # Force sub prompt-um 60 seconds-la auto delete aaganum na itha use pannikkalam
+    asyncio.create_task(auto_delete_helper(force_msg, message, 60))
+    
     return force_msg
 
 
@@ -52,47 +65,65 @@ async def send_fsub_prompt(client, message, payload="start"):
 @Client.on_message(filters.command("addfsub") & filters.private)
 async def add_fsub_channel(client, message):
     if message.from_user.id not in ADMINS:
-        return await message.reply("🚫 Unauthorized access.")
+        k = await message.reply("🚫 Unauthorized access.")
+        asyncio.create_task(auto_delete_helper(k, message, 10))
+        return
 
     try:
         channel_id = int(message.text.split()[1])
     except (IndexError, ValueError):
-        return await message.reply("<b>Usage:</b> <code>/addfsub -100xxxxxxx</code>")
+        k = await message.reply("<b>Usage:</b> <code>/addfsub -100xxxxxxx</code>")
+        asyncio.create_task(auto_delete_helper(k, message, 15))
+        return
 
     channels = await db.get_auth_channels()
     if channel_id in channels:
-        return await message.reply("This channel is already in the Force Sub list.")
+        k = await message.reply("This channel is already in the Force Sub list.")
+        asyncio.create_task(auto_delete_helper(k, message, 15))
+        return
 
     channels.append(channel_id)
     await db.set_auth_channels(channels)
-    await message.reply(f"✅ <b>FSub Channel Added Successfully:</b>\nID: `{channel_id}`")
+    k = await message.reply(f"✅ <b>FSub Channel Added Successfully:</b>\nID: `{channel_id}`")
+    asyncio.create_task(auto_delete_helper(k, message, 30))
 
 @Client.on_message(filters.command("delfsub") & filters.private)
 async def remove_fsub_channel(client, message):
     if message.from_user.id not in ADMINS:
-        return await message.reply("🚫 Unauthorized access.")
+        k = await message.reply("🚫 Unauthorized access.")
+        asyncio.create_task(auto_delete_helper(k, message, 10))
+        return
 
     try:
         channel_id = int(message.text.split()[1])
     except (IndexError, ValueError):
-        return await message.reply("<b>Usage:</b> <code>/delfsub -100xxxxxxx</code>")
+        k = await message.reply("<b>Usage:</b> <code>/delfsub -100xxxxxxx</code>")
+        asyncio.create_task(auto_delete_helper(k, message, 15))
+        return
 
     channels = await db.get_auth_channels()
     if channel_id not in channels:
-        return await message.reply("This channel is not in the Force Sub list.")
+        k = await message.reply("This channel is not in the Force Sub list.")
+        asyncio.create_task(auto_delete_helper(k, message, 15))
+        return
 
     channels.remove(channel_id)
     await db.set_auth_channels(channels)
-    await message.reply(f"🗑️ <b>FSub Channel Removed Successfully:</b>\nID: `{channel_id}`")
+    k = await message.reply(f"🗑️ <b>FSub Channel Removed Successfully:</b>\nID: `{channel_id}`")
+    asyncio.create_task(auto_delete_helper(k, message, 30))
 
 @Client.on_message(filters.command("listfsub") & filters.private)
 async def list_fsub_channels(client, message):
     if message.from_user.id not in ADMINS:
-        return await message.reply("🚫 Unauthorized access.")
+        k = await message.reply("🚫 Unauthorized access.")
+        asyncio.create_task(auto_delete_helper(k, message, 10))
+        return
 
     channels = await db.get_auth_channels()
     if not channels:
-        return await message.reply("No Force Sub channels have been set yet.")
+        k = await message.reply("No Force Sub channels have been set yet.")
+        asyncio.create_task(auto_delete_helper(k, message, 15))
+        return
 
     text = "<b>📝 Current FSub Channels:</b>\n\n"
     for ch in channels:
@@ -103,4 +134,6 @@ async def list_fsub_channels(client, message):
             name = "Unknown Channel (Check if bot is admin)"
         text += f"▪️ {name} (`{ch}`)\n"
 
-    await message.reply(text)
+    k = await message.reply(text)
+    # List konjam perusa irukkum, so padikka time venum nu ithukku 60 seconds vechirukken
+    asyncio.create_task(auto_delete_helper(k, message, 60))
