@@ -139,8 +139,8 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>🆔 ID:</b> <code>{}</code>
 <b>🏷 Name:</b> {}"""
 
-    RESULT_TXT = """<blockquote><b>⚡ Found something for you!</b></blockquote>
-<i>Check the results below:</i>"""
+    RESULT_TXT = """<blockquote><b>⚡ Found something for you!</b></blockquote>\n
+<blockquote><b>⌛ Only 1 minute left! Hurry! 🔥</b></blockquote>\n<i>Check the results below:</i>"""
 
     CUSTOM_FILE_CAPTION = """<b>📂 Filename:</b> <b><i>{file_caption}</i></b>\n
 <b>💾 Size:</b> <b>{file_size}</b>\n
