@@ -57,9 +57,9 @@ async def auto_delete_msgs(bot_msg, user_msg, delay):
 # 👇 FIX: Search & Button Name Cleaner 👇
 def clean_filename(name):
     if not name: return ""
-    # '@' simbal kku appuram varum yentha peyaraiyum thedi pidichu azhikka
-    cleaned = re.sub(r"@\w+", "", name)
-    # micham irukka antha adaipu kurigalai azhikka
+    # '@' symbol matrum athukku appuram vara letters, numbers, '_' (underscore) ellathaiyum thedi azhikka
+    cleaned = re.sub(r"@[a-zA-Z0-9_]+", "", name)
+    # micham irukka thevaiyillatha adaipu kurigalai azhikka
     return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
 
 @Client.on_message((filters.group | filters.private) & filters.text & ~filters.command(["start", "help", "about", "plan", "settings", "addfsub", "delfsub", "listfsub", "channel", "delete", "deleteall", "set_template", "stats", "logs"]))
