@@ -26,6 +26,7 @@ from utils import get_size
 from info import BOT_START_TIME
 from datetime import datetime
 from utils import temp
+from plugins.fsub_manager import send_fsub_prompt
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -65,18 +66,11 @@ def clean_filename(name):
 @Client.on_message((filters.group | filters.private) & filters.text & ~filters.command(["start", "help", "about", "plan", "settings", "fsub", "channel", "delete", "deleteall", "set_template", "stats", "logs"]))
 async def give_filter(client, message):
     
-    # 👇 INGA PUTHA FSUB CHECK ADD PANNU 👇
     if message.chat.type == enums.ChatType.PRIVATE:
         if not await is_subscribed(message.from_user.id, client):
-            links = await create_invite_links(client)
-            btn = [[InlineKeyboardButton("🤖 Join Updates Channel", url=url)] for url in links.values()]
-            await message.reply_text(
-                "**Please Join My Updates Channel to use this Bot!**",
-                reply_markup=InlineKeyboardMarkup(btn),
-                parse_mode=enums.ParseMode.MARKDOWN
-            )
+            from plugins.fsub_manager import send_fsub_prompt
+            await send_fsub_prompt(client, message)
             return
-    # 👆 ITHUVARAI 👆
 
     k = await manual_filters(client, message)
     if k == False:
