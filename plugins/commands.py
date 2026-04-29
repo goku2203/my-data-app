@@ -39,8 +39,9 @@ async def delete_maint_msg(bot_msg, user_msg):
 
 def clean_filename(name):
     if not name: return ""
-    pattern = r"(?i)(@goku_stark|@goku\s?stark|@gokustark|goku\s?stark|gokustark|@goku|goku|stark)"
-    cleaned = re.sub(pattern, "", name)
+    # '@' simbal kku appuram varum yentha peyaraiyum thedi pidichu azhikka
+    cleaned = re.sub(r"@\w+", "", name)
+    # micham irukka antha adaipu kurigalai azhikka
     return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
 
 async def create_file_buttons(client, sent_message):
