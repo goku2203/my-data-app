@@ -63,7 +63,7 @@ def clean_filename(name):
     # Remove leftover brackets, hyphens or spaces at the start/end
     return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
 
-@Client.on_message((filters.group | filters.private) & filters.text & ~filters.command(["start", "help", "about", "plan", "settings", "fsub", "channel", "delete", "deleteall", "set_template", "stats", "logs"]))
+@Client.on_message((filters.group | filters.private) & filters.text & ~filters.command(["start", "help", "about", "plan", "settings", "addfsub", "delfsub", "listfsub", "channel", "delete", "deleteall", "set_template", "stats", "logs"]))
 async def give_filter(client, message):
     
     if message.chat.type == enums.ChatType.PRIVATE:
