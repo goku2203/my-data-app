@@ -1,6 +1,6 @@
 #  @MrMNTG @MusammilN
 #please give credits https://github.com/MN-BOTS/ShobanaFilterBot
-
+import re
 import logging
 import asyncio
 import re
@@ -513,3 +513,27 @@ async def get_missing_channels(user_id: int, client) -> list:
             missing.append(channel)
 
     return missing
+
+# Inga unga thevaiyillatha varthaigalai add pannikkonga
+JUNK_WORDS = [
+    "goku_stark",
+    "goku stark",
+    "goku",
+    "tamil rockers",
+    "tamilrockers",
+    "grouplinkstamil",
+    "Team_HDT",
+    "cinema_company",
+    "filmbox_studios"
+]
+
+# Pattern Compilation (Super Fast Speed kku)
+_escaped_words = [re.escape(word) for word in JUNK_WORDS]
+_escaped_words.append(r"@[a-zA-Z0-9_]+")
+JUNK_PATTERN = re.compile(r"(" + "|".join(_escaped_words) + r")", flags=re.IGNORECASE)
+
+# Master Clean Function
+def clean_filename(name):
+    if not name: return ""
+    cleaned = JUNK_PATTERN.sub("", name)
+    return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
