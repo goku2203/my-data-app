@@ -47,12 +47,11 @@ async def send_fsub_prompt(client, message, payload="start"):
         "2️⃣ Click the <b>'🔄 Try Again'</b> button."
     )
 
-    # Unga tenor gif link-a inga podunga 
-    # (Note: link kandippa direct image link-a irukkanum)
-    TENOR_GIF_URL = "https://media1.tenor.com/m/1N9K0fob6XsAAAAd/kiss.gif" 
+# Tenor link-kku bathila unga Telegram GIF oda file_id-a inga podunga
+    TELEGRAM_GIF_ID = "CgACAgUAAxkBAAFIXpFp8gXAccTj90H5g7CyGAx03-b4hQACsiAAAmpNkFc5UJL9-qzIJjsE" 
 
     force_msg = await message.reply_animation(
-        animation=TENOR_GIF_URL, 
+        animation=TELEGRAM_GIF_ID, 
         caption=text,
         reply_markup=InlineKeyboardMarkup(buttons),
         parse_mode=enums.ParseMode.HTML
