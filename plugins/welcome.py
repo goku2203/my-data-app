@@ -15,7 +15,8 @@ LEAVE_STICKER_ID = "CAACAgIAAxkBAAFGz6Jp14akiWmHaqkF73vgliEtijxcSQACOQcAAkb7rATR
 
 WELCOME_MSG_ENGLISH = """
 > **🌟 Hello {mention}! 👋** 🎉
-> __✨ Welcome to our awesome group! 🎬🔥__
+
+**✨ Welcome to our awesome group! 🎬🔥**
 
 📜 **GROUP RULES**
 
