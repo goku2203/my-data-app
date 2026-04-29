@@ -27,6 +27,7 @@ from info import BOT_START_TIME
 from datetime import datetime
 from utils import temp
 from plugins.fsub_manager import send_fsub_prompt
+from utils import clean_filename
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
