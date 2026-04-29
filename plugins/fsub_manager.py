@@ -47,8 +47,12 @@ async def send_fsub_prompt(client, message, payload="start"):
         "2️⃣ Click the <b>'🔄 Try Again'</b> button."
     )
 
-    force_msg = await message.reply_photo(
-        photo=random.choice(PICS), 
+    # Unga tenor gif link-a inga podunga 
+    # (Note: link kandippa direct image link-a irukkanum)
+    TENOR_GIF_URL = "https://media1.tenor.com/m/1N9K0fob6XsAAAAd/kiss.gif" 
+
+    force_msg = await message.reply_animation(
+        animation=TENOR_GIF_URL, 
         caption=text,
         reply_markup=InlineKeyboardMarkup(buttons),
         parse_mode=enums.ParseMode.HTML
