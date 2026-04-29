@@ -1,0 +1,13 @@
+name: Render Auto Update
+
+on:
+  schedule:
+    # Keezha irukka time-ah unakku etha mathiri mathiko
+    - cron: '30 18 * * *' 
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
