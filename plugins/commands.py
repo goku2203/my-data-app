@@ -299,15 +299,15 @@ async def start(client, message):
         if not await check_verification(client, message.from_user.id):
 
             try:
-                anim_msg = await message.reply_text("<b>⏳ Processing ▒▒▒▒▒▒▒▒▒▒ 0%</b>", parse_mode=enums.ParseMode.HTML)
+                anim_msg = await message.reply_text("<b>⏳ Processing .</b>", parse_mode=enums.ParseMode.HTML)
                 await asyncio.sleep(0.5)
-                await anim_msg.edit_text("<b>⏳ Processing █████▒▒▒▒▒ 50%</b>", parse_mode=enums.ParseMode.HTML)
+                await anim_msg.edit_text("<b>⏳ Processing . .</b>", parse_mode=enums.ParseMode.HTML)
                 await asyncio.sleep(0.5)
-                await anim_msg.edit_text("<b>🎯 Ready! ██████████ 100%</b>", parse_mode=enums.ParseMode.HTML)
+                await anim_msg.edit_text("<b>⏳ Processing . . .</b>", parse_mode=enums.ParseMode.HTML)
                 await asyncio.sleep(0.5)
                 await anim_msg.delete()
             except Exception as e:
-                pass 
+                pass
             
             verify_url = await get_verify_link(message.from_user.id, data)
             
