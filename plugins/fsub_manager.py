@@ -48,10 +48,10 @@ async def send_fsub_prompt(client, message, payload="start"):
     )
 
 # Tenor link-kku bathila unga Telegram GIF oda file_id-a inga podunga
-    TELEGRAM_GIF_ID = "CgACAgUAAxkBAAIn5WnyJgtCRXxTkjVgemqHCnIzhIkqAALUKAACIqmQV01VDBEmrygHHgQ" 
+    TELEGRAM_IMG_ID = "https://ibb.co/ZRxjR05T" 
 
     force_msg = await message.reply_animation(
-        animation=TELEGRAM_GIF_ID, 
+        animation=TELEGRAM_IMG_ID, 
         caption=text,
         reply_markup=InlineKeyboardMarkup(buttons),
         parse_mode=enums.ParseMode.HTML
