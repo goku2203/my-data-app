@@ -22,6 +22,7 @@ from utils import temp
 import psutil
 import time
 from info import BOT_START_TIME
+from plugins.fsub_manager import send_fsub_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -219,45 +220,13 @@ async def start(client, message):
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
 
     if not await is_subscribed(message.from_user.id, client):
-        try:
-            from utils import get_missing_channels
-            missing_channels = await get_missing_channels(message.from_user.id, client)
-        except Exception:
-            missing_channels = []
-
-        links = await create_invite_links(client)
-        btn = []
-        
-        if missing_channels:
-            for index, channel_id in enumerate(missing_channels, start=1):
-                url = links.get(channel_id)
-                if url:
-                    btn.append([InlineKeyboardButton(f"✨ Join Channel {index} ✨", url=url)])
-        else:
-            for url in links.values():
-                btn.append([InlineKeyboardButton("🤖 Join Updates Channel", url=url)])
-
-        if len(message.command) == 2:
+        if len(message.command) > 1:
             payload = message.command[1]
         else:
             payload = "start"
-
-        btn.append([InlineKeyboardButton("🔄 Try Again", url=f"https://t.me/{temp.U_NAME}?start={payload}")])
-        
-        force_text = (
-            "<b>⚠️ Access Denied!</b>\n\n"
-            "<i>Nanba! Neenga innum namma channels-la join pannala. 👇</i>\n\n"
-            "<b>🚀 Eppadi Access Panrathu?</b>\n"
-            "1️⃣ Keezha irukka channels-la join pannunga.\n"
-            "2️⃣ Apram <b>'🔄 Try Again'</b> button-a click pannunga.\n\n"
-            "<i>Note: Neenga join panna channel button automatic-a maranjidum! ✨</i>"
-        )
-        force_msg = await client.send_message(
-            chat_id=message.from_user.id,
-            text=force_text,
-            reply_markup=InlineKeyboardMarkup(btn),
-            parse_mode=enums.ParseMode.HTML
-        )
+            
+        from plugins.fsub_manager import send_fsub_prompt
+        force_msg = await send_fsub_prompt(client, message, payload)
         FORCE_MSG[message.from_user.id] = force_msg.id
         return
 
@@ -523,23 +492,6 @@ def is_admin(user) -> bool:
         user.id in ADMINS or
         (f"@{user.username}" in ADMINS if user.username else False)
     )
-
-@Client.on_message(filters.command("fsub") & filters.private)
-async def set_auth_channels(client, message: Message):
-    user = message.from_user
-    if not is_admin(user):
-        return await message.reply("🚫 You are not authorized to use this command.")
-
-    args = message.text.split()[1:]
-    if not args:
-        return await message.reply("Usage: /fsub (channel_id1) (channel_id2) ...")
-
-    try:
-        channels = [int(cid) for cid in args]
-        await db.set_auth_channels(channels)
-        await message.reply(f"✅ AUTH_CHANNELs updated:\n{channels}")
-    except ValueError:
-        await message.reply("❌ Invalid channel IDs. Use numeric Telegram chat IDs.")
 
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
 async def channel_info(bot, message):
