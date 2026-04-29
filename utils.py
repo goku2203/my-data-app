@@ -524,7 +524,8 @@ JUNK_WORDS = [
     "grouplinkstamil",
     "Team_HDT",
     "cinema_company",
-    "filmbox_studios"
+    "Filmbox_Studios",
+    "Goku_Stark"
 ]
 
 # Pattern Compilation (Super Fast Speed kku)
