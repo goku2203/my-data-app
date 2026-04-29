@@ -37,13 +37,6 @@ async def delete_maint_msg(bot_msg, user_msg):
     try: await user_msg.delete()
     except: pass
 
-def clean_filename(name):
-    if not name: return ""
-    # '@' symbol matrum athukku appuram vara letters, numbers, '_' (underscore) ellathaiyum thedi azhikka
-    cleaned = re.sub(r"@[a-zA-Z0-9_]+", "", name)
-    # micham irukka thevaiyillatha adaipu kurigalai azhikka
-    return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
-
 async def create_file_buttons(client, sent_message):
     buttons = []
     if sent_message.chat.username:
