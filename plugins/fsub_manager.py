@@ -44,7 +44,7 @@ async def send_fsub_prompt(client, message, payload="start"):
     )
 
     # Note: ibb.co direct image link aaga irunthaal innum fast aaga work aagum (e.g., https://i.ibb.co/...)
-    TELEGRAM_IMG_ID = "https://ibb.co/ZRxjR05T" 
+    TELEGRAM_IMG_ID = "https://ibb.co/GvGqcxdH" 
 
     try:
         # 🔥 FIX: Animation kku bathila reply_photo use panniyachu
