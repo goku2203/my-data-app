@@ -3,7 +3,6 @@
 import re
 import logging
 import asyncio
-import re
 import os
 import aiohttp
 import requests
@@ -530,11 +529,19 @@ JUNK_WORDS = [
 
 # Pattern Compilation (Super Fast Speed kku)
 _escaped_words = [re.escape(word) for word in JUNK_WORDS]
+# Auto @username remover idhula update aagirukku
 _escaped_words.append(r"@[a-zA-Z0-9_]+")
 JUNK_PATTERN = re.compile(r"(" + "|".join(_escaped_words) + r")", flags=re.IGNORECASE)
 
-# Master Clean Function
+# Master Clean Function (Advanced Setup)
 def clean_filename(name):
     if not name: return ""
-    cleaned = JUNK_PATTERN.sub("", name)
+    
+    # 1. '-Stark' ah perfectly remove panra step (Extra spaces & hyphen oda gaali pannum)
+    cleaned = re.sub(r'(?i)-\s*Stark\s*', '', name)
+    
+    # 2. Matha junk words & @usernames ah remove panra step
+    cleaned = JUNK_PATTERN.sub("", cleaned)
+    
+    # 3. Starting & ending la irukka thevaiyillatha symbols ah clean panni tharum
     return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
