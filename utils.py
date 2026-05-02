@@ -538,7 +538,7 @@ def clean_filename(name):
     if not name: return ""
     
     # 1. '-Stark' ah perfectly remove panra step
-    cleaned = re.sub(r'(?i)-\s*Stark\s*', '', name)
+    cleaned = re.sub(r'(?i)[-\s]*Stark[\s]*', ' ', name)
     
     # 2. THE BRAHMASTRA: '@' la aaramikkira FULL peraiyum thookidum!
     cleaned = re.sub(r'(?i)@[^\s\[\]\(\)]+', '', cleaned)
