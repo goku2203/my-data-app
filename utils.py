@@ -533,15 +533,18 @@ _escaped_words = [re.escape(word) for word in JUNK_WORDS]
 _escaped_words.append(r"@[a-zA-Z0-9_]+")
 JUNK_PATTERN = re.compile(r"(" + "|".join(_escaped_words) + r")", flags=re.IGNORECASE)
 
-# Master Clean Function (Advanced Setup)
+# Master Clean Function (Ultimate Setup)
 def clean_filename(name):
     if not name: return ""
     
-    # 1. '-Stark' ah perfectly remove panra step (Extra spaces & hyphen oda gaali pannum)
+    # 1. '-Stark' ah perfectly remove panra step
     cleaned = re.sub(r'(?i)-\s*Stark\s*', '', name)
     
-    # 2. Matha junk words & @usernames ah remove panra step
+    # 2. THE BRAHMASTRA: '@' la aaramikkira FULL peraiyum thookidum!
+    cleaned = re.sub(r'(?i)@[^\s\[\]\(\)]+', '', cleaned)
+    
+    # 3. Matha junk words (goku_stark, filmbox_studios ellam)
     cleaned = JUNK_PATTERN.sub("", cleaned)
     
-    # 3. Starting & ending la irukka thevaiyillatha symbols ah clean panni tharum
+    # 4. Starting & ending la irukka thevaiyillatha symbols ah clean panni tharum
     return re.sub(r"^[_\-\s\[\]\(\)]+|[_\-\s\[\]\(\)]+$", "", cleaned).strip()
