@@ -1001,7 +1001,7 @@ async def auto_filter(client, msg, spoll=False):
                     disp_name = clean_filename(file.file_name) # Cleaned Name for Button
                     btn.append([
                         InlineKeyboardButton(
-                            text=f"📂[{get_size(file.file_size)}]--{disp_name}", 
+                            text=f"📁 [{get_size(file.file_size)}] ➵ {disp_name}", 
                             url=f"https://t.me/{temp.U_NAME}?start={pre}_{file.file_id}"
                         )
                     ])
