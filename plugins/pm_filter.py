@@ -93,6 +93,9 @@ async def next_page(bot, query):
     if not files:
         return
 
+    # 👈 INGA ITHA PUDHUSA ADD PANNU (Size Order-kku)
+    files.sort(key=lambda x: x.file_size)
+
     settings = await get_settings(query.message.chat.id)
     if not settings:
         settings = {"button": True, "botpm": False, "file_secure": False, "imdb": False, "spell_check": False, "template": IMDB_TEMPLATE, "welcome": False}
