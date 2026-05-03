@@ -253,10 +253,11 @@ async def media_handler(client, message):
         except:
             pass 
 
-        ANIME_CHANNEL_ID = -1002591922002 
+        ANIME_CHANNEL_ID = -1002591922002
+        USER_REQ_DB_ID = -1003796989516
         
-        if message.chat.id == ANIME_CHANNEL_ID:
-            return 
+        if message.chat.id in [ANIME_CHANNEL_ID, USER_REQ_DB_ID]:
+            return
 
         if not UPDATES_CHANNEL:
             return
