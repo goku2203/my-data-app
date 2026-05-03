@@ -975,6 +975,10 @@ async def auto_filter(client, msg, spoll=False):
             message = msg.message.reply_to_message
             search, files, offset, total_results = spoll
 
+        # 👈 INGA ITHA PUDHUSA ADD PANNU (Size Order-kku)
+        if files:
+            files.sort(key=lambda x: x.file_size)
+
         pre = 'filep' if settings['file_secure'] else 'file'
 
         if HYPER_MODE:
