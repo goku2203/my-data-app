@@ -89,3 +89,7 @@ VERIFY_EXPIRE = int(os.environ.get("VERIFY_EXPIRE", "600")) # 600 seconds = 10 M
 
 # 👇 Itha info.py file la kadeisiya podunga 👇
 UPDATES_CHANNEL = int(environ.get("UPDATES_CHANNEL", "-1003803095451"))
+
+# Itha info.py file la kadeisiya podunga
+MOVIE_DB_CHANNEL = -1001999941677 # Ithu unnoda pazhaya Normal Movie DB
+USER_REQ_DB_CHANNEL = -1003796989516 # Inga unnoda PUDHU User Request DB ID podu
