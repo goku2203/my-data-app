@@ -48,9 +48,9 @@ async def alert_handler(client, message):
 
         # Puthu DB na User Request, illana normal
         if message.chat.id == USER_REQ_DB_CHANNEL:
-            text = f"🎬 {clean_name} Added\n📌 User Request"
+            text = f"{clean_name} Added ➡️ User Request 👤"
         else:
-            text = f"🎬 {clean_name} Added ✅"
+            text = f"{clean_name} Added ✅"
 
         await client.send_message(chat_id=LOG_CHANNEL_ID, text=text)
         
