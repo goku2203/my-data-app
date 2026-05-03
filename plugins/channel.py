@@ -19,11 +19,12 @@ async def media(bot, message):
     media.caption = message.caption
     # --- INGA MAATHUNGA ---
     
-    # Unga Backup Tamil Movie Channel ID-a inga podunga
-    MOVIE_CHANNEL_ID = -1001999941677  
+    # Unga Backup Tamil Movie Channel ID & Pudhu User Request DB ID
+    MOVIE_CHANNEL_ID = -1001999941677
+    USER_REQ_DB_ID = -100xxxxxxx # Unnoda pudhu DB channel ID
     
-    # Condition: Idhu Movie Channel-a iruntha mattum save pannu
-    if message.chat.id == MOVIE_CHANNEL_ID:
+    # Condition: Idhu Movie Channel illana User Req Channel-a iruntha mattum save pannu
+    if message.chat.id in [MOVIE_CHANNEL_ID, USER_REQ_DB_ID]:
         await save_file(media)
     
     # Anime channel-a iruntha 'save_file' run aagathu, so update-um pogathu.
