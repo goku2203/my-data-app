@@ -24,7 +24,7 @@ def get_clean_name(name):
 # 👇👇 MANUAL INDEXING CODE (Optimized for No Lag) 👇👇
 # ====================================================
 
-@Client.on_callback_query(filters.regex(r'^index'))
+@Client.on_callback_query(filters.regex(r'^index'), group=-1)
 async def index_files(bot, query):
     if query.data.startswith('index_cancel'):
         temp.CANCEL = True
