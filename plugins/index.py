@@ -154,20 +154,20 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
     deleted = 0
     no_media = 0
     unsupported = 0
-
+    processed_count = 0 # 👈 Itha puthusa add panni irukkom
+    
     async with lock:
         try:
             current = temp.CURRENT
             temp.CANCEL = False
             
-            # 🟢 FIX 3: Reduced chunk size to prevent Memory Crashes (RAM problems)
             CHUNK_SIZE = 100 
             
             while current <= lst_msg_id:
                 if temp.CANCEL:
                     await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>")
                     break
-                
+                    
                 end_msg_id = min(current + CHUNK_SIZE - 1, lst_msg_id)
                 msg_ids_to_fetch = list(range(current, end_msg_id + 1))
                 
@@ -176,36 +176,34 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 except FloodWait as e:
                     logger.warning(f"FloodWait encountered: sleeping for {e.value} seconds.")
                     await asyncio.sleep(e.value)
-                    continue 
+                    continue
                 except Exception as fetch_error:
                     logger.error(f"Error fetching chunk: {fetch_error}")
                     errors += len(msg_ids_to_fetch)
                     current = end_msg_id + 1
-                    # Breathing space for the bot
-                    await asyncio.sleep(0.5) 
+                    await asyncio.sleep(0.5)
                     continue
-                
+                    
                 for message in messages:
                     if temp.CANCEL:
-                        break 
+                        break
                         
-                    # 🟢 FIX 4: YIELD - Ithu bot freeze aagura prechanaiya 100% thadukkum!
                     await asyncio.sleep(0.01)
+                    processed_count += 1 # 👈 Oru file-kku 1 count aagum
                     
-                    current_msg_id = message.id if message and not message.empty else 0
-                    
-                    if current % 100 == 0: 
+                    # 👈 Current kku pathila processed_count vachu update pandrom
+                    if processed_count % 100 == 0: 
                         can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
                         reply = InlineKeyboardMarkup(can)
-                        try:
-                             await msg.edit_text(
-                                 text=f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>\nErrors Occurred: <code>{errors}</code>",
-                                 reply_markup=reply)
+                        try: 
+                            await msg.edit_text(
+                                text=f"Total messages fetched: <code>{processed_count}</code>\nTotal messages saved: <code>{total_files}</code>\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>\nErrors Occurred: <code>{errors}</code>",
+                                reply_markup=reply)
                         except MessageNotModified:
                             pass 
                         except FloodWait as fw:
-                             await asyncio.sleep(fw.value)
-                    
+                            await asyncio.sleep(fw.value)
+                            
                     if message is None or message.empty:
                         deleted += 1
                         continue
@@ -215,7 +213,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                     elif message.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.AUDIO, enums.MessageMediaType.DOCUMENT]:
                         unsupported += 1
                         continue
-                    
+                        
                     media = getattr(message, message.media.value, None)
                     if not media:
                         unsupported += 1
@@ -231,15 +229,13 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                         duplicate += 1
                     elif vnay == 2:
                         errors += 1
-                
+                        
                 current = end_msg_id + 1
-                
-                # 🟢 FIX 5: Extra Breathing space - Start command lag varama irukka
                 await asyncio.sleep(0.5)
-
+                
         except Exception as e:
             logger.exception(e)
             await msg.edit(f'Error: {e}')
         else:
             if not temp.CANCEL:
-                 await msg.edit(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>\nErrors Occurred: <code>{errors}</code>')
+                await msg.edit(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>\nErrors Occurred: <code>{errors}</code>')
