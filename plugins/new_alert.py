@@ -3,6 +3,7 @@ import time
 import logging
 from pyrogram import Client, filters
 from info import MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL
+from pyrogram import Client, filters, enums
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +49,11 @@ async def alert_handler(client, message):
 
         # Puthu DB na User Request, illana normal
         if message.chat.id == USER_REQ_DB_CHANNEL:
-            text = f"{clean_name} Added ➡️ User Request 👤"
+            text = f"<b>{clean_name} Added ✅  [User Request]</b>"
         else:
-            text = f"{clean_name} Added ✅"
+            text = f"<b>{clean_name} Added ✅</b>"
 
-        await client.send_message(chat_id=LOG_CHANNEL_ID, text=text)
+        await client.send_message(chat_id=LOG_CHANNEL_ID, text=text, parse_mode=enums.ParseMode.HTML)
         
     except Exception as e:
         logger.error(f"⚠️ Alert Error: {e}")
