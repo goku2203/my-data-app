@@ -45,18 +45,14 @@ async def alert_handler(client, message):
                 return
         LAST_SENT[clean_name] = current_time
 
-        # Premium Emoji HTML format. EMOJI ID ah inga mathikkalam.
-        premium_emoji = '<tg-emoji emoji-id="6296367896398399651">⭐</tg-emoji>'
-
-        # Puthu DB na User Request, Anime na Anime, illana normal
+        # Premium emoji remove panniyachu, ippo normal ah varum
         if message.chat.id == USER_REQ_DB_CHANNEL:
-            text = f"{premium_emoji} <b>{clean_name} Added ✅  [User Request]</b>"
+            text = f"<b>{clean_name} Added ✅  [User Request]</b>"
         elif message.chat.id == ANIME_CHANNEL_ID:
-            text = f"{premium_emoji} <b>{clean_name} Added ✅  [Anime]</b>"
+            text = f"<b>{clean_name} Added ✅  [Anime]</b>"
         else:
-            text = f"{premium_emoji} <b>{clean_name} Added ✅</b>"
+            text = f"<b>{clean_name} Added ✅</b>"
 
-        # Direct ah text laye premium emoji mix aagi vanthudum
         await client.send_message(chat_id=ALERT_LOG_CHANNEL_ID, text=text, parse_mode=enums.ParseMode.HTML)
         
     except Exception as e:
