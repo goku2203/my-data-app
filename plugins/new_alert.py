@@ -52,7 +52,7 @@ async def alert_handler(client, message):
         else:
             text = f"<b>{clean_name} Added ✅</b>"
 
-        await client.send_message(chat_id=LOG_CHANNEL_ID, text=text, parse_mode=enums.ParseMode.HTML)
+        await client.send_message(chat_id=ALERT_LOG_CHANNEL_ID, text=text, parse_mode=enums.ParseMode.HTML)
         
     except Exception as e:
         logger.error(f"⚠️ Alert Error: {e}")
