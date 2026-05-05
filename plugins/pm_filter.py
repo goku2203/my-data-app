@@ -28,6 +28,7 @@ from datetime import datetime
 from utils import temp
 from plugins.fsub_manager import send_fsub_prompt
 from utils import clean_filename
+from info import ADMINS, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE, MISSING_LOG_CHANNEL
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -35,7 +36,6 @@ logger.setLevel(logging.INFO)
 BUTTONS = {}
 SPELL_CHECK = {}
 
-MISSING_LOG_CHANNEL = -1003555146843
 LOG_COOLDOWN = 600
 RECENT_REQUESTS = {}
 
