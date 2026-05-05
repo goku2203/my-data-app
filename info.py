@@ -87,9 +87,29 @@ SHORTLINK_API = os.environ.get("SHORTLINK_API", "9142b3e52913166ef75d3b8ad05bc2e
 IS_VERIFY = is_enabled(os.environ.get("IS_VERIFY", "True"), True)
 VERIFY_EXPIRE = int(os.environ.get("VERIFY_EXPIRE", "600")) # 600 seconds = 10 Minutes
 
-# 👇 Itha info.py file la kadeisiya podunga 👇
+# 👇 Itha info.py file la - ethu Autopost Channel 👇
 UPDATES_CHANNEL = int(environ.get("UPDATES_CHANNEL", "-1003803095451"))
 
-# Itha info.py file la kadeisiya podunga
-MOVIE_DB_CHANNEL = -1001999941677 # Ithu unnoda pazhaya Normal Movie DB
-USER_REQ_DB_CHANNEL = -1003796989516 # Inga unnoda PUDHU User Request DB ID podu
+# ==========================================
+# ALL TELEGRAM CHANNELS & GROUPS IDs
+# ==========================================
+
+# 1. MOVIE - Database Channel
+# Purpose: Namma Main Godown. Nee normal ah upload pandra movies ellam inga thaan save aagum.
+MOVIE_DB_CHANNEL = int(environ.get("MOVIE_DB_CHANNEL", "-1001999941677"))
+
+# 2. ANIME CHANNEL ID - Database Channel
+# Purpose: Idhu bot kku anime database ah index varum, aana alert message varum. Auto post channel la post varadhu.
+ANIME_CHANNEL_ID = int(environ.get("ANIME_CHANNEL_ID", "-1002591922002"))
+
+# 3. USER REQUEST - Database Channel
+# Purpose: Bot la index varum, alert channel kku message pogum. Idhu second DB channel, auto post channel la post varadhu.
+USER_REQ_DB_CHANNEL = int(environ.get("USER_REQ_DB_CHANNEL", "-1003796989516"))
+
+# 4. ALERT LOG CHANNEL ID
+# Purpose: Notification Board. Puthusa entha padam or anime DataBase la add aanaalum, channel la alert message vanthudum.
+ALERT_LOG_CHANNEL_ID = int(environ.get("ALERT_LOG_CHANNEL_ID", "-1003602676231"))
+
+# 5. MISSING LOG CHANNEL ID
+# Purpose: To-Do List. Bot la illaatha padam search pannina, entha channel la than report aagum.
+MISSING_LOG_CHANNEL = int(environ.get("MISSING_LOG_CHANNEL", "-1003555146843"))
