@@ -6,7 +6,7 @@ from info import CHANNELS, UPDATES_CHANNEL
 from database.ia_filterdb import save_file, unpack_new_file_id
 from utils import temp, get_size
 from pyrogram.enums import ParseMode
-from info import CHANNELS, UPDATES_CHANNEL, USER_REQ_DB_CHANNEL
+from info import CHANNELS, UPDATES_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID
 
 logger = logging.getLogger(__name__)
 
@@ -254,7 +254,6 @@ async def media_handler(client, message):
         except:
             pass 
 
-        ANIME_CHANNEL_ID = -1002591922002
         # Anime matrum User Request channel kku auto post pogaathu
         if message.chat.id in [ANIME_CHANNEL_ID, USER_REQ_DB_CHANNEL]:
             return
