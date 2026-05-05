@@ -1,9 +1,8 @@
 import re
 import time
 import logging
-from pyrogram import Client, filters
 from pyrogram import Client, filters, enums
-from info import MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ALERT_LOG_CHANNEL_ID
+from info import MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, ALERT_LOG_CHANNEL_ID
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ def get_name_with_year(name):
     clean = re.sub(r'\s+', ' ', clean).strip()
     return clean.title()
 
-@Client.on_message(filters.chat([MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL]) & (filters.document | filters.video | filters.audio), group=10)
+@Client.on_message(filters.chat([MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID]) & (filters.document | filters.video | filters.audio), group=10)
 async def alert_handler(client, message):
     try:
         media = getattr(message, message.media.value)
@@ -46,12 +45,18 @@ async def alert_handler(client, message):
                 return
         LAST_SENT[clean_name] = current_time
 
-        # Puthu DB na User Request, illana normal
-        if message.chat.id == USER_REQ_DB_CHANNEL:
-            text = f"<b>{clean_name} Added ✅  [User Request]</b>"
-        else:
-            text = f"<b>{clean_name} Added ✅</b>"
+        # Premium Emoji HTML format. EMOJI ID ah inga mathikkalam.
+        premium_emoji = '<tg-emoji emoji-id="6296367896398399651">⭐</tg-emoji>'
 
+        # Puthu DB na User Request, Anime na Anime, illana normal
+        if message.chat.id == USER_REQ_DB_CHANNEL:
+            text = f"{premium_emoji} <b>{clean_name} Added ✅  [User Request]</b>"
+        elif message.chat.id == ANIME_CHANNEL_ID:
+            text = f"{premium_emoji} <b>{clean_name} Added ✅  [Anime]</b>"
+        else:
+            text = f"{premium_emoji} <b>{clean_name} Added ✅</b>"
+
+        # Direct ah text laye premium emoji mix aagi vanthudum
         await client.send_message(chat_id=ALERT_LOG_CHANNEL_ID, text=text, parse_mode=enums.ParseMode.HTML)
         
     except Exception as e:
