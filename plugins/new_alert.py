@@ -2,13 +2,12 @@ import re
 import time
 import logging
 from pyrogram import Client, filters
-from info import MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL
 from pyrogram import Client, filters, enums
+from info import MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ALERT_LOG_CHANNEL_ID
 
 logger = logging.getLogger(__name__)
 
 # Alert pora channel
-LOG_CHANNEL_ID = -1003602676231 
 LAST_SENT = {}
 
 def get_name_with_year(name):
