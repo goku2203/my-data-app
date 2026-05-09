@@ -66,25 +66,20 @@ async def save_file(media):
             return True, 1
 
 async def get_search_results(query, file_type=None, max_results=10, offset=0, filter=False):
-    """For given query return (results, next_offset)"""
-
+    """3-Level Powerful Search Engine"""
     query = query.strip()
     
-    # 1. User type pandrathula irukkura thevai illatha junk words-a thookiduvom
-    junk_words = r"\b(movie|movies|download|tamil|telugu|malayalam|hindi|english|dubbed|hd|hq|1080p|720p|4k|print|full|file|link|send|give|please|plz)\b"
+    # 1. Thevai illatha junk words-a thookiduvom (Updated list)
+    junk_words = r"\b(movie|movies|download|tamil|telugu|malayalam|hindi|english|dubbed|hd|hq|1080p|720p|480p|4k|print|full|file|link|send|give|please|plz|bro|pro|sir|update)\b"
     clean_query = re.sub(junk_words, "", query, flags=re.IGNORECASE).strip()
     
-    # User verum "tamil movie" nu mattum type panniruntha empty aagidum, appo pazhaya query-a use pannikalam
     if not clean_query:
         clean_query = query 
 
-    # 2. Words-a thani thaniya pirichu Lookahead Regex create pandrom (Words maari maari irunthalum kandupudikka)
     keywords = clean_query.split()
-    
     if not keywords:
         raw_pattern = '.'
     else:
-        # Ithu yentha order la per irunthalum exact aaga unga DB la thedi edukkum
         raw_pattern = "".join([f"(?=.*{re.escape(word)})" for word in keywords])
             
     try:
@@ -92,26 +87,59 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
     except:
         return [], '', 0
 
-    if USE_CAPTION_FILTER:
-        filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]}
-    else:
-        filter_db = {'file_name': regex}
-
+    filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]} if USE_CAPTION_FILTER else {'file_name': regex}
     if file_type:
         filter_db['file_type'] = file_type
 
+    # LEVEL 1: Normal Exact Search
     total_results = await Media.count_documents(filter_db)
-    next_offset = offset + max_results
 
+    # LEVEL 2: FUZZY SEARCH (For Spelling Mistakes like 'mester', 'masterr')
+    if total_results == 0:
+        fuzzy_keywords = []
+        for word in keywords:
+            word = re.escape(word) # Special characters error varaama thadukka
+            word = re.sub(r'(.)\1+', r'\1', word) # Double letters ah single aakura (masterr -> master)
+            word = re.sub(r'[aeiouAEIOU]', '.', word) # Vowels ah dot aakura (mester -> m.st.r)
+            fuzzy_keywords.append(word)
+            
+        fuzzy_pattern = "".join([f"(?=.*{word})" for word in fuzzy_keywords])
+        try:
+            regex = re.compile(fuzzy_pattern, flags=re.IGNORECASE)
+            filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]} if USE_CAPTION_FILTER else {'file_name': regex}
+            if file_type: filter_db['file_type'] = file_type
+            total_results = await Media.count_documents(filter_db)
+        except:
+            pass
+
+    # LEVEL 3: YEAR IGNORE SEARCH (For 'Master 2022' when DB has 'Master')
+    if total_results == 0:
+        no_num_query = re.sub(r'\b\d{4}\b', '', clean_query).strip() # 4 digit years ah remove pandrom
+        no_num_keywords = no_num_query.split()
+        if no_num_keywords and no_num_keywords != keywords:
+            fn_keywords = []
+            for word in no_num_keywords:
+                word = re.escape(word)
+                word = re.sub(r'(.)\1+', r'\1', word)
+                word = re.sub(r'[aeiouAEIOU]', '.', word)
+                fn_keywords.append(word)
+                
+            raw_pattern_2 = "".join([f"(?=.*{word})" for word in fn_keywords])
+            try:
+                regex = re.compile(raw_pattern_2, flags=re.IGNORECASE)
+                filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]} if USE_CAPTION_FILTER else {'file_name': regex}
+                if file_type: filter_db['file_type'] = file_type
+                total_results = await Media.count_documents(filter_db)
+            except:
+                pass
+
+    next_offset = offset + max_results
     if next_offset > total_results:
         next_offset = ''
 
     cursor = Media.find(filter_db)
-    # Sort by recent
     cursor.sort('$natural', -1)
-    # Slice files according to offset and max results
     cursor.skip(offset).limit(max_results)
-    # Get list of files
     files = await cursor.to_list(length=max_results)
 
     return files, next_offset, total_results
