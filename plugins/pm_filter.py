@@ -1160,9 +1160,11 @@ async def advantage_spell_chok(client, msg):
         try:
             first_char = query[0] if query else ""
             if first_char:
-                cursor = Media.collection.find({"file_name": {"$regex": f"^{first_char}", "$options": "i"}}).limit(200)
-                db_files = await cursor.to_list(length=200)
-                db_names = [x['file_name'] for x in db_files]
+                # Bug Fix: Limit ah 3000 aakki, sort panni cleaned filenames ah theda vaikkurom
+                cursor = Media.collection.find({"file_name": {"$regex": f"^{first_char}", "$options": "i"}}).sort("$natural", -1).limit(3000)
+                db_files = await cursor.to_list(length=3000)
+                db_names = [clean_filename(x['file_name']) for x in db_files] 
+                db_names = list(set(db_names)) # Duplicates ah remove pandrom
                 if db_names:
                     matches = difflib.get_close_matches(query, db_names, n=5, cutoff=0.5)
                     movielist += matches
