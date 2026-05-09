@@ -911,11 +911,8 @@ async def auto_filter(client, msg, spoll=False):
                 
                 # Video Sticker animation add pandrathu
                 search_msg = await message.reply_sticker(
-                    sticker="CAACAgUAAxkBAAFHdmhp4u2qHd7nMQnPWsgKNGc5nv6uogACPR0AArb0GFe5EjJNJRqswjsE"
+                    sticker=random.choice(script.WAIT_STICKERS)
                 )
-                
-                # Sticker paakka oru 1.5 seconds wait panna vaikkalam
-                await asyncio.sleep(1.5)
                 
                 files, offset, total_results = await get_search_results(search.lower(), offset=0, filter=True)
                 
