@@ -908,12 +908,20 @@ async def auto_filter(client, msg, spoll=False):
                     return
                 # 👆 ITHU VARAI 👆
                 
-                # Video Sticker animation add pandrathu
+                # info.py la irunthu random aaga oru sticker eduthu anuppum
                 search_msg = await message.reply_sticker(
-                    sticker=random.choice(script.WAIT_STICKERS)
+                    sticker=random.choice(WAIT_STICKERS)
                 )
                 
-                files, offset, total_results = await get_search_results(search.lower(), offset=0, filter=True)
+                # Background la theda start pandrom + 1.5 seconds timer start pandrom
+                search_task = asyncio.create_task(get_search_results(search.lower(), offset=0, filter=True))
+                sleep_task = asyncio.create_task(asyncio.sleep(1.5))
+                
+                # Rendu task-um (search & timer) mudiyura varai sticker a run panna vaikurom
+                await asyncio.gather(search_task, sleep_task)
+                
+                # Thedi mudicha results a edukurom
+                files, offset, total_results = search_task.result()
                 
                 if not files:
                     clean_query = search.lower()
