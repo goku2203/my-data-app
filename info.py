@@ -87,6 +87,15 @@ SHORTLINK_API = os.environ.get("SHORTLINK_API", "9142b3e52913166ef75d3b8ad05bc2e
 IS_VERIFY = is_enabled(os.environ.get("IS_VERIFY", "True"), True)
 VERIFY_EXPIRE = int(os.environ.get("VERIFY_EXPIRE", "600")) # 600 seconds = 10 Minutes
 
+# Random Animated Stickers for Search
+WAIT_STICKERS = [
+    "CAACAgUAAxkBAAFHdmhp4u2qHd7nMQnPWsgKNGc5nv6uogACPR0AArb0GFe5EjJNJRqswjsE", # Pazhaya sticker
+    "CAACAgUAAxkBAAFJMAtp_2W7Dwf7shW6QWUCE9KIB9PT2wAC7h4AArhHkFe1Sv3ZskzL0zsE", 
+    "CAACAgUAAxkBAAFJMA1p_2W-r3AXl0xk0pyRTlLUx0y-GwACdRwAAs3b-FcQ6RRr9fdJzTsE",
+    "CAACAgUAAxkBAAFJMBdp_2XtMcruOoWoi8qfxOVEwtcQrgACfSIAAkHq-VfbPPjOrj0HxTsE",
+    "CAACAgUAAxkBAAFJMBlp_2XvOZBoW8id9kXVYLfHliPJlwACGR4AAvc_AAFU6k2LTq0oK147BA"
+]
+
 # 👇 Itha info.py file la - ethu Autopost Channel 👇
 UPDATES_CHANNEL = int(environ.get("UPDATES_CHANNEL", "-1003803095451"))
 
