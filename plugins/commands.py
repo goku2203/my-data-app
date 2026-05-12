@@ -336,7 +336,7 @@ async def start(client, message):
             verify_text = (
                 "<b>🔒 Access Denied : Verification Required!</b>\n\n"
                 "<blockquote><b>📂 File Details:</b>\n\n"
-                f"<code>{raw_caption}</code></blockquote>\n\n"
+                f"{raw_caption}</blockquote>\n\n"
                 "<b>🎯 Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed.👇</i>\n\n"
                 "<blockquote><b>⏳ Time Limit : 10 Minutes!</b></blockquote>"
             )
