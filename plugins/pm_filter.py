@@ -1263,11 +1263,3 @@ async def manual_filters(client, message, text=False):
                 break
     else:
         return False
-
-@Client.on_message(filters.command("getid") & filters.private)
-async def get_gif_id(client, message):
-    if message.reply_to_message and message.reply_to_message.animation:
-        file_id = message.reply_to_message.animation.file_id
-        await message.reply(f"<b>✅ Itho namma Bot-oda GIF ID:</b>\n\n<code>{file_id}</code>")
-    else:
-        await message.reply("Oru GIF-kku reply panni /getid nu type pannunga bro!")
