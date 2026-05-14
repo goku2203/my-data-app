@@ -122,3 +122,13 @@ ALERT_LOG_CHANNEL_ID = int(environ.get("ALERT_LOG_CHANNEL_ID", "-1003602676231")
 # 5. MISSING LOG CHANNEL ID
 # Purpose: To-Do List. Bot la illaatha padam search pannina, entha channel la than report aagum.
 MISSING_LOG_CHANNEL = int(environ.get("MISSING_LOG_CHANNEL", "-1003555146843"))
+
+# =======================================================================
+# 🖼️ TMDB API KEY - AUTO POST IMAGE KAGA
+# =======================================================================
+# Ithu ethukku na: Auto post channel-la movie/anime name vachu TMDB 
+# website-la search panni, auto-va 16:9 Landscape Poster download panni 
+# post pandrathukkaga intha API key use aaguthu.
+# Neenga API key maathanum na inga mattum maathina pothum.
+# =======================================================================
+TMDB_API_KEY = "f0ed821364e340369110e83b814899ed"
