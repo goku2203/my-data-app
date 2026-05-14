@@ -134,15 +134,22 @@ def get_safe_name(name):
     # Users ku normal ah theriyum, aana copyright bots ku atha match panna mudiyathu.
     return "\u200B".join(list(name))
 
-# 👇 PUTHUSA ADD PANNA TMDB IMAGE FUNCTION 👇
-async def get_tmdb_image(movie_name):
+# 👇 PUTHUSA UPDATE PANNA TMDB IMAGE FUNCTION (Year Match Odayum) 👇
+async def get_tmdb_image(movie_name, year):
     try:
         search_url = f"https://api.themoviedb.org/3/search/multi?api_key={TMDB_API_KEY}&query={urllib.parse.quote(movie_name)}"
         async with aiohttp.ClientSession() as session:
             async with session.get(search_url) as response:
                 data = await response.json()
                 if data.get('results'):
-                    # Result-la 16:9 Backdrop image irukka nu thedum
+                    # 1. First, namma file-la irukkura Year-um, TMDB movie year-um match aagutha nu paarkum (Perfect Match)
+                    if year and year != "N/A":
+                        for result in data['results']:
+                            res_year = result.get('release_date', '')[:4] if 'release_date' in result else result.get('first_air_date', '')[:4]
+                            if res_year == year and result.get('backdrop_path'):
+                                return f"https://image.tmdb.org/t/p/original{result['backdrop_path']}"
+                    
+                    # 2. Oruvela Year illana illa match aagalana, normal-a first kidaikkura image edukkum
                     for result in data['results']:
                         if result.get('backdrop_path'):
                             return f"https://image.tmdb.org/t/p/original{result['backdrop_path']}"
@@ -213,8 +220,9 @@ async def send_batched_post(client, clean_name):
     # 👇 ITHU THAAN NAMMA PUTHOO SAFE NAME 👇
     safe_title = get_safe_name(clean_name)
     
-    # 👇 PUTHUSA ADD PANNATHU: TMDB la irunthu Image URL edukka 👇
-    image_url = await get_tmdb_image(clean_name)
+    # 👇 PUTHUSA UPDATE PANNATHU: TMDB la irunthu exact Year vachu Image URL edukka 👇
+    movie_year = first_file['year']
+    image_url = await get_tmdb_image(clean_name, movie_year)
 
     # --- CAPTION SETUP ---
     caption = (
