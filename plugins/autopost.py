@@ -1,12 +1,13 @@
 import logging
 import asyncio
 import re
+import aiohttp
+import urllib.parse
 from pyrogram import Client, filters
-from info import CHANNELS, UPDATES_CHANNEL
 from database.ia_filterdb import save_file, unpack_new_file_id
 from utils import temp, get_size
 from pyrogram.enums import ParseMode
-from info import CHANNELS, UPDATES_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID
+from info import CHANNELS, UPDATES_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, TMDB_API_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +134,22 @@ def get_safe_name(name):
     # Users ku normal ah theriyum, aana copyright bots ku atha match panna mudiyathu.
     return "\u200B".join(list(name))
 
+# 👇 PUTHUSA ADD PANNA TMDB IMAGE FUNCTION 👇
+async def get_tmdb_image(movie_name):
+    try:
+        search_url = f"https://api.themoviedb.org/3/search/multi?api_key={TMDB_API_KEY}&query={urllib.parse.quote(movie_name)}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(search_url) as response:
+                data = await response.json()
+                if data.get('results'):
+                    # Result-la 16:9 Backdrop image irukka nu thedum
+                    for result in data['results']:
+                        if result.get('backdrop_path'):
+                            return f"https://image.tmdb.org/t/p/original{result['backdrop_path']}"
+        return None # Image kidaikkalana None anuppum
+    except Exception as e:
+        logger.error(f"TMDB Error: {e}")
+        return None
 
 # --- 2. BATCH SENDER ---
 
@@ -195,6 +212,9 @@ async def send_batched_post(client, clean_name):
 
     # 👇 ITHU THAAN NAMMA PUTHOO SAFE NAME 👇
     safe_title = get_safe_name(clean_name)
+    
+    # 👇 PUTHUSA ADD PANNATHU: TMDB la irunthu Image URL edukka 👇
+    image_url = await get_tmdb_image(clean_name)
 
     # --- CAPTION SETUP ---
     caption = (
@@ -227,11 +247,21 @@ async def send_batched_post(client, clean_name):
     caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
 
     try:
-        await client.send_message(
-            chat_id=UPDATES_CHANNEL,
-            text=caption,
-            parse_mode=ParseMode.HTML 
-        )
+        if image_url:
+            # Image kidaicha Photo post podum (16:9 Landscape)
+            await client.send_photo(
+                chat_id=UPDATES_CHANNEL,
+                photo=image_url,
+                caption=caption,
+                parse_mode=ParseMode.HTML 
+            )
+        else:
+            # Oruvela TMDB la image illana, pazhaya mathiri Text post podum
+            await client.send_message(
+                chat_id=UPDATES_CHANNEL,
+                text=caption,
+                parse_mode=ParseMode.HTML 
+            )
         logger.info(f"✅ Post Sent: {clean_name}")
     except Exception as e:
         logger.error(f"❌ Post Failed: {e}")
