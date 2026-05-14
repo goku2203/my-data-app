@@ -134,26 +134,53 @@ def get_safe_name(name):
     # Users ku normal ah theriyum, aana copyright bots ku atha match panna mudiyathu.
     return "\u200B".join(list(name))
 
-# 👇 PUTHUSA UPDATE PANNA TMDB IMAGE FUNCTION (Year Match Odayum) 👇
+# 👇 PUTHUSA UPDATE PANNA TMDB IMAGE FUNCTION (16:9 Tamil -> 16:9 English -> Vertical Poster) 👇
 async def get_tmdb_image(movie_name, year):
     try:
-        search_url = f"https://api.themoviedb.org/3/search/multi?api_key={TMDB_API_KEY}&query={urllib.parse.quote(movie_name)}"
+        # Step 1: First Movie thedi athoda ID & Fallback Poster-ah edukkum
+        search_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={urllib.parse.quote(movie_name)}"
         async with aiohttp.ClientSession() as session:
             async with session.get(search_url) as response:
                 data = await response.json()
-                if data.get('results'):
-                    # 1. First, namma file-la irukkura Year-um, TMDB movie year-um match aagutha nu paarkum (Perfect Match)
-                    if year and year != "N/A":
-                        for result in data['results']:
-                            res_year = result.get('release_date', '')[:4] if 'release_date' in result else result.get('first_air_date', '')[:4]
-                            if res_year == year and result.get('backdrop_path'):
-                                return f"https://image.tmdb.org/t/p/original{result['backdrop_path']}"
-                    
-                    # 2. Oruvela Year illana illa match aagalana, normal-a first kidaikkura image edukkum
+                if not data.get('results'):
+                    return None
+
+                movie = None
+                # Year match aagutha nu paarkum
+                if year and year != "N/A":
                     for result in data['results']:
-                        if result.get('backdrop_path'):
-                            return f"https://image.tmdb.org/t/p/original{result['backdrop_path']}"
-        return None # Image kidaikkalana None anuppum
+                        res_year = result.get('release_date', '')[:4]
+                        if res_year == year:
+                            movie = result
+                            break
+                
+                if not movie:
+                    movie = data['results'][0]
+                
+                movie_id = movie['id']
+                # Plan B-kaga Vertical Poster-ah ready-a vachikkurom
+                fallback_poster = f"https://image.tmdb.org/t/p/original{movie['poster_path']}" if movie.get('poster_path') else None
+
+        # Step 2: Movie ID vachu, Text (Logo) irukkura 16:9 Image thedum
+        images_url = f"https://api.themoviedb.org/3/movie/{movie_id}/images?api_key={TMDB_API_KEY}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(images_url) as response:
+                img_data = await response.json()
+                
+                if img_data.get('backdrops'):
+                    # Priority 1: First 'ta' (Tamil) language tag irukka nu thedum
+                    for backdrop in img_data['backdrops']:
+                        if backdrop.get('iso_639_1') == 'ta':
+                            return f"https://image.tmdb.org/t/p/original{backdrop['file_path']}"
+                    
+                    # Priority 2: Tamil kidaikkalana, 'en' (English) tag irukka nu thedum
+                    for backdrop in img_data['backdrops']:
+                        if backdrop.get('iso_639_1') == 'en':
+                            return f"https://image.tmdb.org/t/p/original{backdrop['file_path']}"
+        
+        # Step 3: Oruvela 16:9 Logo image (Tamil & English) illana, Vertical Poster-ah (Plan B) anuppidum
+        return fallback_poster
+
     except Exception as e:
         logger.error(f"TMDB Error: {e}")
         return None
