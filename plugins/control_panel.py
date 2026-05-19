@@ -22,6 +22,12 @@ async def get_panel_data(user_mention):
     total_chats = await db.total_chat_count()
     total_files = await Media.collection.count_documents({})
     
+    # 👇 Puthusa add panna Monthly Verified Logic 👇
+    now = datetime.now()
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
+    # 👆 Ithu varai 👆
+    
     monsize = await db.get_db_size()
     db_size_mb = monsize / (1024 * 1024)
     mongo_percent = (db_size_mb / 512) * 100
@@ -31,7 +37,7 @@ async def get_panel_data(user_mention):
     cpu = psutil.cpu_percent(interval=0.5)
     ram = psutil.virtual_memory().percent
     
-    # Neenga update panna same attractive UI
+    # UI la Monthly Verified & Total Files theliva mathiyachu
     stats_text = (
         "<blockquote><b>👑 𝗢𝗪𝗡𝗘𝗥 𝗖𝗢𝗡𝗧𝗥𝗢𝗟 𝗣𝗔𝗡𝗘𝗟 👑</b></blockquote>\n\n"
         f"<i>Welcome Master {user_mention}! Here is your Bot Status.</i>\n\n"
@@ -41,7 +47,8 @@ async def get_panel_data(user_mention):
         "<b>📊 <u>𝗨𝘀𝗲𝗿 𝗦𝘁𝗮𝘁𝗶𝘀𝘁𝗶𝗰𝘀</u></b>\n"
         f"┣ 👤 <b>Total Users:</b> <code>{total_users}</code>\n"
         f"┣ 👥 <b>Total Groups:</b> <code>{total_chats}</code>\n"
-        f"┗ 🗂️ <b>Total Files:</b> <code>{total_files}</code>\n\n"
+        f"┣ 🗂️ <b>Total Files:</b> <code>{total_files}</code>\n"
+        f"┗ 📅 <b>Monthly Verified:</b> <code>{monthly_verified}</code>\n\n"
         "<b>💾 <u>𝗦𝘁𝗼𝗿𝗮𝗴𝗲 & 𝗗𝗮𝘁𝗮𝗯𝗮𝘀𝗲 (𝗠𝗼𝗻𝗴𝗼𝗗𝗕)</u></b>\n"
         f"┣ 📈 <b>Used:</b> <code>{monsize_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
         f"┗ 🟢 <b>Free:</b> <code>{free}</code>\n\n"
