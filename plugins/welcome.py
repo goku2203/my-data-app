@@ -10,6 +10,9 @@ from utils import get_settings, temp
 
 WELCOME_STICKER_ID = "CAACAgIAAxkBAAFGz4Vp14TkEDwLXzANxjQxctqfYSDePgAC0wUAAj-VzAqfWrvSXUfHMTsE"
 LEAVE_STICKER_ID = "CAACAgIAAxkBAAFGz6Jp14akiWmHaqkF73vgliEtijxcSQACOQcAAkb7rATRJ-6r0eDcKzsE"
+WELCOME_IMAGE = "https://files.catbox.moe/48aih2.jpg"
+
+# ==========================================
 
 # Blockquote (>), Bold (**), Italic (__) and Emojis added
 
@@ -80,12 +83,27 @@ async def welcome_leave_handler(client: Client, update: ChatMemberUpdated):
             print(f"Welcome Sticker anuppa mudiyala: {e}")
             
         try:
-            # Inga iruntha theva illatha {} brackets ah eduthutten
+            # Text-ah ready pandrom
             welcome_text = WELCOME_MSG_ENGLISH.format(mention=new.user.mention)
-            welcome_msg = await client.send_message(chat_id, text=welcome_text)
+            
+            # Photo iruntha photo-voda caption-ah text-ah anuppum, illana verum text anuppum
+            if WELCOME_IMAGE:
+                welcome_msg = await client.send_photo(
+                    chat_id, 
+                    photo=WELCOME_IMAGE, 
+                    caption=welcome_text,
+                    protect_content=True  # <-- Itha pudhusa add pannanum
+                )
+            else:
+                welcome_msg = await client.send_message(
+                    chat_id, 
+                    text=welcome_text,
+                    protect_content=True  # <-- Text ah anuppunalum forward panna mudiyathu
+                )
+                
             asyncio.create_task(auto_delete(welcome_msg, MSG_DELETE_TIME))
         except Exception as e:
-            print(f"Welcome Text anuppa mudiyala: {e}")
+            print(f"Welcome Text/Photo anuppa mudiyala: {e}")
 
     # ==========================
     # 2. User Leave Aagumbothu
