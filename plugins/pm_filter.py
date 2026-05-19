@@ -93,8 +93,10 @@ async def next_page(bot, query):
         return
 
     # 👈 INGA ITHA PUDHUSA ADD PANNU (Name + Size Order-kku)
-    # First same movie files-a group pannum, apram size order-la (200MB -> 2GB -> 5GB) adukkum
-    files.sort(key=lambda x: (clean_filename(x.file_name).lower(), x.file_size))
+    # 1. First chinna size-la irunthu periya size-kku adukkum (Low MB -> GB)
+    files.sort(key=lambda x: x.file_size, reverse=False)
+    # 2. Appuram movie name vachu group pannum
+    files.sort(key=lambda x: clean_filename(x.file_name).lower())
 
     settings = await get_settings(query.message.chat.id)
     if not settings:
