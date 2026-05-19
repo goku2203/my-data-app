@@ -134,7 +134,7 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
                 pass
 
     next_offset = offset + max_results
-    if next_offset > total_results:
+    if next_offset >= total_results:
         next_offset = ''
 
     cursor = Media.find(filter_db)
