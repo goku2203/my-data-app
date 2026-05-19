@@ -126,7 +126,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 file_id=file_id,
                 caption=caption,
                 parse_mode=enums.ParseMode.HTML,
-                protect_content=False, # Puthusa maathiyachu, ippo forward pannalam
+                protect_content=False,
             )
             asyncio.create_task(auto_delete_file(client, msg, 120)) 
             
@@ -139,7 +139,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 file_id=file_id,
                 caption=safe_fallback_caption,
                 parse_mode=enums.ParseMode.DEFAULT, 
-                protect_content=False, # Ingeyuum False potaachu
+                protect_content=False,
             )
             asyncio.create_task(auto_delete_file(client, msg, 120))
         except:
@@ -188,16 +188,15 @@ async def start(client, message):
         except:
             pass
     
+    # 🎯 GROUP-LA START KUDUTHA VARA VENDIYA BUTTONS
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
             [
-                InlineKeyboardButton("⛩️ ᴀɴɪᴍᴇ ᴡᴏʀʟᴅ", url="https://t.me/Anime_single")
+                InlineKeyboardButton("🎬 Anime Channel", url="https://t.me/Anime_single"),
+                InlineKeyboardButton('📢 Main Channel', url='https://t.me/super_goku_god')
             ],
             [
-                InlineKeyboardButton(f'ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url='https://t.me/super_goku_god')
-            ],
-            [
-                InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot")
+                InlineKeyboardButton("👨‍💻 Contact Admin", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
             
@@ -225,22 +224,23 @@ async def start(client, message):
         FORCE_MSG[message.from_user.id] = force_msg.id
         return
 
+    # 🎯 BOT PM-LA START KUDUTHA VARA VENDIYA BUTTONS
     if len(message.command) != 2 or (len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help", "start"]):
         buttons = [
             [
-                InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴠɪʟʟᴀɢᴇ ➕", url=f"http://t.me/{BOT_USERNAME}?startgroup=true")
+                InlineKeyboardButton("➕ Add Me To Your Group ➕", url=f"http://t.me/{BOT_USERNAME}?startgroup=true")
             ],
             [
-                InlineKeyboardButton("📜 ᴊᴜᴛsᴜ (ʜᴇʟᴘ)", callback_data="help"),
-                InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ ᴍᴇ", callback_data="about")
+                InlineKeyboardButton("🛠️ Help Center", callback_data="help"),
+                InlineKeyboardButton("ℹ️ About Bot", callback_data="about")
             ],
             [
-                InlineKeyboardButton("⛩️ ᴀɴɪᴍᴇ ᴡᴏʀʟᴅ", url="https://t.me/Anime_single"), 
-                InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇs", url="https://t.me/super_goku_god")
+                InlineKeyboardButton("🎬 Anime Channel", url="https://t.me/Anime_single"), 
+                InlineKeyboardButton("📢 Updates Channel", url="https://t.me/super_goku_god")
             ],
             [
-                InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot"),
-                InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
+                InlineKeyboardButton("👨‍💻 Contact Admin", url="https://t.me/Tamilmovieslink_bot"),
+                InlineKeyboardButton("💎 Premium Plans", callback_data="premium_data")
             ]
         ]
         reply_markup = InlineKeyboardMarkup(buttons)
@@ -299,12 +299,9 @@ async def start(client, message):
         if not await check_verification(client, message.from_user.id):
 
             try:
-                anim_msg = await message.reply_text("<b>⏳ Processing .</b>", parse_mode=enums.ParseMode.HTML)
-                await asyncio.sleep(0.5)
-                await anim_msg.edit_text("<b>⏳ Processing . .</b>", parse_mode=enums.ParseMode.HTML)
-                await asyncio.sleep(0.5)
-                await anim_msg.edit_text("<b>⏳ Processing . . .</b>", parse_mode=enums.ParseMode.HTML)
-                await asyncio.sleep(0.5)
+                # 👇 INGA THAAN CHANGE PANNIRUKKEN 👇
+                anim_msg = await message.reply_text("<b>⏳ Please wait...</b>", parse_mode=enums.ParseMode.HTML)
+                await asyncio.sleep(1.2)
                 await anim_msg.delete()
             except Exception as e:
                 pass
@@ -390,7 +387,7 @@ async def start(client, message):
                     file_id=msg.get("file_id"),
                     caption=f_caption,
                     parse_mode=enums.ParseMode.HTML, 
-                    protect_content=False, # Ithu Forward aaga false potaachu
+                    protect_content=False, 
                     )
             except FloodWait as e:
                 await asyncio.sleep(e.x)
@@ -399,7 +396,7 @@ async def start(client, message):
                     file_id=msg.get("file_id"),
                     caption=f_caption,
                     parse_mode=enums.ParseMode.HTML,
-                    protect_content=False, # Ithu Forward aaga false potaachu
+                    protect_content=False, 
                     )
             except Exception as e:
                 logger.warning(e, exc_info=True)
@@ -429,10 +426,10 @@ async def start(client, message):
                     except Exception as e:
                         logger.exception(e)
                 try:
-                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=False) # Ithu Forward aaga false potaachu
+                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=False) 
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
-                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=False) # Ithu Forward aaga false potaachu
+                    await msg.copy(message.chat.id, caption=f_caption, parse_mode=enums.ParseMode.HTML, protect_content=False) 
                 except Exception as e:
                     logger.exception(e)
                     continue
@@ -440,10 +437,10 @@ async def start(client, message):
                 continue
             else:
                 try:
-                    await msg.copy(message.chat.id, protect_content=False) # Ithu Forward aaga false potaachu
+                    await msg.copy(message.chat.id, protect_content=False) 
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
-                    await msg.copy(message.chat.id, protect_content=False) # Ithu Forward aaga false potaachu
+                    await msg.copy(message.chat.id, protect_content=False) 
                 except Exception as e:
                     logger.exception(e)
                     continue
