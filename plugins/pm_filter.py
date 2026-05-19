@@ -570,6 +570,12 @@ async def cb_handler(client: Client, query: CallbackQuery):
         total_users = await db.total_users_count()
         total_chats = await db.total_chat_count()
         total_files = await Media.count_documents()
+
+        # 👇 PUTHUSA ADD PANNA MONTHLY VERIFIED LOGIC 👇
+        now = datetime.now()
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
+        # 👆 ITHU VARAI 👆
         
         now = datetime.now()
         start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
