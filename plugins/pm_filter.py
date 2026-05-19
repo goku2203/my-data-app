@@ -3,31 +3,25 @@ import re
 import ast
 import math
 import time
+import difflib
+import psutil
+import logging
+import random
+from datetime import datetime
+
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty, ButtonUrlInvalid
-from Script import script
-import pyrogram
-from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, make_inactive
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
-from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, create_invite_links
+
+from Script import script
+from info import HYPER_MODE, PICS, BOT_START_TIME, ADMINS, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE, MISSING_LOG_CHANNEL, WAIT_STICKERS
+from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, create_invite_links, clean_filename
+from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, make_inactive
 from database.users_chats_db import db
-from info import HYPER_MODE
 from database.ia_filterdb import Media, get_file_details, get_search_results
 from database.filters_mdb import del_all, find_filter, get_filters
-import logging
-import random
-from info import PICS
-import difflib
-import psutil
-import time
-from utils import get_size
-from info import BOT_START_TIME
-from datetime import datetime
-from utils import temp
 from plugins.fsub_manager import send_fsub_prompt
-from utils import clean_filename
-from info import ADMINS, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE, MISSING_LOG_CHANNEL, WAIT_STICKERS
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -92,10 +86,9 @@ async def next_page(bot, query):
     if not files:
         return
 
-    # 👈 INGA ITHA PUDHUSA ADD PANNU (Name + Size Order-kku)
-    # 1. First chinna size-la irunthu periya size-kku adukkum (Low MB -> GB)
+    # First chinna size-la irunthu periya size-kku adukkum (Low MB -> GB)
     files.sort(key=lambda x: x.file_size, reverse=False)
-    # 2. Appuram movie name vachu group pannum
+    # Appuram movie name vachu group pannum
     files.sort(key=lambda x: clean_filename(x.file_name).lower())
 
     settings = await get_settings(query.message.chat.id)
@@ -106,7 +99,7 @@ async def next_page(bot, query):
         cap_lines = []
         for file in files:
             file_link = f"https://t.me/{temp.U_NAME}?start=file_{file.file_id}"
-            disp_name = clean_filename(file.file_name) # Cleaned Name for Button
+            disp_name = clean_filename(file.file_name) 
             cap_lines.append(f"📁 {get_size(file.file_size)} - [{disp_name}]({file_link})")
         cap_text = "\n".join(cap_lines)
         btn = []
@@ -114,7 +107,7 @@ async def next_page(bot, query):
         if settings['button']:
             btn = []
             for file in files:
-                disp_name = clean_filename(file.file_name) # Cleaned Name for Button
+                disp_name = clean_filename(file.file_name) 
                 btn.append([
                     InlineKeyboardButton(
                         text=f"📂[{get_size(file.file_size)}] ➵ {disp_name}", callback_data=f'files#{file.file_id}'
@@ -123,7 +116,7 @@ async def next_page(bot, query):
         else:
             btn = []
             for file in files:
-                disp_name = clean_filename(file.file_name) # Cleaned Name for Button
+                disp_name = clean_filename(file.file_name) 
                 btn.append([
                     InlineKeyboardButton(
                         text=f"{disp_name}", callback_data=f'files#{file.file_id}'
@@ -428,7 +421,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             return await query.answer('No such file exist.')
         files = files_[0]
         
-        # 👇 FIX: Cleaned filename only for this query answer
         title = clean_filename(files.file_name)
         size = get_size(files.file_size)
         f_caption = clean_filename(files.caption)
@@ -476,7 +468,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             return await query.answer('No such file exist.')
             
         await query.answer()
-        # Note: Sending is now fully handled in commands.py
         await client.send_message(query.from_user.id, "Please request from Bot PM.")
 
     elif query.data == "pages":
@@ -526,6 +517,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
         await query.answer()
 
+    # 👇 INGA THAAN NEENGA THAPPU PANNIRUNTHEENGA. NAAN FIX PANNITEN 👇
     elif query.data == "help":
         buttons = [
             [
@@ -544,12 +536,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
-        if query.from_user.id in ADMINS:
-            buttons.append([InlineKeyboardButton("👑 𝐎𝐰𝐧𝐞𝐫 𝐏𝐚𝐧𝐞𝐥 (𝐋𝐢𝐯𝐞 𝐒𝐭𝐚𝐭𝐬) 👑", callback_data="owner_panel")])
         
         reply_markup = InlineKeyboardMarkup(buttons)
         
-        # Inga thaan photo maarura mathiri maathi irukken
+        # Intha edit_media code thaan missing ah irunthuchu
         await query.message.edit_media(
             media=InputMediaPhoto(
                 media=random.choice(PICS),
@@ -557,73 +547,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 parse_mode=enums.ParseMode.HTML
             ),
             reply_markup=reply_markup
-        )
-
-    elif query.data == "owner_panel":
-        if query.from_user.id not in ADMINS:
-            return await query.answer("Kuthu Vangiruva! Ithu Owner ku mattum thaan! 😠", show_alert=True)
-        
-        await query.answer("Advanced Live Stats Fetching... ⏳")
-        
-        start_t = time.time()
-        uptime_sec = int(time.time() - BOT_START_TIME)
-        uptime = f"{uptime_sec // 86400}d {(uptime_sec % 86400) // 3600}h {(uptime_sec % 3600) // 60}m"
-        
-        total_users = await db.total_users_count()
-        total_chats = await db.total_chat_count()
-        total_files = await Media.count_documents()
-
-        # 👇 PUTHUSA ADD PANNA MONTHLY VERIFIED LOGIC 👇
-        now = datetime.now()
-        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
-        # 👆 ITHU VARAI 👆
-        
-        now = datetime.now()
-        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
-        
-        monsize = await db.get_db_size()
-        db_size_mb = monsize / (1024 * 1024)
-        mongo_percent = (db_size_mb / 512) * 100
-        free = get_size(536870912 - monsize)
-        monsize_str = get_size(monsize)
-        
-        cpu = psutil.cpu_percent(interval=0.5)
-        ram = psutil.virtual_memory().percent
-        ping_time = round((time.time() - start_t) * 1000, 2)
-        
-        text = (
-            "<blockquote><b>👑 <u>𝐎𝐖𝐍𝐄𝐑 𝐂𝐎𝐍𝐓𝐑𝐎𝐋 𝐏𝐀𝐍𝐄𝐋</u> 👑</b></blockquote>\n\n"
-            f"<i>Vanakam Master {query.from_user.mention}!</i>\n\n"
-            "<b>🤖 <u>𝐒𝐲𝐬𝐭𝐞𝐦 𝐏𝐞𝐫𝐟𝐨𝐫𝐦𝐚𝐧𝐜𝐞</u></b>\n"
-            f"┣ ⏱️ <b>Uptime:</b> <code>{uptime}</code>\n"
-            f"┗ 🚀 <b>Ping:</b> <code>{ping_time} ms</code>\n\n"
-            "<b>📊 <u>𝐔𝐬𝐞𝐫 𝐒𝐭𝐚𝐭𝐢𝐬𝐭𝐢𝐜𝐬</u></b>\n"
-            f"┣ 👤 <b>Total Users:</b> <code>{total_users}</code>\n"
-            f"┣ 👥 <b>Total Groups:</b> <code>{total_chats}</code>\n"
-            f"┗ 📅 <b>Monthly Verified:</b> <code>{monthly_verified}</code>\n\n"
-            "<b>📂 <u>𝐒𝐭𝐨𝐫𝐚𝐠𝐞 & 𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞</u></b>\n"
-            f"┣ 🗂️ <b>Total Files:</b> <code>{total_files}</code>\n"
-            f"┣ 💾 <b>Used:</b> <code>{monsize_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
-            f"┗ 🟢 <b>Free DB:</b> <code>{free}</code>\n\n"
-            "<b>🖥️ <u>𝐒𝐞𝐫𝐯𝐞𝐫 𝐇𝐚𝐫𝐝𝐰𝐚𝐫𝐞</u></b>\n"
-            f"┣ ⚡ <b>CPU Usage:</b> <code>{cpu}%</code>\n"
-            f"┗ 💽 <b>RAM Usage:</b> <code>{ram}%</code>"
-        )
-        
-        buttons = [
-            [InlineKeyboardButton("♻️ Refresh Stats", callback_data="owner_panel")],
-            [InlineKeyboardButton("🔙 Back to Help", callback_data="help")]
-        ]
-        
-        await query.message.edit_media(
-            media=InputMediaPhoto(
-                media=random.choice(PICS),
-                caption=text,
-                parse_mode=enums.ParseMode.HTML
-            ),
-            reply_markup=InlineKeyboardMarkup(buttons)
         )
 
     elif query.data == "about":
@@ -894,9 +817,8 @@ async def auto_filter(client, msg, spoll=False):
                 for word in junk_words:
                     search = re.sub(r'(?i)\b' + word + r'\b', '', search)
                 search = search.strip()
-                # 👆 ITHU VARAI 👆
 
-                # 👇 PUTHUSA ADD PANNA SPAM FILTER 👇
+                # 👇 SPAM FILTER 👇
                 spam_words = [
                     "porn", "p_o_r_n", "slut", "booty", "anal", 
                     "pussy", "dick", "boobs", "whore", "cum", 
@@ -913,9 +835,7 @@ async def auto_filter(client, msg, spoll=False):
                             break
                             
                 if is_spam:
-                    # Ithu thappaana msg nu therinja, bot ethuvum pannaathu
                     return
-                # 👆 ITHU VARAI 👆
                 
                 # info.py la irunthu random aaga oru sticker eduthu anuppum
                 search_msg = await message.reply_sticker(
@@ -957,17 +877,13 @@ async def auto_filter(client, msg, spoll=False):
                                 print(f"Missing Log Error: {e}")
                     
                     if settings["spell_check"]:
-                        await search_msg.delete() # Mudhalla sticker ah delete panniduvom
-                        
-                        # Direct ah spell check function ku poyidum, searching text varathu
+                        await search_msg.delete() 
                         return await advantage_spell_chok(client, msg)
                         
                     else:
                         req_btn = [[InlineKeyboardButton("📝 Request Movie", url="https://t.me/Tamilmovieslink_bot")]]
+                        await search_msg.delete() 
                         
-                        await search_msg.delete() # Mudhalla sticker ah delete panniduvom
-                        
-                        # Apram pudhusa message anuppuvom
                         not_found_msg = await message.reply_text(
                             text=script.SPOLL_NOT_FND.format(search=search),
                             reply_markup=InlineKeyboardMarkup(req_btn)
@@ -984,7 +900,6 @@ async def auto_filter(client, msg, spoll=False):
             message = msg.message.reply_to_message
             search, files, offset, total_results = spoll
 
-        # 👈 INGA ITHA PUDHUSA ADD PANNU (Name + Size Order-kku)
         if files:
             files.sort(key=lambda x: (clean_filename(x.file_name).lower(), x.file_size))
 
@@ -993,7 +908,7 @@ async def auto_filter(client, msg, spoll=False):
         if HYPER_MODE:
             cap_lines = []
             for file in files:
-                disp_name = clean_filename(file.file_name) # Cleaned Name for Button
+                disp_name = clean_filename(file.file_name) 
                 file_link = f"https://t.me/{temp.U_NAME}?start={pre}_{file.file_id}"
                 cap_lines.append(f"📁 {get_size(file.file_size)} - [{disp_name}]({file_link})")
             cap_text = "\n".join(cap_lines)
@@ -1014,7 +929,7 @@ async def auto_filter(client, msg, spoll=False):
             if settings["button"]:
                 btn = []
                 for file in files:
-                    disp_name = clean_filename(file.file_name) # Cleaned Name for Button
+                    disp_name = clean_filename(file.file_name) 
                     btn.append([
                         InlineKeyboardButton(
                             text=f"📁 [{get_size(file.file_size)}] ➵ {disp_name}", 
@@ -1024,7 +939,7 @@ async def auto_filter(client, msg, spoll=False):
             else:
                 btn = []
                 for file in files:
-                    disp_name = clean_filename(file.file_name) # Cleaned Name for Button
+                    disp_name = clean_filename(file.file_name) 
                     btn.append([
                         InlineKeyboardButton(
                             text=f"{disp_name}",
@@ -1169,11 +1084,10 @@ async def advantage_spell_chok(client, msg):
         try:
             first_char = query[0] if query else ""
             if first_char:
-                # Bug Fix: Limit ah 3000 aakki, sort panni cleaned filenames ah theda vaikkurom
                 cursor = Media.collection.find({"file_name": {"$regex": f"^{first_char}", "$options": "i"}}).sort("$natural", -1).limit(3000)
                 db_files = await cursor.to_list(length=3000)
                 db_names = [clean_filename(x['file_name']) for x in db_files] 
-                db_names = list(set(db_names)) # Duplicates ah remove pandrom
+                db_names = list(set(db_names)) 
                 if db_names:
                     matches = difflib.get_close_matches(query, db_names, n=5, cutoff=0.5)
                     movielist += matches
