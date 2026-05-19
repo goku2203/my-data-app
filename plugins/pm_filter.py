@@ -308,7 +308,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(f"{stat}", callback_data=f"{cb}:{group_id}"),
              InlineKeyboardButton("DELETE", callback_data=f"deletecb:{group_id}")],
-            [InlineKeyboardButton("BACK", callback_data="backcb")]
+            [InlineKeyboardButton("🔙 Back", callback_data="backcb")]
         ])
 
         await query.message.edit_text(
@@ -485,19 +485,19 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "start" or query.data == "start_data":
         buttons = [
             [
-                InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴠɪʟʟᴀɢᴇ ➕", url=f"https://t.me/{temp.U_NAME}?startgroup=true")
+                InlineKeyboardButton("➕ Add Me To Your Group ➕", url=f"https://t.me/{temp.U_NAME}?startgroup=true")
             ],
             [
-                InlineKeyboardButton("📜 ᴊᴜᴛsᴜ (ʜᴇʟᴘ)", callback_data="help"),
-                InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ ᴍᴇ", callback_data="about")
+                InlineKeyboardButton("🛠️ Help Center", callback_data="help"),
+                InlineKeyboardButton("ℹ️ About Bot", callback_data="about")
             ],
             [
-                InlineKeyboardButton("⛩️ ᴀɴɪᴍᴇ ᴡᴏʀʟᴅ", url="https://t.me/Anime_single"), 
-                InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇs", url="https://t.me/super_goku_god")
+                InlineKeyboardButton("🎬 Anime Channel", url="https://t.me/Anime_single"), 
+                InlineKeyboardButton("📢 Updates Channel", url="https://t.me/super_goku_god")
             ],
             [
-                InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot"),
-                InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
+                InlineKeyboardButton("👨‍💻 Contact Admin", url="https://t.me/Tamilmovieslink_bot"),
+                InlineKeyboardButton("💎 Premium Plans", callback_data="premium_data")
             ]
         ]
         
@@ -517,29 +517,27 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
         await query.answer()
 
-    # 👇 INGA THAAN NEENGA THAPPU PANNIRUNTHEENGA. NAAN FIX PANNITEN 👇
     elif query.data == "help":
         buttons = [
             [
-                InlineKeyboardButton("🛠️ ᴍᴀɴᴜᴀʟ ғɪʟᴛᴇʀ", callback_data="manual_filter"),
-                InlineKeyboardButton("🤖 ᴀᴜᴛᴏ ғɪʟᴛᴇʀ", callback_data="auto_filter")
+                InlineKeyboardButton("🛠️ Manual Filter", callback_data="manual_filter"),
+                InlineKeyboardButton("🤖 Auto Filter", callback_data="auto_filter")
             ],
             [
-                InlineKeyboardButton("🔗 ᴄᴏɴɴᴇᴄᴛɪᴏɴs", callback_data="connection"),
-                InlineKeyboardButton("🧩 ᴇxᴛʀᴀs", callback_data="extras")
+                InlineKeyboardButton("🔗 Connections", callback_data="connection"),
+                InlineKeyboardButton("🧩 Extras", callback_data="extras")
             ],
             [
-                InlineKeyboardButton("🔙 ʀᴇᴛᴜʀɴ", callback_data="start_data"),
-                InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_data")
+                InlineKeyboardButton("🔙 Return", callback_data="start_data"),
+                InlineKeyboardButton("💎 Premium Plans", callback_data="premium_data")
             ],
             [
-                InlineKeyboardButton("⚡ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ ⚡", url="https://t.me/Tamilmovieslink_bot")
+                InlineKeyboardButton("👨‍💻 Contact Admin", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
         
         reply_markup = InlineKeyboardMarkup(buttons)
         
-        # Intha edit_media code thaan missing ah irunthuchu
         await query.message.edit_media(
             media=InputMediaPhoto(
                 media=random.choice(PICS),
@@ -551,8 +549,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "about":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='start'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('🔙 Back', callback_data='start'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -567,8 +565,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "source":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='about'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('🔙 Back', callback_data='about'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -583,9 +581,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "manual_filter":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot'),
-            InlineKeyboardButton('ʙᴜᴛᴛᴏɴ', callback_data='button')
+            InlineKeyboardButton('🔙 Back', callback_data='help'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot'),
+            InlineKeyboardButton('🔘 Button', callback_data='button')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -600,8 +598,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "button":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('🔙 Back', callback_data='help'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -616,8 +614,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "auto_filter":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('🔙 Back', callback_data='help'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -632,8 +630,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "connection":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('🔙 Back', callback_data='help'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -648,9 +646,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "extras":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('ᴀᴅᴍɪɴ', callback_data='admin'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('🔙 Back', callback_data='help'),
+            InlineKeyboardButton('👨‍💻 Admin', callback_data='admin'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -665,8 +663,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
     elif query.data == "admin":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('🔙 Back', callback_data='help'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -681,9 +679,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data == "stats":
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('♻️', callback_data='rfrsh'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('🔙 Back', callback_data='help'),
+            InlineKeyboardButton('🔄 Refresh', callback_data='rfrsh'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         total = await Media.count_documents()
@@ -713,9 +711,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "rfrsh":
         await query.answer("Fetching MongoDb DataBase")
         buttons = [[
-            InlineKeyboardButton('ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('♻️', callback_data='rfrsh'),
-            InlineKeyboardButton('⚡ Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('🔙 Back', callback_data='help'),
+            InlineKeyboardButton('🔄 Refresh', callback_data='rfrsh'),
+            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         total = await Media.count_documents()
