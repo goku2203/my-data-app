@@ -980,9 +980,9 @@ async def auto_filter(client, msg, spoll=False):
             message = msg.message.reply_to_message
             search, files, offset, total_results = spoll
 
-        # 👈 INGA ITHA PUDHUSA ADD PANNU (Size Order-kku)
+        # 👈 INGA ITHA PUDHUSA ADD PANNU (Name + Size Order-kku)
         if files:
-            files.sort(key=lambda x: x.file_size)
+            files.sort(key=lambda x: (clean_filename(x.file_name).lower(), x.file_size))
 
         pre = 'filep' if settings['file_secure'] else 'file'
 
