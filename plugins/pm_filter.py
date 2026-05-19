@@ -138,7 +138,7 @@ async def next_page(bot, query):
     else:
         off_set = offset - 10
 
-    if n_offset == 0:
+    if n_offset == 0 or len(files) < 10:
         btn.append(
             [
                 InlineKeyboardButton("◀️ BACK", callback_data=f"next_{req}_{key}_{off_set}"),
@@ -995,7 +995,7 @@ async def auto_filter(client, msg, spoll=False):
             cap_text = "\n".join(cap_lines)
 
             btn = []
-            if offset != "":
+            if offset != "" and len(files) >= 10:
                 key = f"{message.chat.id}-{message.id}"
                 BUTTONS[key] = search
                 req = message.from_user.id if message.from_user else 0
