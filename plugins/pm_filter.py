@@ -86,10 +86,8 @@ async def next_page(bot, query):
     if not files:
         return
 
-    # First chinna size-la irunthu periya size-kku adukkum (Low MB -> GB)
-    files.sort(key=lambda x: x.file_size, reverse=False)
-    # Appuram movie name vachu group pannum
-    files.sort(key=lambda x: clean_filename(x.file_name).lower())
+    # Movie name vachu group panni, Low MB to High GB sort pannum
+    files.sort(key=lambda x: (clean_filename(x.file_name).lower(), x.file_size))
 
     settings = await get_settings(query.message.chat.id)
     if not settings:
