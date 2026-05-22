@@ -1,6 +1,8 @@
 import logging
 import asyncio
 import re
+import os
+from database.ia_filterdb import Media
 from pyrogram import Client, filters, enums
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
@@ -133,3 +135,47 @@ async def close_message(bot: Client, query: CallbackQuery):
     """
     await query.answer()
     await query.message.delete()
+
+import os
+from database.ia_filterdb import Media
+
+@Client.on_message(filters.command("cleancam") & filters.user(ADMINS))
+async def clean_cam_prints(client, message):
+    status = await message.reply("🗑 Checking and collecting Theater/Cam prints in Database...")
+    
+    # Intha words irukkura files ellam thedappadum
+    cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
+    
+    deleted_files = []
+    
+    for word in cam_words:
+        # First entha files nu thedi list-la add pandrathu
+        cursor = Media.collection.find({"file_name": {"$regex": f"(?i){word}"}})
+        async for doc in cursor:
+            deleted_files.append(doc.get("file_name", "Unknown File"))
+            
+        # List edutha kappuram database-la irunthu delete pandrathu
+        await Media.collection.delete_many({"file_name": {"$regex": f"(?i){word}"}})
+        
+    # Ore file rendu thadava list-la varama thadukka
+    deleted_files = list(set(deleted_files))
+    total_deleted = len(deleted_files)
+    
+    if total_deleted == 0:
+        return await status.edit("✅ Database clean! No Theater/Cam prints found.")
+        
+    # Delete aana files-oda list-a oru text file-la create pandrathu
+    file_path = "deleted_movies_list.txt"
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write("🎬 DELETED THEATER/CAM PRINTS LIST:\n")
+        f.write("======================================\n\n")
+        for name in deleted_files:
+            f.write(f"- {name}\n")
+            
+    # Success message + Text file-a anuppurathu
+    await status.edit(f"✅ Success! Total **{total_deleted}** Theater/Cam prints Database-la irunthu delete aayiduchu.\n\nKela irukkura Document file-a download panni open pannunga. Athula entha padangal delete aachu ngara full details irukkum. Atha vachu unga Main DB Channel-la thedi delete pannikonga! 👇")
+    await message.reply_document(document=file_path)
+    
+    # Send pannatha kappuram system-la irunthu antha text file-a thukkiduvom
+    if os.path.exists(file_path):
+        os.remove(file_path)
