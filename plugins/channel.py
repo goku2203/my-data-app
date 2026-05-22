@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-from info import CHANNELS, MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL
+from info import CHANNELS, MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, CAM_DB_CHANNEL
 from database.ia_filterdb import save_file
 
 media_filter = filters.document | filters.video | filters.audio
@@ -17,5 +17,5 @@ async def media(bot, message):
     media.caption = message.caption
     
     # Rendu DB channel layum file vantha save pannum
-    if message.chat.id in [MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL]:
+    if message.chat.id in [MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, CAM_DB_CHANNEL]:
         await save_file(media)
