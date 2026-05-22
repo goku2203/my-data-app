@@ -36,7 +36,7 @@ PICS = (environ.get('PICS', 'https://i.ibb.co/p6SmhYv3/photo.jpg https://i.ibb.c
 
 # Admins, Channels & Users
 ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '600302393').split()]
-CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '-1001999941677 -1002591922002').split()]
+CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '-1001999941677 -1002591922002 -1003952875911').split()]
 auth_users = [int(user) if id_pattern.search(user) else user for user in environ.get('AUTH_USERS', '').split()]
 AUTH_USERS = (auth_users + ADMINS) if auth_users else []
 auth_grp = environ.get('AUTH_GROUPS', '')
@@ -122,6 +122,10 @@ ALERT_LOG_CHANNEL_ID = int(environ.get("ALERT_LOG_CHANNEL_ID", "-1003602676231")
 # 5. MISSING LOG CHANNEL ID
 # Purpose: To-Do List. Bot la illaatha padam search pannina, entha channel la than report aagum.
 MISSING_LOG_CHANNEL = int(environ.get("MISSING_LOG_CHANNEL", "-1003555146843"))
+
+# 6. CAM / THEATER - Database Channel
+# Purpose: Inga verum Theater / Cam / PreDVD prints mattum thaan upload pannanum.
+CAM_DB_CHANNEL = int(environ.get("CAM_DB_CHANNEL", "-1003952875911")) # Inga unga puthu channel ID podunga
 
 # =======================================================================
 # 🖼️ TMDB API KEY - AUTO POST IMAGE KAGA
