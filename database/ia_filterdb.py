@@ -139,8 +139,8 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
         next_offset = ''
 
     cursor = Media.find(filter_db)
-    # Ipo file name and file size (Low MB to High GB) vachu database-laye sort pandrom
-    cursor.sort([('file_name', 1), ('file_size', 1)])
+    # File size (Low MB to High GB) vachu database-laye sort pandrom
+    cursor.sort('file_size', 1)
     cursor.skip(offset).limit(max_results)
     files = await cursor.to_list(length=max_results)
 
