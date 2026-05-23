@@ -1,4 +1,10 @@
 class script(object):
+
+    # ==========================================
+    # 🟢 MAIN BOT COMMANDS TEXTS
+    # ==========================================
+
+    # Bot ah start pannumbothu varum First Message (/start)
     START_TXT = """<b>👋 Hello {}!</b>
     
 <b>I am an Advanced Auto-Filter Bot. 🤖</b>
@@ -12,6 +18,7 @@ class script(object):
 
 <i>Click the buttons below to explore more.</i>"""
 
+    # Help button click pannumbothu varum Message (/help)
     HELP_TXT = """<b>⚙️ Help & System Status</b>
 
 <b>👤 User:</b> {}
@@ -24,10 +31,12 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
 <b>👇 Choose a category below:</b>"""
 
+    # Bot maintenance la irukkumbothu varum Message
     MAINT_TXT = (
         "<b>⚠️ Bot is Under Maintenance! 🛠️</b>\n\n<i>5 to 10 minutes wait pannunga. Work nadanthutu irukku!</i>"
     )
 
+    # About button click pannumbothu varum Message (/about)
     ABOUT_TXT = """<b>✯ 𝙼𝚈 𝙿𝚁𝙾𝙵𝙸𝙻𝙴 ✯</b>
 
 <b>🤖 𝐍𝐚𝐦𝐞: {}</b>
@@ -36,6 +45,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>💾 𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞: MongoDB</b>
 <b>📡 𝐒𝐞𝐫𝐯𝐞𝐫: Koyeb</b>"""
 
+    # Source Code details kaatura Message
     SOURCE_TXT = """<b>🛠️ Source Code</b>
 
 <i>This project is Open Source. You can find the code below.</i>
@@ -43,6 +53,11 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>👨‍💻 Developer:</b> <a href="https://t.me/Goku_Stark">Goku Stark</a>
 <b>📂 Repository:</b> <a href="https://t.me/Goku_Stark">Click Here</a>"""
 
+    # ==========================================
+    # 🔵 GUIDES & TUTORIAL TEXTS
+    # ==========================================
+
+    # Manual Filters epdi use pandrathu nu solra Text
     MANUALFILTER_TXT = """<b>🛠️ Manual Filters Help</b>
 
 <i>Filters allow the bot to reply automatically when a specific keyword is detected.</i>
@@ -58,6 +73,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • /del - <code>Delete a specific filter</code>
 • /delall - <code>Delete all filters (Owner only)</code>"""
 
+    # Buttons epdi create pandrathu nu solra Text
     BUTTON_TXT = """<b>🔘 Button Formatting Help</b>
 
 <i>I support both URL and Alert (Pop-up) buttons.</i>
@@ -70,6 +86,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>2️⃣ Alert Button Format:</b>
 <code>[Button Text](buttonalert:This is a pop-up message!)</code>"""
 
+    # Auto Filter setup pandra Guide
     AUTOFILTER_TXT = """<b>🤖 Auto-Filter Guide</b>
 
 <b>1️⃣ For Private Channels:</b>
@@ -84,6 +101,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • Use <code>/settings</code> in PM to enable Auto-Filter.
 """
 
+    # Group and PM connection commands Guide
     CONNECTION_TXT = """<b>🔗 Connection Manager</b>
 
 <i>Connect your groups to my PM to manage filters easily and avoid spam.</i>
@@ -93,6 +111,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • /disconnect - <code>Disconnect a group</code>
 • /connections - <code>View active connections</code>"""
 
+    # Extra features pathina Details
     EXTRAMOD_TXT = """<b>🧩 Extra Modules</b>
 
 <i>Here are some cool extra features I offer!</i>
@@ -105,6 +124,11 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • /ping - <code>Check Bot Latency</code>
 • /stats - <code>Check Bot Statistics</code>"""
 
+    # ==========================================
+    # 🔴 ADMIN & SYSTEM LOG TEXTS
+    # ==========================================
+
+    # Admin commands list
     ADMIN_TXT = """<b>🛡️ Admin Control Panel</b>
 
 <i>Commands strictly for Bot Admins only.</i>
@@ -119,6 +143,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • /unban - <code>Unban a user</code>
 • /broadcast - <code>Send message to all users</code>"""
 
+    # Bot Status & Database details
     STATUS_TXT = """<b>📊 <u>Database Statistics</u></b>
 
 <b>📂 Total Files:</b> <code>{}</code>
@@ -127,6 +152,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>💾 Used Storage:</b> <code>{}</code>
 <b>🆓 Free Storage:</b> <code>{}</code>"""
 
+    # Puthu Group la bot ah add panna Log Channel la varum Text
     LOG_TEXT_G = """<b>#NewGroupDetected 👥</b>
     
 <b>🏷 Name:</b> {}
@@ -134,17 +160,24 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>🔢 Members:</b> <code>{}</code>
 <b>👤 Added By:</b> {}"""
 
+    # Puthu User bot ah start panna Log Channel la varum Text
     LOG_TEXT_P = """<b>New User 👤</b>
     
 <b>🆔 ID:</b> <code>{}</code>
 <b>🏷 Name:</b> {}"""
 
+    # ==========================================
+    # 🎬 MOVIE SEARCH & RESULTS TEXTS
+    # ==========================================
+
+    # File thedi kedaicha varum Message
     RESULT_TXT = (
     "<blockquote><b>⚡ Found something for you!</b></blockquote>\n"
     "[ ⌛ Only 1 minute left! Hurry! ]\n\n"
     "<i>Check the results below:</i>"
-)
+    )
 
+    # File send aagumbothu keela varum Caption (Auto Delete details oda)
     CUSTOM_FILE_CAPTION = """<b>📂 Filename:</b> <b><i>{file_caption}</i></b>\n
 <b>💾 Size:</b> <b>{file_size}</b>\n
 
@@ -157,13 +190,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <blockquote><i>This message will</i> <b>AUTO-DELETE</b> <i>in</i> <b>10 Minute</b> <i>to prevent copyright strikes! ⏳</i>\n
 <b><i>Please forward or save this file immediately!</i></b></blockquote>"""
 
-    RESTART_GC_TXT = """<b>♻️ System Restarted!</b>
-
-<b>📅 Date:</b> <code>{}</code>
-<b>⏰ Time:</b> <code>{}</code>
-<b>🌐 Zone:</b> <code>Asia/Kolkata</code>
-<b>🛠️ Version:</b> <code>v2.0 [Stable]</code>"""
-
+    # Bot thedi file kedaikkalana varum Message
     SPOLL_NOT_FND = """<b>🎬 Movie Not Found! 😕</b>
     
 🔍 <b>Eng:</b> I couldn’t find your movie  
@@ -181,7 +208,10 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 🌐 <b>Still miss aagudha?</b>  
 👉 <b>Google la search pannunga bro 👇</b>"""
 
-    # SPELL CHECK LANGUAGES
+    # ==========================================
+    # 🔠 SPELLING CHECK & ALERT TEXTS
+    # ==========================================
+
     ENG_SPELL = """<b>💡 Spelling Check (English)</b>
     
 1️⃣ Use correct spelling.
@@ -206,6 +236,10 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 2️⃣ படம் OTT இல் வெளியாகிவிட்டதா என சரிபார்க்கவும்.
 3️⃣ முயற்சிக்கவும்: <code>Movie Name Year</code>"""
 
+    # ==========================================
+    # 🔄 SYSTEM ALERTS & NOTIFICATIONS
+    # ==========================================
+
     CHK_MOV_ALRT = """<b>♻️ Checking Database... Please Wait! ♻️</b>"""
 
     OLD_MES = """<b>⚠️ Request Expired!</b>
@@ -219,3 +253,10 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <pre>Use /bugs to request this movie.</pre>"""
 
     RESTART_TXT = """<b>✅ Bot Restarted Successfully!</b>"""
+    
+    RESTART_GC_TXT = """<b>♻️ System Restarted!</b>
+
+<b>📅 Date:</b> <code>{}</code>
+<b>⏰ Time:</b> <code>{}</code>
+<b>🌐 Zone:</b> <code>Asia/Kolkata</code>
+<b>🛠️ Version:</b> <code>v2.0 [Stable]</code>"""
