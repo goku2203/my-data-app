@@ -10,6 +10,7 @@ from umongo import Instance, Document, fields
 from motor.motor_asyncio import AsyncIOMotorClient
 from marshmallow.exceptions import ValidationError
 from info import DATABASE_URI, DATABASE_NAME, COLLECTION_NAME, USE_CAPTION_FILTER
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -138,7 +139,8 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
         next_offset = ''
 
     cursor = Media.find(filter_db)
-    cursor.sort('$natural', -1)
+    # Ipo file name and file size (Low MB to High GB) vachu database-laye sort pandrom
+    cursor.sort([('file_name', 1), ('file_size', 1)])
     cursor.skip(offset).limit(max_results)
     files = await cursor.to_list(length=max_results)
 
@@ -186,9 +188,6 @@ def unpack_new_file_id(new_file_id):
     )
     file_ref = encode_file_ref(decoded.file_reference)
     return file_id, file_ref
-
-import re
-from collections import defaultdict
 
 async def get_movie_list(limit=20):
     cursor = Media.find().sort("$natural", -1).limit(100)
