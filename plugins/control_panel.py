@@ -178,22 +178,38 @@ async def channel_panel_callbacks(client, query: CallbackQuery):
         else:
             await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
 
-# --- Add / Delete Commands ---
+# --- Add / Delete Commands with AUTO-DELETE ---
 
 @Client.on_message(filters.command("addchannel") & filters.user(ADMINS))
 async def add_channel_cmd(client, message):
     try:
         chat_id = int(message.command[1])
         await add_index_channel(chat_id)
-        await message.reply(f"✅ <b>Success!</b> Channel <code>{chat_id}</code> has been added successfully.", parse_mode=enums.ParseMode.HTML)
+        msg = await message.reply(f"✅ <b>Success!</b> Channel <code>{chat_id}</code> has been added successfully.", parse_mode=enums.ParseMode.HTML)
     except:
-        await message.reply("⚠️ <b>Invalid command!</b>\nUsage: <code>/addchannel -100123456789</code>")
+        msg = await message.reply("⚠️ <b>Invalid command!</b>\nUsage: <code>/addchannel -100123456789</code>")
+        
+    # 10 seconds wait panni messages delete aagum
+    await asyncio.sleep(10)
+    try:
+        await message.delete() # User anupina command ah delete pannum
+        await msg.delete()     # Bot oda reply ah delete pannum
+    except:
+        pass
 
 @Client.on_message(filters.command("delchannel") & filters.user(ADMINS))
 async def del_channel_cmd(client, message):
     try:
         chat_id = int(message.command[1])
         await del_index_channel(chat_id)
-        await message.reply(f"🗑️ <b>Done!</b> Channel <code>{chat_id}</code> has been removed successfully.", parse_mode=enums.ParseMode.HTML)
+        msg = await message.reply(f"🗑️ <b>Done!</b> Channel <code>{chat_id}</code> has been removed successfully.", parse_mode=enums.ParseMode.HTML)
     except:
-        await message.reply("⚠️ <b>Invalid command!</b>\nUsage: <code>/delchannel -100123456789</code>")
+        msg = await message.reply("⚠️ <b>Invalid command!</b>\nUsage: <code>/delchannel -100123456789</code>")
+        
+    # 10 seconds wait panni messages delete aagum
+    await asyncio.sleep(10)
+    try:
+        await message.delete() 
+        await msg.delete()
+    except:
+        pass
