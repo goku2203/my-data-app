@@ -87,7 +87,7 @@ async def next_page(bot, query):
         return
 
     # Movie name vachu group panni, Low MB to High GB sort pannum
-    files.sort(key=lambda x: (x.file_name.lower(), x.file_size if x.file_size else 0))
+    files.sort(key=lambda x: (x.file_name.lower(), x.file_size if x.file_size else 0), reverse=False)
 
     settings = await get_settings(query.message.chat.id)
     if not settings:
@@ -897,7 +897,7 @@ async def auto_filter(client, msg, spoll=False):
             search, files, offset, total_results = spoll
 
         if files:
-            files.sort(key=lambda x: (x.file_name.lower(), x.file_size if x.file_size else 0))
+            files.sort(key=lambda x: (x.file_name.lower(), x.file_size if x.file_size else 0), reverse=False)
 
         pre = 'filep' if settings['file_secure'] else 'file'
 
