@@ -2,7 +2,7 @@ import re
 import time
 import logging
 from pyrogram import Client, filters, enums
-from info import MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, ALERT_LOG_CHANNEL_ID
+from info import MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, ALERT_LOG_CHANNEL_ID, CAM_DB_CHANNEL
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ def get_anime_name(name):
     return clean.title()
 
 
-@Client.on_message(filters.chat([MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID]) & (filters.document | filters.video | filters.audio), group=10)
+@Client.on_message(filters.chat([MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, CAM_DB_CHANNEL]) & (filters.document | filters.video | filters.audio), group=10)
 async def alert_handler(client, message):
     try:
         media = getattr(message, message.media.value)
@@ -79,6 +79,8 @@ async def alert_handler(client, message):
             text = f"<b>[User Request] {clean_name} Added ✅ </b>"
         elif message.chat.id == ANIME_CHANNEL_ID:
             text = f"<b>[New Anime] {clean_name} Added ✅ </b>"
+        elif message.chat.id == CAM_DB_CHANNEL:
+            text = f"<b>{clean_name} Added ✅ </b>"
         else:
             text = f"<b>{clean_name} Added ✅</b>"
 
