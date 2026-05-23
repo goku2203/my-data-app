@@ -3,6 +3,8 @@ import asyncio
 import re
 import aiohttp
 import urllib.parse
+from database.channel_db import get_all_index_channels
+from pyrogram import enums
 from pyrogram import Client, filters
 from database.ia_filterdb import save_file, unpack_new_file_id
 from utils import temp, get_size
@@ -128,16 +130,11 @@ def get_quality_short(filename):
     if "720p" in filename: return "HD"
     return "HD-Rip"
 
-# 👇 PUTHUSA ADD PANNA ANTI-COPYRIGHT FUNCTION 👇
 def get_safe_name(name):
-    # This adds an invisible "Zero-Width Space" between every letter.
-    # Users ku normal ah theriyum, aana copyright bots ku atha match panna mudiyathu.
     return "\u200B".join(list(name))
 
-# 👇 PUTHUSA UPDATE PANNA TMDB IMAGE FUNCTION (16:9 Tamil -> 16:9 English -> Vertical Poster) 👇
 async def get_tmdb_image(movie_name, year):
     try:
-        # Step 1: First Movie thedi athoda ID & Fallback Poster-ah edukkum
         search_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={urllib.parse.quote(movie_name)}"
         async with aiohttp.ClientSession() as session:
             async with session.get(search_url) as response:
@@ -146,7 +143,6 @@ async def get_tmdb_image(movie_name, year):
                     return None
 
                 movie = None
-                # Year match aagutha nu paarkum
                 if year and year != "N/A":
                     for result in data['results']:
                         res_year = result.get('release_date', '')[:4]
@@ -158,27 +154,22 @@ async def get_tmdb_image(movie_name, year):
                     movie = data['results'][0]
                 
                 movie_id = movie['id']
-                # Plan B-kaga Vertical Poster-ah ready-a vachikkurom
                 fallback_poster = f"https://image.tmdb.org/t/p/original{movie['poster_path']}" if movie.get('poster_path') else None
 
-        # Step 2: Movie ID vachu, Text (Logo) irukkura 16:9 Image thedum
         images_url = f"https://api.themoviedb.org/3/movie/{movie_id}/images?api_key={TMDB_API_KEY}"
         async with aiohttp.ClientSession() as session:
             async with session.get(images_url) as response:
                 img_data = await response.json()
                 
                 if img_data.get('backdrops'):
-                    # Priority 1: First 'ta' (Tamil) language tag irukka nu thedum
                     for backdrop in img_data['backdrops']:
                         if backdrop.get('iso_639_1') == 'ta':
                             return f"https://image.tmdb.org/t/p/original{backdrop['file_path']}"
                     
-                    # Priority 2: Tamil kidaikkalana, 'en' (English) tag irukka nu thedum
                     for backdrop in img_data['backdrops']:
                         if backdrop.get('iso_639_1') == 'en':
                             return f"https://image.tmdb.org/t/p/original{backdrop['file_path']}"
         
-        # Step 3: Oruvela 16:9 Logo image (Tamil & English) illana, Vertical Poster-ah (Plan B) anuppidum
         return fallback_poster
 
     except Exception as e:
@@ -210,7 +201,6 @@ async def send_batched_post(client, clean_name):
     if not unique_files:
         return
 
-    # --- MERGE AUDIO INFO ---
     all_audios = set()
     first_file = unique_files[0]
     
@@ -227,7 +217,6 @@ async def send_batched_post(client, clean_name):
     else:
         final_audio_str = first_file['audio']
 
-    # --- MERGE PRINT QUALITY INFO ---
     all_prints = set()
     for f in unique_files:
         if f['print_q']:
@@ -244,14 +233,10 @@ async def send_batched_post(client, clean_name):
         else:
             categorized["HD-Rip"].append(file)
 
-    # 👇 ITHU THAAN NAMMA PUTHOO SAFE NAME 👇
     safe_title = get_safe_name(clean_name)
-    
-    # 👇 PUTHUSA UPDATE PANNATHU: TMDB la irunthu exact Year vachu Image URL edukka 👇
     movie_year = first_file['year']
     image_url = await get_tmdb_image(clean_name, movie_year)
 
-    # --- CAPTION SETUP ---
     caption = (
         f"🎬 <b>{safe_title}</b>\n\n"
         f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
@@ -267,9 +252,7 @@ async def send_batched_post(client, clean_name):
         files = categorized[category]
         if files:
             has_files = True
-            
             files.sort(key=lambda x: x['raw_size'])
-            
             for f in files:
                 caption += f" ➪ <a href='{f['link']}'><b>{f['short_q']} - {f['size']}</b></a>\n"
 
@@ -283,7 +266,6 @@ async def send_batched_post(client, clean_name):
 
     try:
         if image_url:
-            # Image kidaicha Photo post podum (16:9 Landscape)
             await client.send_photo(
                 chat_id=UPDATES_CHANNEL,
                 photo=image_url,
@@ -291,7 +273,6 @@ async def send_batched_post(client, clean_name):
                 parse_mode=ParseMode.HTML 
             )
         else:
-            # Oruvela TMDB la image illana, pazhaya mathiri Text post podum
             await client.send_message(
                 chat_id=UPDATES_CHANNEL,
                 text=caption,
@@ -303,8 +284,21 @@ async def send_batched_post(client, clean_name):
 
 # --- 3. MAIN LISTENER ---
 
-@Client.on_message(filters.chat(CHANNELS) & (filters.document | filters.video | filters.audio), group=1)
+# Removed CHANNELS filter. Now it triggers dynamically based on the DB check below.
+@Client.on_message((filters.document | filters.video | filters.audio), group=1)
 async def media_handler(client, message):
+    
+    # Ignore messages sent directly to the bot (Private Chat)
+    if getattr(message.chat, "type", None) == enums.ChatType.PRIVATE:
+        return
+        
+    # Retrieve the list of allowed channels dynamically from the database
+    active_channels = await get_all_index_channels()
+    
+    # If the message comes from an unknown channel, ignore it
+    if message.chat.id not in active_channels:
+        return
+
     try:
         media = getattr(message, message.media.value)
         file_id, file_ref = unpack_new_file_id(media.file_id)
@@ -319,7 +313,6 @@ async def media_handler(client, message):
         except:
             pass 
 
-        # Anime matrum User Request channel kku auto post pogaathu
         if message.chat.id in [ANIME_CHANNEL_ID, USER_REQ_DB_CHANNEL]:
             return
 
