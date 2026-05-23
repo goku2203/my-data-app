@@ -347,6 +347,9 @@ async def start(client, message):
             )
             asyncio.create_task(auto_delete_message(client, verify_msg, 600))
             return
+            
+        # 👇 ITHA PUTHUSA ADD PANNUNGA (Oru thadava file edutha odane verify cancel aagidum) 👇
+        await db.col.update_one({'id': message.from_user.id}, {'$set': {'verify_status_v2': {'is_verified': False, 'verify_until': None}}})
 
     try:
         pre, file_id = data.split('_', 1)
