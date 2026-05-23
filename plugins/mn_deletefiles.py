@@ -6,9 +6,6 @@ from database.ia_filterdb import Media
 from pyrogram import Client, filters, enums
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
-# Ensure this import path is correct for your bot's setup
-from database.ia_filterdb import Media
-
 # You MUST define ADMINS in your bot's config (e.g., info.py)
 from info import ADMINS
 
@@ -136,46 +133,81 @@ async def close_message(bot: Client, query: CallbackQuery):
     await query.answer()
     await query.message.delete()
 
-import os
-from database.ia_filterdb import Media
+
+# ==============================================================
+# PUTHIYA CLEANCAM CODE (SAFE VERSION WITH TEXT FILE & AUTO-DELETE)
+# ==============================================================
 
 @Client.on_message(filters.command("cleancam") & filters.user(ADMINS))
-async def clean_cam_prints(client, message):
-    status = await message.reply("🗑 Checking and collecting Theater/Cam prints in Database...")
+async def ask_clean_cam(client, message):
+    # Bot PM la mattum work aagura mathiri set pandrom
+    if message.chat.type != enums.ChatType.PRIVATE:
+        return await message.reply_text(
+            "<b>Hey bro, intha command-ah Bot oda PM (Private Message) la mattum use pannunga!</b>",
+            parse_mode=enums.ParseMode.HTML
+        )
     
-    # Intha words irukkura files ellam thedappadum
+    status = await message.reply("🔍 Checking Database for Theater/Cam prints... Please wait.")
+    
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
+    found_files = []
     
-    deleted_files = []
-    
+    # Files ah thedi list la podurom (aana ippo delete panna maatom)
     for word in cam_words:
-        # First entha files nu thedi list-la add pandrathu
         cursor = Media.collection.find({"file_name": {"$regex": f"(?i){word}"}})
         async for doc in cursor:
-            deleted_files.append(doc.get("file_name", "Unknown File"))
+            found_files.append(doc.get("file_name", "Unknown File"))
             
-        # List edutha kappuram database-la irunthu delete pandrathu
-        await Media.collection.delete_many({"file_name": {"$regex": f"(?i){word}"}})
-        
-    # Ore file rendu thadava list-la varama thadukka
-    deleted_files = list(set(deleted_files))
-    total_deleted = len(deleted_files)
+    found_files = list(set(found_files))
+    total_found = len(found_files)
     
-    if total_deleted == 0:
-        return await status.edit("✅ Database clean! No Theater/Cam prints found.")
+    if total_found == 0:
+        await status.edit("✅ Database clean! No Theater/Cam prints found.")
+        await asyncio.sleep(5)
+        return await status.delete()
         
-    # Delete aana files-oda list-a oru text file-la create pandrathu
-    file_path = "deleted_movies_list.txt"
+    # Text file create pandrom
+    file_path = "cam_prints_to_delete.txt"
     with open(file_path, "w", encoding="utf-8") as f:
-        f.write("🎬 DELETED THEATER/CAM PRINTS LIST:\n")
+        f.write(f"🎬 FOUND {total_found} THEATER/CAM PRINTS:\n")
         f.write("======================================\n\n")
-        for name in deleted_files:
+        for name in found_files:
             f.write(f"- {name}\n")
             
-    # Success message + Text file-a anuppurathu
-    await status.edit(f"✅ Success! Total **{total_deleted}** Theater/Cam prints Database-la irunthu delete aayiduchu.\n\nKela irukkura Document file-a download panni open pannunga. Athula entha padangal delete aachu ngara full details irukkum. Atha vachu unga Main DB Channel-la thedi delete pannikonga! 👇")
-    await message.reply_document(document=file_path)
+    # Yes / No buttons create pandrom
+    confirm_button = InlineKeyboardButton("✅ Yes, Delete All", callback_data="confirm_cleancam")
+    abort_button = InlineKeyboardButton("❌ No, Cancel", callback_data="close_message")
+    markup = InlineKeyboardMarkup([[confirm_button], [abort_button]])
     
-    # Send pannatha kappuram system-la irunthu antha text file-a thukkiduvom
+    # Document oda serthu caption la buttons anuppurom
+    await message.reply_document(
+        document=file_path,
+        caption=f"⚠️ **Attention!**\n\nNaan database-la thediyathula **{total_found}** Theater/Cam prints kidaichirukku.\n\nMela irukkura `.txt` file-ah open panni entha files nu check pannikonga.\n\n**Itha ellam permanent-ah delete pannanuma?**",
+        reply_markup=markup
+    )
+    
+    # Status message ah thukkidrom
+    await status.delete()
+    
+    # System la irunthu file ah remove pandrom
     if os.path.exists(file_path):
         os.remove(file_path)
+
+@Client.on_callback_query(filters.regex(r'^confirm_cleancam$'))
+async def execute_clean_cam(client, query):
+    await query.answer("Deleting Cam Prints... Please wait!", show_alert=True)
+    
+    cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
+    
+    # Ippo thaan unmaiyave delete pandrom
+    for word in cam_words:
+        await Media.collection.delete_many({"file_name": {"$regex": f"(?i){word}"}})
+        
+    await query.message.edit_caption(
+        caption="✅ **Success!**\n\nDatabase-la irunthu ellam Theater/Cam prints-um delete aayiduchu. Intha message konja nerathula automatic-ah azhinjidum.",
+        reply_markup=None # Buttons ah remove pannidrom
+    )
+    
+    # 10 seconds kalichu antha message automatic ah delete aagidum
+    await asyncio.sleep(10)
+    await query.message.delete()
