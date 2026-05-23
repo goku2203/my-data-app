@@ -3,12 +3,14 @@ import psutil
 import asyncio
 from datetime import datetime
 from pyrogram import Client, filters, enums
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from database.users_chats_db import db
 from database.ia_filterdb import Media
 from info import ADMINS, BOT_START_TIME, PICS
 import random
 from utils import get_size
+# Puthusa add panna Database imports
+from database.channel_db import add_index_channel, del_index_channel, get_all_index_channels
 
 # Refresh-kum, command-kum common-a data edukka intha function
 async def get_panel_data(user_mention):
@@ -22,11 +24,9 @@ async def get_panel_data(user_mention):
     total_chats = await db.total_chat_count()
     total_files = await Media.collection.count_documents({})
     
-    # 👇 Puthusa add panna Monthly Verified Logic 👇
     now = datetime.now()
     start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     monthly_verified = await db.col.count_documents({"verify_status_v2.verify_until": {"$gte": start_of_month}})
-    # 👆 Ithu varai 👆
     
     monsize = await db.get_db_size()
     db_size_mb = monsize / (1024 * 1024)
@@ -37,7 +37,6 @@ async def get_panel_data(user_mention):
     cpu = psutil.cpu_percent(interval=0.5)
     ram = psutil.virtual_memory().percent
     
-    # UI la Monthly Verified & Total Files theliva mathiyachu
     stats_text = (
         "<blockquote><b>👑 𝗢𝗪𝗡𝗘𝗥 𝗖𝗢𝗡𝗧𝗥𝗢𝗟 𝗣𝗔𝗡𝗘𝗟 👑</b></blockquote>\n\n"
         f"<i>Welcome Master {user_mention}! Here is your Bot Status.</i>\n\n"
@@ -58,6 +57,10 @@ async def get_panel_data(user_mention):
     )
     
     buttons = InlineKeyboardMarkup([
+        [
+            # 👇 Ithu thaan puthu Manage Channels button 👇
+            InlineKeyboardButton("⚙️ Manage Index Channels", callback_data="chan_menu")
+        ],
         [
             InlineKeyboardButton("☁️ Render Dashboard", url="https://dashboard.render.com"),
             InlineKeyboardButton("🍃 MongoDB Cloud", url="https://cloud.mongodb.com")
@@ -92,16 +95,12 @@ async def stats_command(client, message):
             parse_mode=enums.ParseMode.HTML
         )
 
-# Refresh button-kanda Callback Handler
 @Client.on_callback_query(filters.regex("^refresh_panel$") & filters.user(ADMINS))
 async def refresh_panel_callback(client, callback_query):
     try:
         await callback_query.answer("🔄 Refreshing Control Panel...", show_alert=False)
-        
-        # Puthu updated data edukkurom
         stats_text, buttons = await get_panel_data(callback_query.from_user.mention)
         
-        # Message photo va iruntha caption ah mathanum
         if callback_query.message.photo:
             await callback_query.message.edit_caption(
                 caption=stats_text,
@@ -109,12 +108,86 @@ async def refresh_panel_callback(client, callback_query):
                 parse_mode=enums.ParseMode.HTML
             )
         else:
-            # Text ah iruntha athai mathanum
             await callback_query.message.edit_text(
                 text=stats_text,
                 reply_markup=buttons,
                 parse_mode=enums.ParseMode.HTML
             )
     except Exception as e:
-        # Same data va iruntha MessageNotModified error varum, atha thadukka intha except block
         pass
+
+
+# =========================================================
+# 👇 CHANNEL MANAGEMENT SETTINGS (MERGED HERE) 👇
+# =========================================================
+
+@Client.on_callback_query(filters.regex(r'^chan_') & filters.user(ADMINS))
+async def channel_panel_callbacks(client, query: CallbackQuery):
+    data = query.data
+    
+    if data == "chan_menu":
+        # Channel menu buttons
+        buttons = [
+            [InlineKeyboardButton("📝 List All Channels", callback_data="chan_list")],
+            [InlineKeyboardButton("➕ Add Channel", callback_data="chan_add"), 
+             InlineKeyboardButton("🗑️ Delete Channel", callback_data="chan_del")],
+            [InlineKeyboardButton("🔙 Back to Stats", callback_data="refresh_panel")]
+        ]
+        text = "<b>⚙️ CHANNEL MANAGEMENT ⚙️</b>\n\nEnna pannanum nu kela select pannunga bro:"
+        
+        if query.message.photo:
+            await query.message.edit_caption(caption=text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=enums.ParseMode.HTML)
+        else:
+            await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=enums.ParseMode.HTML)
+            
+    elif data == "chan_list":
+        channels = await get_all_index_channels()
+        if not channels:
+            return await query.answer("Database-la entha channel-um illa bro!", show_alert=True)
+            
+        text = "<b>📝 Auto-Indexing Channels List:</b>\n\n"
+        for ch in channels:
+            text += f"🔹 <code>{ch}</code>\n"
+            
+        btn = [[InlineKeyboardButton("🔙 Back to Menu", callback_data="chan_menu")]]
+        
+        if query.message.photo:
+            await query.message.edit_caption(caption=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+        else:
+            await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+        
+    elif data == "chan_add":
+        text = "<b>➕ To Add a New Channel:</b>\n\nCommand type pannunga:\n<code>/addchannel -100123456789</code>\n\n<i>(Minus symbol marakkama podunga)</i>"
+        btn = [[InlineKeyboardButton("🔙 Back to Menu", callback_data="chan_menu")]]
+        if query.message.photo:
+            await query.message.edit_caption(caption=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+        else:
+            await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+        
+    elif data == "chan_del":
+        text = "<b>🗑️ To Delete a Channel:</b>\n\nCommand type pannunga:\n<code>/delchannel -100123456789</code>"
+        btn = [[InlineKeyboardButton("🔙 Back to Menu", callback_data="chan_menu")]]
+        if query.message.photo:
+            await query.message.edit_caption(caption=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+        else:
+            await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+
+# --- Add / Delete Commands ---
+
+@Client.on_message(filters.command("addchannel") & filters.user(ADMINS))
+async def add_channel_cmd(client, message):
+    try:
+        chat_id = int(message.command[1])
+        await add_index_channel(chat_id)
+        await message.reply(f"✅ Success! Channel <code>{chat_id}</code> add aayiduchu.", parse_mode=enums.ParseMode.HTML)
+    except:
+        await message.reply("⚠️ Invalid command! Ippadi podunga: <code>/addchannel -100123456789</code>")
+
+@Client.on_message(filters.command("delchannel") & filters.user(ADMINS))
+async def del_channel_cmd(client, message):
+    try:
+        chat_id = int(message.command[1])
+        await del_index_channel(chat_id)
+        await message.reply(f"🗑️ Done! Channel <code>{chat_id}</code> remove aayiduchu.", parse_mode=enums.ParseMode.HTML)
+    except:
+        await message.reply("⚠️ Invalid command! Ippadi podunga: <code>/delchannel -100123456789</code>")
