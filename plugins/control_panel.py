@@ -116,7 +116,6 @@ async def refresh_panel_callback(client, callback_query):
     except Exception as e:
         pass
 
-
 # =========================================================
 # 👇 CHANNEL MANAGEMENT SETTINGS (MERGED HERE) 👇
 # =========================================================
@@ -133,7 +132,7 @@ async def channel_panel_callbacks(client, query: CallbackQuery):
              InlineKeyboardButton("🗑️ Delete Channel", callback_data="chan_del")],
             [InlineKeyboardButton("🔙 Back to Stats", callback_data="refresh_panel")]
         ]
-        text = "<b>⚙️ CHANNEL MANAGEMENT ⚙️</b>\n\nEnna pannanum nu kela select pannunga bro:"
+        text = "<b>⚙️ CHANNEL MANAGEMENT ⚙️</b>\n\nPlease select an option below to proceed:"
         
         if query.message.photo:
             await query.message.edit_caption(caption=text, reply_markup=InlineKeyboardMarkup(buttons), parse_mode=enums.ParseMode.HTML)
@@ -143,11 +142,18 @@ async def channel_panel_callbacks(client, query: CallbackQuery):
     elif data == "chan_list":
         channels = await get_all_index_channels()
         if not channels:
-            return await query.answer("Database-la entha channel-um illa bro!", show_alert=True)
+            return await query.answer("No channels are currently found in the database!", show_alert=True)
             
         text = "<b>📝 Auto-Indexing Channels List:</b>\n\n"
         for ch in channels:
-            text += f"🔹 <code>{ch}</code>\n"
+            # Bot channel name ah fetch panna try pannum
+            try:
+                chat = await client.get_chat(ch)
+                title = chat.title
+            except Exception:
+                title = "Unknown Channel"
+                
+            text += f"✅ <b>{title}</b> | ID: <code>{ch}</code> 🔗\n"
             
         btn = [[InlineKeyboardButton("🔙 Back to Menu", callback_data="chan_menu")]]
         
@@ -157,7 +163,7 @@ async def channel_panel_callbacks(client, query: CallbackQuery):
             await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
         
     elif data == "chan_add":
-        text = "<b>➕ To Add a New Channel:</b>\n\nCommand type pannunga:\n<code>/addchannel -100123456789</code>\n\n<i>(Minus symbol marakkama podunga)</i>"
+        text = "<b>➕ To Add a New Channel:</b>\n\nSend the following command in the chat:\n<code>/addchannel -100123456789</code>\n\n<i>(Ensure you include the minus '-' symbol)</i>"
         btn = [[InlineKeyboardButton("🔙 Back to Menu", callback_data="chan_menu")]]
         if query.message.photo:
             await query.message.edit_caption(caption=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
@@ -165,7 +171,7 @@ async def channel_panel_callbacks(client, query: CallbackQuery):
             await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
         
     elif data == "chan_del":
-        text = "<b>🗑️ To Delete a Channel:</b>\n\nCommand type pannunga:\n<code>/delchannel -100123456789</code>"
+        text = "<b>🗑️ To Delete a Channel:</b>\n\nSend the following command in the chat:\n<code>/delchannel -100123456789</code>"
         btn = [[InlineKeyboardButton("🔙 Back to Menu", callback_data="chan_menu")]]
         if query.message.photo:
             await query.message.edit_caption(caption=text, reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
@@ -179,15 +185,15 @@ async def add_channel_cmd(client, message):
     try:
         chat_id = int(message.command[1])
         await add_index_channel(chat_id)
-        await message.reply(f"✅ Success! Channel <code>{chat_id}</code> add aayiduchu.", parse_mode=enums.ParseMode.HTML)
+        await message.reply(f"✅ <b>Success!</b> Channel <code>{chat_id}</code> has been added successfully.", parse_mode=enums.ParseMode.HTML)
     except:
-        await message.reply("⚠️ Invalid command! Ippadi podunga: <code>/addchannel -100123456789</code>")
+        await message.reply("⚠️ <b>Invalid command!</b>\nUsage: <code>/addchannel -100123456789</code>")
 
 @Client.on_message(filters.command("delchannel") & filters.user(ADMINS))
 async def del_channel_cmd(client, message):
     try:
         chat_id = int(message.command[1])
         await del_index_channel(chat_id)
-        await message.reply(f"🗑️ Done! Channel <code>{chat_id}</code> remove aayiduchu.", parse_mode=enums.ParseMode.HTML)
+        await message.reply(f"🗑️ <b>Done!</b> Channel <code>{chat_id}</code> has been removed successfully.", parse_mode=enums.ParseMode.HTML)
     except:
-        await message.reply("⚠️ Invalid command! Ippadi podunga: <code>/delchannel -100123456789</code>")
+        await message.reply("⚠️ <b>Invalid command!</b>\nUsage: <code>/delchannel -100123456789</code>")
