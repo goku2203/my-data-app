@@ -76,11 +76,11 @@ async def alert_handler(client, message):
 
         # MESSAGE SEND PANDRA IDAM
         if message.chat.id == USER_REQ_DB_CHANNEL:
-            text = f"<b>[User Request] {clean_name} Added ✅ </b>"
+            text = f"✨ User Request Added\n\n▸ {clean_name}"
         elif message.chat.id == ANIME_CHANNEL_ID:
-            text = f"<b>[New Anime] {clean_name} Added ✅ </b>"
+            text = f"🎬 New Anime Added\n\n▸ {clean_name}"
         elif message.chat.id == CAM_DB_CHANNEL:
-            text = f"<b>{clean_name} Added ✅ </b>"
+            text = f"🎬 New Movie Added\n\n▸ {clean_name}"
         else:
             text = f"<b>{clean_name} Added ✅</b>"
 
