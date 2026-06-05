@@ -42,7 +42,7 @@ def get_anime_name(name):
     clean = re.sub(r'@\w+\s*', '', clean)
     
     # Anime file-la [E01-12], Web-DL, Quality varum pothu atha cut panna
-    match = re.search(r'(\[e\d+|\be\d+|combined|cr\s|web-dl|720p|1080p|x264|multi audio)', clean)
+    match = re.search(r'(\[e\d+|\be\d+|combined|cr\s|web-dl|720p|1080p|480p|x264|multi audio)', clean)
     if match:
         clean = clean[:match.start()] # Athukku appuram irukkura ellathayum remove pannidum
         
