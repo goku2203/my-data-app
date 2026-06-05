@@ -162,9 +162,7 @@ async def ask_clean_cam(client, message):
     total_found = len(found_files)
     
     if total_found == 0:
-        await status.edit("✅ Database clean! No Theater/Cam prints found.")
-        await asyncio.sleep(5)
-        return await status.delete()
+        return await status.edit("  Database clean! No Theater/Cam prints found.")
         
     # Text file create pandrom
     file_path = "cam_prints_to_delete.txt"
