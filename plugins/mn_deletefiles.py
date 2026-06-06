@@ -162,7 +162,7 @@ async def ask_clean_cam(client, message):
     total_found = len(found_files)
     
     if total_found == 0:
-        return await status.edit("  Database clean! No Theater/Cam prints found.")
+        return await status.edit("✅ Database clean! No Theater/Cam prints found.")
         
     # Text file create pandrom
     file_path = "cam_prints_to_delete.txt"
@@ -193,7 +193,7 @@ async def ask_clean_cam(client, message):
 
 @Client.on_callback_query(filters.regex(r'^confirm_cleancam$'))
 async def execute_clean_cam(client, query):
-    await query.answer("Deleting Cam Prints... Please wait!", show_alert=True)[cite: 1]
+    await query.answer("Deleting Cam Prints... Please wait!", show_alert=True)
     
     # --- DM ku Backup anuppura puthu code ---
     # User ku txt file ah PM la anuppa try pandrom
@@ -207,17 +207,17 @@ async def execute_clean_cam(client, query):
         print(f"PM ku backup anuppa mudiyala: {e}")
     # ----------------------------------------
 
-    cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"][cite: 1]
+    cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
     
     # Database la irunthu antha files ah delete pandrom
-    for word in cam_words:[cite: 1]
-        await Media.collection.delete_many({"file_name": {"$regex": f"(?i){word}"}})[cite: 1]
+    for word in cam_words:
+        await Media.collection.delete_many({"file_name": {"$regex": f"(?i){word}"}})
         
     await query.message.edit_caption(
         caption="**Success!**\n\nAll Theater/Cam prints have been deleted from the database. This message will auto-delete shortly.",
         reply_markup=None # Buttons ah remove pandrom
-    )[cite: 1]
+    )
     
     # 10 seconds wait panni message ah delete pandrom
-    await asyncio.sleep(10)[cite: 1]
-    await query.message.delete()[cite: 1]
+    await asyncio.sleep(10)
+    await query.message.delete()
