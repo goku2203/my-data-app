@@ -4,7 +4,6 @@ class script(object):
     # 🟢 MAIN BOT COMMANDS TEXTS
     # ==========================================
 
-    # Bot ah start pannumbothu varum First Message (/start)
     START_TXT = """<b>👋 Hello {}!</b>
     
 <b>I am an Advanced Auto-Filter Bot. 🤖</b>
@@ -18,7 +17,6 @@ class script(object):
 
 <i>Click the buttons below to explore more.</i>"""
 
-    # Help button click pannumbothu varum Message (/help)
     HELP_TXT = """<b>⚙️ Help & System Status</b>
 
 <b>👤 User:</b> {}
@@ -31,12 +29,10 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
 <b>👇 Choose a category below:</b>"""
 
-    # Bot maintenance la irukkumbothu varum Message
     MAINT_TXT = (
         "<b>⚠️ Bot is Under Maintenance! 🛠️</b>\n\n<i>5 to 10 minutes wait pannunga. Work nadanthutu irukku!</i>"
     )
 
-    # About button click pannumbothu varum Message (/about)
     ABOUT_TXT = """<b>✯ 𝙼𝚈 𝙿𝚁𝙾𝙵𝙸𝙻𝙴 ✯</b>
 
 <b>🤖 𝐍𝐚𝐦𝐞: {}</b>
@@ -45,7 +41,6 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>💾 𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞: MongoDB</b>
 <b>📡 𝐒𝐞𝐫𝐯𝐞𝐫: Koyeb</b>"""
 
-    # Source Code details kaatura Message
     SOURCE_TXT = """<b>🛠️ Source Code</b>
 
 <i>This project is Open Source. You can find the code below.</i>
@@ -57,7 +52,6 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     # 🔵 GUIDES & TUTORIAL TEXTS
     # ==========================================
 
-    # Manual Filters epdi use pandrathu nu solra Text
     MANUALFILTER_TXT = """<b>🛠️ Manual Filters Help</b>
 
 <i>Filters allow the bot to reply automatically when a specific keyword is detected.</i>
@@ -73,7 +67,6 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • /del - <code>Delete a specific filter</code>
 • /delall - <code>Delete all filters (Owner only)</code>"""
 
-    # Buttons epdi create pandrathu nu solra Text
     BUTTON_TXT = """<b>🔘 Button Formatting Help</b>
 
 <i>I support both URL and Alert (Pop-up) buttons.</i>
@@ -86,7 +79,6 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>2️⃣ Alert Button Format:</b>
 <code>[Button Text](buttonalert:This is a pop-up message!)</code>"""
 
-    # Auto Filter setup pandra Guide
     AUTOFILTER_TXT = """<b>🤖 Auto-Filter Guide</b>
 
 <b>1️⃣ For Private Channels:</b>
@@ -101,7 +93,6 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • Use <code>/settings</code> in PM to enable Auto-Filter.
 """
 
-    # Group and PM connection commands Guide
     CONNECTION_TXT = """<b>🔗 Connection Manager</b>
 
 <i>Connect your groups to my PM to manage filters easily and avoid spam.</i>
@@ -111,48 +102,10 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • /disconnect - <code>Disconnect a group</code>
 • /connections - <code>View active connections</code>"""
 
-    # Extra features pathina Details
-    EXTRAMOD_TXT = """<b>🧩 Extra Modules</b>
-
-<i>Here are some cool extra features I offer!</i>
-
-<b>🎮 Commands:</b>
-• /id - <code>Get User ID</code>
-• /info - <code>Get User Info</code>
-• /imdb - <code>Search IMDb Details</code>
-• /search - <code>Search across sources</code>
-• /ping - <code>Check Bot Latency</code>
-• /stats - <code>Check Bot Statistics</code>"""
-
     # ==========================================
     # 🔴 ADMIN & SYSTEM LOG TEXTS
     # ==========================================
 
-    # Admin commands list
-    ADMIN_TXT = """<b>🛡️ Admin Control Panel</b>
-
-<i>Commands strictly for Bot Admins only.</i>
-
-<b>🎮 Commands:</b>
-• /logs - <code>View Error Logs</code>
-• /stats - <code>Database Statistics</code>
-• /delete - <code>Delete file from DB</code>
-• /users - <code>List all users</code>
-• /chats - <code>List all groups</code>
-• /ban - <code>Ban a user</code>
-• /unban - <code>Unban a user</code>
-• /broadcast - <code>Send message to all users</code>"""
-
-    # Bot Status & Database details
-    STATUS_TXT = """<b>📊 <u>Database Statistics</u></b>
-
-<b>📂 Total Files:</b> <code>{}</code>
-<b>👤 Total Users:</b> <code>{}</code>
-<b>👥 Total Chats:</b> <code>{}</code>
-<b>💾 Used Storage:</b> <code>{}</code>
-<b>🆓 Free Storage:</b> <code>{}</code>"""
-
-    # Puthu Group la bot ah add panna Log Channel la varum Text
     LOG_TEXT_G = """<b>#NewGroupDetected 👥</b>
     
 <b>🏷 Name:</b> {}
@@ -160,7 +113,6 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>🔢 Members:</b> <code>{}</code>
 <b>👤 Added By:</b> {}"""
 
-    # Puthu User bot ah start panna Log Channel la varum Text
     LOG_TEXT_P = """<b>New User 👤</b>
     
 <b>🆔 ID:</b> <code>{}</code>
@@ -170,14 +122,12 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     # 🎬 MOVIE SEARCH & RESULTS TEXTS
     # ==========================================
 
-    # File thedi kedaicha varum Message
     RESULT_TXT = (
     "<blockquote><b>⚡ Found something for you!</b></blockquote>\n"
     "[ ⌛ Only 1 minute left! Hurry! ]\n\n"
     "<i>Check the results below:</i>"
     )
 
-    # File send aagumbothu keela varum Caption (Auto Delete details oda)
     CUSTOM_FILE_CAPTION = """<b>📂 Filename:</b> <b><i>{file_caption}</i></b>\n
 <b>💾 Size:</b> <b>{file_size}</b>\n
 
@@ -190,7 +140,6 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <blockquote><i>This message will</i> <b>AUTO-DELETE</b> <i>in</i> <b>10 Minute</b> <i>to prevent copyright strikes! ⏳</i>\n
 <b><i>Please forward or save this file immediately!</i></b></blockquote>"""
 
-    # Bot thedi file kedaikkalana varum Message
     SPOLL_NOT_FND = """<b>🎬 Movie Not Found! 😕</b>
     
 🔍 <b>Eng:</b> I couldn’t find your movie  
