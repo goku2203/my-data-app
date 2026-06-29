@@ -523,7 +523,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ],
             [
                 InlineKeyboardButton("🔗 Connections", callback_data="connection"),
-                InlineKeyboardButton("🧩 Extras", callback_data="extras")
             ],
             [
                 InlineKeyboardButton("🔙 Return", callback_data="start_data"),
@@ -641,103 +640,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             ),
             reply_markup=reply_markup
         )
-
-    elif query.data == "extras":
-        buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='help'),
-            InlineKeyboardButton('👨‍💻 Admin', callback_data='admin'),
-            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        
-        await query.message.edit_media(
-            media=InputMediaPhoto(
-                media=random.choice(PICS),
-                caption=script.EXTRAMOD_TXT,
-                parse_mode=enums.ParseMode.HTML
-            ),
-            reply_markup=reply_markup
-        )
     
-    elif query.data == "admin":
-        buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='help'),
-            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        
-        await query.message.edit_media(
-            media=InputMediaPhoto(
-                media=random.choice(PICS),
-                caption=script.ADMIN_TXT,
-                parse_mode=enums.ParseMode.HTML
-            ),
-            reply_markup=reply_markup
-        )
-
-    elif query.data == "stats":
-        buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='help'),
-            InlineKeyboardButton('🔄 Refresh', callback_data='rfrsh'),
-            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        total = await Media.count_documents()
-        users = await db.total_users_count()
-        chats = await db.total_chat_count()
-        monsize = await db.get_db_size()
-        free = 536870912 - monsize
-        monsize = get_size(monsize)
-        free = get_size(free)
-        
-        db_size_bytes = await db.get_db_size()
-        db_size_mb = db_size_bytes / (1024 * 1024)
-        mongo_percent = (db_size_mb / 512) * 100
-        
-        monsize = get_size(db_size_bytes)
-        free = get_size(536870912 - db_size_bytes)
-        
-        await query.message.edit_media(
-            media=InputMediaPhoto(
-                media=random.choice(PICS),
-                caption=script.STATUS_TXT.format(total, users, chats, monsize, free),
-                parse_mode=enums.ParseMode.HTML
-            ),
-            reply_markup=reply_markup
-        )
-
-    elif query.data == "rfrsh":
-        await query.answer("Fetching MongoDb DataBase")
-        buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='help'),
-            InlineKeyboardButton('🔄 Refresh', callback_data='rfrsh'),
-            InlineKeyboardButton('👨‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        total = await Media.count_documents()
-        users = await db.total_users_count()
-        chats = await db.total_chat_count()
-        monsize = await db.get_db_size()
-        free = 536870912 - monsize
-        monsize = get_size(monsize)
-        free = get_size(free)
-        
-        db_size_bytes = await db.get_db_size()
-        db_size_mb = db_size_bytes / (1024 * 1024)
-        mongo_percent = (db_size_mb / 512) * 100
-        
-        monsize = get_size(db_size_bytes)
-        free = get_size(536870912 - db_size_bytes)
-        
-        await query.message.edit_media(
-            media=InputMediaPhoto(
-                media=random.choice(PICS),
-                caption=script.STATUS_TXT.format(total, users, chats, monsize, free),
-                parse_mode=enums.ParseMode.HTML
-            ),
-            reply_markup=reply_markup
-        )
-
     elif query.data.startswith("setgs"):
         ident, set_type, status, grp_id = query.data.split("#")
         grpid = await active_connection(str(query.from_user.id))
