@@ -1,11 +1,8 @@
 import re
 from os import environ
-from Script import script
 from time import time
-import os
-# Add this to info.py
-BOT_USERNAME = environ.get("BOT_USERNAME", "Mikasa_Lovely_bot")
 
+# Regex pattern for checking integer IDs
 id_pattern = re.compile(r'^.\d+$')
 
 def is_enabled(value, default):
@@ -13,17 +10,18 @@ def is_enabled(value, default):
         return True
     elif value.lower() in ["false", "no", "0", "disable", "n"]:
         return False
-    else:
-        return default
+    return default
 
-#Bot information
+# --- Bot Credentials ---
+BOT_USERNAME = environ.get("BOT_USERNAME", "Mikasa_Lovely_bot")
 SESSION = environ.get('SESSION', 'Media_search')
 API_ID = int(environ.get('API_ID', '28910807'))
 API_HASH = environ.get('API_HASH', 'ed988261e49d480ef468664ce8c2eff0')
 BOT_TOKEN = environ.get('BOT_TOKEN', '')
 
-# Keep-Alive URL
-KEEP_ALIVE_URL = environ.get("KEEP_ALIVE_URL", "https://burning-brittney-leech2-3bc21fb5.koyeb.app/")  # <-- Add this line
+# --- Keep Alive ---
+KEEP_ALIVE_URL = environ.get("KEEP_ALIVE_URL", "https://burning-brittney-leech2-3bc21fb5.koyeb.app/")
+
 #hyper link
 HYPER_MODE = bool(environ.get('HYPER_MODE', False))
 #request fsub
