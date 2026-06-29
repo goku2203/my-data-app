@@ -1,17 +1,18 @@
 import os
+import asyncio
 from pyrogram import Client, filters, enums
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant, MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from info import IMDB_TEMPLATE
-from utils import extract_user, get_file_id, get_poster, last_online
+from utils import extract_user, get_file_id, get_poster, last_online, get_settings
 import time
 from datetime import datetime
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 from database.users_chats_db import db
 from info import ADMINS
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 @Client.on_message(filters.command('id'))
 async def showid(client, message):
@@ -132,6 +133,21 @@ async def who_is(client, message):
 
 @Client.on_message(filters.command(["imdb", 'search']))
 async def imdb_search(client, message):
+    # --- PUTHU CODE (Admin Enable/Disable Check) ---
+    if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+        settings = await get_settings(message.chat.id)
+        if not settings.get("imdb", False): # Admin disable panni iruntha
+            k = await message.reply("<b>➲ IMDB search-a admin intha group-la disable panni irukkanga!</b>\n\n<i>Admin /settings command use panni enable pannalam.</i>", parse_mode=enums.ParseMode.HTML)
+            # 10 seconds la thevai illatha msg delete aaga (Chat clean-a irukka)
+            await asyncio.sleep(10)
+            try:
+                await k.delete()
+                await message.delete()
+            except:
+                pass
+            return
+    # ------------------------------------------------
+
     if ' ' in message.text:
         k = await message.reply('Searching ImDB')
         r, title = message.text.split(None, 1)
@@ -186,7 +202,7 @@ async def imdb_callback(bot: Client, quer_y: CallbackQuery):
             composer = imdb["composer"],
             cinematographer = imdb["cinematographer"],
             music_team = imdb["music_team"],
-            distributors = imdb["distributors"],
+            distributors = distributors = imdb["distributors"],
             release_date = imdb['release_date'],
             year = imdb['year'],
             genres = imdb['genres'],
