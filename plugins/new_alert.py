@@ -41,8 +41,8 @@ def get_anime_name(name):
     clean = re.sub(r'(?i)(?:\[|\(|@)?\s*goku[\s._-]*stark\s*(?:\]|\))?', '', clean)
     clean = re.sub(r'@\w+\s*', '', clean)
     
-    # Anime file-la [E01-12], Web-DL, Quality varum pothu atha cut panna
-    match = re.search(r'(\[e\d+|\be\d+|combined|cr\s|web-dl|720p|1080p|480p|x264|multi audio)', clean)
+    # Season (S01) ah cut pannama, Episode (EP) allathu Quality varum pothu mattum cut pannum
+    match = re.search(r'(\bep?\s*\d+-\d+|\bep?\s*\d+|\b\[?e\d+|combined|cr\s|web-dl|720p|1080p|480p|x264|x265|multi audio|bluray)', clean)
     if match:
         clean = clean[:match.start()] # Athukku appuram irukkura ellathayum remove pannidum
         
@@ -51,8 +51,8 @@ def get_anime_name(name):
     clean = re.sub(r'[-_./@|:+]', ' ', clean)
     clean = re.sub(r'\s+', ' ', clean).strip()
     
+    # Capitalize panni correct-aana format la return pannum
     return clean.title()
-
 
 @Client.on_message(filters.chat([MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, CAM_DB_CHANNEL]) & (filters.document | filters.video | filters.audio), group=10)
 async def alert_handler(client, message):
