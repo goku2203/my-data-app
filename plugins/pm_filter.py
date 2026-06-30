@@ -1,6 +1,5 @@
 import asyncio
 import re
-import ast
 import math
 import time
 import difflib
@@ -13,15 +12,7 @@ from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidD
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
-
-from Script import script
-from info import HYPER_MODE, PICS, BOT_START_TIME, ADMINS, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE, MISSING_LOG_CHANNEL, WAIT_STICKERS
-from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, create_invite_links, clean_filename
-from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, make_inactive
-from database.users_chats_db import db
 from database.ia_filterdb import Media, get_file_details, get_search_results
-from database.filters_mdb import del_all, find_filter, get_filters
-from plugins.fsub_manager import send_fsub_prompt
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
