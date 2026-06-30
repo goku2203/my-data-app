@@ -1,10 +1,10 @@
 import asyncio
+import random
 from pyrogram import Client, filters, enums
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from utils import is_subscribed, create_invite_links, get_missing_channels
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from utils import is_subscribed, create_invite_links, get_missing_channels, JOIN_REQUEST_USERS
 from database.users_chats_db import db
 from info import ADMINS, PICS
-import random
 
 # --- Auto Delete Helper Function ---
 async def auto_delete_helper(bot_msg, user_msg, delay=30):
