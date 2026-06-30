@@ -6,6 +6,7 @@ from database.filters_mdb import(
    get_filters,
    delete_filter,
    count_filters
+   del_all  # <-- Itha puthusa add pannanum
 )
 
 from database.connections_mdb import active_connection
@@ -271,3 +272,52 @@ async def delallconfirm(client, message):
             quote=True
         )
 
+@Client.on_callback_query(filters.regex("^(delallconfirm|delallcancel)$"))
+async def delete_all_confirm_handler(client, query):
+    if query.data == "delallconfirm":
+        userid = query.from_user.id
+        chat_type = query.message.chat.type
+        if chat_type == enums.ChatType.PRIVATE:
+            grpid = await active_connection(str(userid))
+            if grpid is not None:
+                grp_id = grpid
+                try:
+                    chat = await client.get_chat(grpid)
+                    title = chat.title
+                except:
+                    await query.message.edit_text("Make sure I'm present in your group!!")
+                    return await query.answer('Processing...')
+            else:
+                await query.message.edit_text(
+                    "I'm not connected to any groups!\nCheck /connections or connect to any groups"
+                )
+                return await query.answer('Action Failed!', show_alert=True)
+        elif chat_type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+            grp_id = query.message.chat.id
+            title = query.message.chat.title
+        else:
+            return await query.answer()
+            
+        st = await client.get_chat_member(grp_id, userid)
+        if (st.status == enums.ChatMemberStatus.OWNER) or (str(userid) in ADMINS):
+            await del_all(query.message, grp_id, title)
+        else:
+            await query.answer("You need to be Group Owner or an Auth User to do that!", show_alert=True)
+            
+    elif query.data == "delallcancel":
+        userid = query.from_user.id
+        chat_type = query.message.chat.type
+        if chat_type == enums.ChatType.PRIVATE:
+            await query.message.reply_to_message.delete()
+            await query.message.delete()
+        elif chat_type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+            grp_id = query.message.chat.id
+            st = await client.get_chat_member(grp_id, userid)
+            if (st.status == enums.ChatMemberStatus.OWNER) or (str(userid) in ADMINS):
+                await query.message.delete()
+                try:
+                    await query.message.reply_to_message.delete()
+                except:
+                    pass
+            else:
+                await query.answer("That's not for you!!", show_alert=True)
