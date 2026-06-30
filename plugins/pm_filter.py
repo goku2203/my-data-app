@@ -200,42 +200,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "close_data":
         await query.message.delete()
 
-    elif query.data == "premium_data":
-        payment_link = "https://upi.pe/gokula8@ibl" 
-        admin_link = "https://t.me/Screenshot_gk_bot"
-        plan_image = "https://i.ibb.co/YFFY84YX/photo.jpg"
-
-        caption = (
-            "<b>💎 PREMIUM PLANS & PRICING 💎</b>\n\n"
-            "Bot-a <b>Ads illama</b>, <b>High Speed-la</b> use panna virumbureengala?\n"
-            "Keezha ulla Plans-la onna select pannunga! 👇\n\n"
-            "<b>💸 CHEAPEST PRICES:</b>\n"
-            "• 1️⃣ <b>1 Day:</b> ₹9 Only\n"
-            "• 7️⃣ <b>7 Days:</b> ₹59 Only\n"
-            "• ♾️ <b>24 Months:</b> ₹99 Only (Best Offer! 🔥)\n\n"
-            "<b>💳 Eppadi Pay Panrathu?</b>\n"
-            "1. Keezha ulla <b>'Pay Now'</b> button click pannunga.\n"
-            "2. Payment pannitu, <b>Screenshot</b> edunga.\n"
-            "3. <b>'Send Screenshot'</b> button click panni Admin-ku anuppunga.\n\n"
-            "<i>✅ Verification mudinjanthum Premium activate aagidum!</i>"
-        )
-        
-        buttons = [
-            [
-                InlineKeyboardButton("💳 Pay Now / QR Code", url=payment_link),
-                InlineKeyboardButton("📸 Send Screenshot", url=admin_link)
-            ],
-            [
-                InlineKeyboardButton("🏠 Home", callback_data="start_data")
-            ]
-        ]
-        
-        await query.message.edit_media(
-            media=InputMediaPhoto(media=plan_image, caption=caption),
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
-        return await query.answer()
-
     elif query.data == "delallconfirm":
         userid = query.from_user.id
         chat_type = query.message.chat.type
