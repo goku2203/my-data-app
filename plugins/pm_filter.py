@@ -30,6 +30,12 @@ SPELL_CHECK = {}
 LOG_COOLDOWN = 600
 RECENT_REQUESTS = {}
 
+# Regex compile panna CPU save aagum
+JUNK_WORDS_LIST = ["1080p", "720p", "480p", "tamil dubbed", "tamil", "telugu", "hindi", "malayalam", "dubbed", "hq", "hd", "print", "download", "movie", "full"]
+JUNK_REGEX = re.compile(r'(?i)\b(' + '|'.join(JUNK_WORDS_LIST) + r')\b')
+
+SPAM_WORDS_LIST = ["porn", "p_o_r_n", "slut", "booty", "anal", "pussy", "dick", "boobs", "whore", "cum", "cuming", "lesbian", "fettish", "creampie", "sex"]
+
 async def auto_delete_msgs(bot_msg, user_msg, delay):
     await asyncio.sleep(delay)
     
@@ -294,32 +300,23 @@ async def auto_filter(client, msg, spoll=False):
             if message.text.startswith("/"): return
             if re.findall(r"((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
                 return
+            # Inside auto_filter function, replace the old junk/spam checking code with this:
+            
             if 2 < len(message.text) < 100:
                 search = message.text
-
-                # 👇 JUNK WORDS REMOVER 👇
-                junk_words = [
-                    "1080p", "720p", "480p", "tamil dubbed", "tamil", 
-                    "telugu", "hindi", "malayalam", "dubbed", "hq", 
-                    "hd", "print", "download", "movie", "full"
-                ]
-                for word in junk_words:
-                    search = re.sub(r'(?i)\b' + word + r'\b', '', search)
-                search = search.strip()
-
-                # 👇 SPAM FILTER 👇
-                spam_words = [
-                    "porn", "p_o_r_n", "slut", "booty", "anal", 
-                    "pussy", "dick", "boobs", "whore", "cum", 
-                    "cuming", "lesbian", "fettish", "creampie", "sex"
-                ]
-                is_spam = False
                 
-                if "@" in search or "http" in search.lower() or "t.me" in search.lower():
+                # JUNK WORDS REMOVER (Using Global Regex)
+                search = JUNK_REGEX.sub('', search).strip()
+                
+                # SPAM FILTER
+                is_spam = False
+                search_lower = search.lower()
+                
+                if "@" in search_lower or "http" in search_lower or "t.me" in search_lower:
                     is_spam = True
                 else:
-                    for word in spam_words:
-                        if word in search.lower():
+                    for word in SPAM_WORDS_LIST:
+                        if word in search_lower:
                             is_spam = True
                             break
                             
@@ -582,19 +579,21 @@ async def advantage_spell_chok(client, msg):
                     movielist += matches
         except Exception as e:
             logger.error(f"Fuzzy Error: {e}")
-
+    
     if not movielist:
-            reqst_gle = mv_rqst.replace(" ", "+")
-            google_btn = [
-                [InlineKeyboardButton('🔍 Check on Google 🔎', url=f"https://www.google.com/search?q={reqst_gle}")]
-            ]
-            k = await msg.reply_text(
-                text=script.SPOLL_NOT_FND, 
-                reply_markup=InlineKeyboardMarkup(google_btn),
-                reply_to_message_id=msg.id
-            )
-            asyncio.create_task(auto_delete_msgs(k, msg, 60))
-            return
+        reqst_gle = mv_rqst.replace(" ", "+")
+        google_btn = [
+            [InlineKeyboardButton('  Check on Google  ', url=f"https://www.google.com/search?q={reqst_gle}")]
+        ]
+        k = await msg.reply_text(
+            text=script.SPOLL_NOT_FND, 
+            reply_markup=InlineKeyboardMarkup(google_btn),
+            reply_to_message_id=msg.id
+        )
+        asyncio.create_task(auto_delete_msgs(k, msg, 60))
+        return
+        
+    # NOTE: I completely removed the difflib.get_close_matches block that loads 3000 files!
 
     movielist = list(dict.fromkeys(movielist)) 
     
