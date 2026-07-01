@@ -6,7 +6,7 @@ from info import ADMINS
 from utils import broadcast_messages
 import asyncio
 
-BROADCAST_BATCH_SIZE = 500  # Now processes 500 users at a time
+BROADCAST_BATCH_SIZE = 100  # Now processes 500 users at a time
 BROADCAST_SLEEP = 1  # Small delay to avoid rate limits
 
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
