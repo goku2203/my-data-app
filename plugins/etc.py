@@ -7,13 +7,25 @@ from utils import humanbytes
 
 CMD = ["/", "."]
 
+# Auto Delete Helper Function inga pudhusa add aagirukku
+async def auto_delete_helper(bot_msg, user_msg, delay=30):
+    await asyncio.sleep(delay)
+    try:
+        if bot_msg: await bot_msg.delete()
+        if user_msg: await user_msg.delete()
+    except:
+        pass
+
 @Client.on_message(filters.command("ping", CMD) & filters.user(ADMINS))
 async def ping(_, message):
     start_t = time.time()
     rm = await message.reply_text("...........")
     end_t = time.time()
     time_taken_s = (end_t - start_t) * 1000
+    
     await rm.edit(f"𝖯𝗂𝗇𝗀!\n{time_taken_s:.3f} ms")
+    # Ping result auto-delete aagum
+    asyncio.create_task(auto_delete_helper(rm, message, 30))
 
 @Client.on_message(filters.command("usage") & filters.user(ADMINS))          
 async def stats(bot, update):
@@ -26,17 +38,13 @@ async def stats(bot, update):
     ram_usage = psutil.virtual_memory().percent
     disk_usage = psutil.disk_usage('/').percent
 
-    ms_g = f"""<b>⚙️ 𝖡𝗈𝗍 𝖲𝗍𝖺𝗍𝗎𝗌</b>
-
-🕔 𝖴𝗉𝗍𝗂𝗆𝖾: <code>{currentTime}</code>
-🛠 𝖢𝖯𝖴 𝖴𝗌𝖺𝗀𝖾: <code>{cpu_usage}%</code>
-🗜 𝖱𝖠𝖬 𝖴𝗌𝖺𝗀𝖾: <code>{ram_usage}%</code>
-🗂 𝖳𝗈𝗍𝖺𝗅 𝖣𝗂𝗌𝗄 𝖲𝗉𝖺𝖼𝖾: <code>{total}</code>
-🗳 𝖴𝗌𝖾𝖽 𝖲𝗉𝖺𝖼𝖾: <code>{used} ({disk_usage}%)</code>
-📝 𝖥𝗋𝖾𝖾 𝖲𝗉𝖺𝖼𝖾: <code>{free}</code> """
+    ms_g = f"""<b>⚙️ 𝖡𝗈𝗍 𝖲𝗍𝖺𝗍𝗎𝗌</b>\n\n🕔 𝖴𝗉𝗍𝗂𝗆𝖾: <code>{currentTime}</code>\n🛠 𝖢𝖯𝖴 𝖴𝗌𝖺𝗀𝖾: <code>{cpu_usage}%</code>\n🗜 𝖱𝖠𝖬 𝖴𝗌𝖺𝗀𝖾: <code>{ram_usage}%</code>\n🗂 𝖳𝗈𝗍𝖺𝗅 𝖣𝗂𝗌𝗄 𝖲𝗉𝖺𝖼𝖾: <code>{total}</code>\n🗳 𝖴𝗌𝖾𝖽 𝖲𝗉𝖺𝖼𝖾: <code>{used} ({disk_usage}%)</code>\n📝 𝖥𝗋𝖾𝖾 𝖲𝗉𝖺𝖼𝖾: <code>{free}</code> """
 
     msg = await bot.send_message(chat_id=update.chat.id, text="__𝖯𝗋𝗈𝖼𝖾𝗌𝗌𝗂𝗇𝗀...__", parse_mode=enums.ParseMode.MARKDOWN)         
     await msg.edit_text(text=ms_g, parse_mode=enums.ParseMode.HTML)
+    
+    # Usage stats auto-delete aagum
+    asyncio.create_task(auto_delete_helper(msg, update, 30))
 
 @Client.on_message(filters.command("restart") & filters.user(ADMINS))
 async def stop_button(bot, message):
