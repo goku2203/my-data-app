@@ -16,9 +16,10 @@ from Script import script
 from database.ia_filterdb import Media, get_file_details, unpack_new_file_id
 from database.users_chats_db import db
 from database.connections_mdb import active_connection
-from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY, BOT_USERNAME
+from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY
 from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user, clean_filename
 from plugins.menu import START_BUTTONS
+from plugins.fsub_manager import send_fsub_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +208,6 @@ async def start(client, message):
         else:
             payload = "start"
             
-        from plugins.fsub_manager import send_fsub_prompt
         force_msg = await send_fsub_prompt(client, message, payload)
         FORCE_MSG[message.from_user.id] = force_msg.id
         return
