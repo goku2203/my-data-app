@@ -2,6 +2,7 @@ import re
 from Script import script
 from os import environ
 from time import time
+import os
 
 # Regex pattern for checking integer IDs
 id_pattern = re.compile(r'^.\d+$')
