@@ -193,7 +193,7 @@ async def advantage_spoll_choker(bot, query):
             k = await query.message.edit(script.MOV_NT_FND)
             asyncio.create_task(auto_delete_msgs(k, query.message.reply_to_message, 10))
 
-@Client.on_callback_query()
+@Client.on_callback_query(filters.regex(r"^(close_data|alertmessage|file|checksub|pages|esp|msp|hsp|tsp)"))
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "close_data":
         await query.message.delete()
