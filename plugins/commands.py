@@ -7,23 +7,17 @@ import json
 import base64
 import html
 from datetime import datetime, timedelta
-from Script import script
+
 from pyrogram import Client, filters, enums
-from pyrogram.errors import ChatAdminRequired, FloodWait, MessageNotModified
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from database.ia_filterdb import Media, get_file_details, unpack_new_file_id, get_search_results
+from pyrogram.errors import FloodWait
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+from Script import script
+from database.ia_filterdb import Media, get_file_details, unpack_new_file_id
 from database.users_chats_db import db
-from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY, UPDATES_CHANNEL, BOT_USERNAME
-from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user
 from database.connections_mdb import active_connection
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram.types import BotCommand, BotCommandScopeDefault, BotCommandScopeChat
-from utils import temp
-import psutil
-import time
-from info import BOT_START_TIME
-from plugins.fsub_manager import send_fsub_prompt
-from utils import clean_filename
+from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY, BOT_USERNAME
+from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user, clean_filename
 from plugins.menu import START_BUTTONS
 
 logger = logging.getLogger(__name__)
@@ -31,13 +25,6 @@ logger = logging.getLogger(__name__)
 BATCH_FILES = {}
 FORCE_MSG = {}
 AUTO_DELETE_SECONDS = 15
-
-async def delete_maint_msg(bot_msg, user_msg):
-    await asyncio.sleep(30)
-    try: await bot_msg.delete()
-    except: pass
-    try: await user_msg.delete()
-    except: pass
 
 async def create_file_buttons(client, sent_message):
     buttons = []
@@ -285,7 +272,6 @@ async def start(client, message):
         if not await check_verification(client, message.from_user.id):
 
             try:
-                # 👇 INGA THAAN CHANGE PANNIRUKKEN 👇
                 anim_msg = await message.reply_text("<b>⏳ Please wait...</b>", parse_mode=enums.ParseMode.HTML)
                 await asyncio.sleep(1.2)
                 await anim_msg.delete()
@@ -333,7 +319,6 @@ async def start(client, message):
             asyncio.create_task(auto_delete_message(client, verify_msg, 600))
             return
             
-        # 👇 ITHA PUTHUSA ADD PANNUNGA (Oru thadava file edutha odane verify cancel aagidum) 👇
         await db.col.update_one({'id': message.from_user.id}, {'$set': {'verify_status_v2': {'is_verified': False, 'verify_until': None}}})
 
     try:
@@ -466,12 +451,6 @@ async def start(client, message):
         file_name=title,
         file_size=size,
         file_caption=f_caption
-    )
-                    
-def is_admin(user) -> bool:
-    return (
-        user.id in ADMINS or
-        (f"@{user.username}" in ADMINS if user.username else False)
     )
 
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
