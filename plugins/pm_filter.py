@@ -46,7 +46,7 @@ async def auto_delete_msgs(bot_msg, user_msg, delay):
         delete_msg(user_msg)
     )
 
-@Client.on_message((filters.group | filters.private) & filters.text & ~filters.command(["start", "help", "about", "plan", "settings", "addfsub", "delfsub", "listfsub", "channel", "delete", "deleteall", "set_template", "stats", "getid", "logs", "cleancam", "deletefiles"]))
+@Client.on_message((filters.group | filters.private) & filters.text & ~filters.regex(r"^[/\.]")) async def give_filter(client, message):
 async def give_filter(client, message):
     
     if message.chat.type == enums.ChatType.PRIVATE:
