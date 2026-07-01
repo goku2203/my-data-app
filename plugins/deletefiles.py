@@ -62,8 +62,16 @@ async def deletemultiplefiles(bot: Client, message: Message):
     
     async for doc in cursor:
         fname = doc.get("file_name", "").lower()
+        # Fix: Caption-um serthu check pandrom (truncated filename problem-kaga)
+        caption = doc.get("caption", "")
+        if caption is None:
+            caption = ""
+        caption = caption.lower()
+        
+        check_text = fname + " " + caption
+        
         # Cam words irukkanu check pandrom
-        if any(x in fname for x in cam_words):
+        if any(x in check_text for x in cam_words):
             cam_count += 1
         else:
             hd_count += 1
@@ -105,21 +113,25 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
     cam_pattern = "|".join(cam_words)
     
-    # Entha button amukunangalo athukku yetha mathiri Query Ready pandrom
+    raw_regex = re.compile(raw_pattern, flags=re.IGNORECASE)
+    cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
+    
+    # Entha button amukunangalo athukku yetha mathiri Query Ready pandrom (Caption checking added)
     if del_type == "all":
-        filter_query = {'file_name': re.compile(raw_pattern, flags=re.IGNORECASE)}
+        filter_query = {'file_name': raw_regex}
     elif del_type == "cam":
         filter_query = {
             '$and': [
-                {'file_name': re.compile(raw_pattern, flags=re.IGNORECASE)},
-                {'file_name': re.compile(cam_pattern, flags=re.IGNORECASE)}
+                {'file_name': raw_regex},
+                {'$or': [{'file_name': cam_regex}, {'caption': cam_regex}]}
             ]
         }
     elif del_type == "hd":
         filter_query = {
             '$and': [
-                {'file_name': re.compile(raw_pattern, flags=re.IGNORECASE)},
-                {'file_name': {'$not': re.compile(cam_pattern, flags=re.IGNORECASE)}}
+                {'file_name': raw_regex},
+                {'file_name': {'$not': cam_regex}},
+                {'caption': {'$not': cam_regex}}
             ]
         }
 
@@ -172,10 +184,13 @@ async def ask_clean_cam(client, message):
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
     found_files = []
     
-    for word in cam_words:
-        cursor = Media.collection.find({"file_name": {"$regex": f"(?i){word}"}})
-        async for doc in cursor:
-            found_files.append(doc.get("file_name", "Unknown File"))
+    # Fix: /cleancam-kum caption check pandra mathiri maathiyachu
+    cam_pattern = "|".join(cam_words)
+    cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
+    
+    cursor = Media.collection.find({'$or': [{'file_name': cam_regex}, {'caption': cam_regex}]})
+    async for doc in cursor:
+        found_files.append(doc.get("file_name", "Unknown File"))
             
     found_files = list(set(found_files))
     total_found = len(found_files)
@@ -223,9 +238,10 @@ async def execute_clean_cam(client, query):
         print(f"PM ku backup anuppa mudiyala: {e}")
         
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
+    cam_pattern = "|".join(cam_words)
+    cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
     
-    for word in cam_words:
-        await Media.collection.delete_many({"file_name": {"$regex": f"(?i){word}"}})
+    await Media.collection.delete_many({'$or': [{'file_name': cam_regex}, {'caption': cam_regex}]})
         
     await query.message.edit_caption(
         caption="**✅ Success!**\n\nAll Theater/Cam prints have been deleted from the database. This message will auto-delete shortly.",
