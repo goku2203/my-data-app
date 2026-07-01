@@ -6,13 +6,20 @@ import difflib
 import psutil
 import logging
 import random
+import ast
 from datetime import datetime
 
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty, ButtonUrlInvalid
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
+
+# --- Missing aana mukkiyamana imports inga add panni irukken ---
 from database.ia_filterdb import Media, get_file_details, get_search_results
+from database.filters_mdb import find_filter, get_filters
+from Script import script
+from info import HYPER_MODE, ADMINS, CUSTOM_FILE_CAPTION, IMDB_TEMPLATE, MISSING_LOG_CHANNEL, WAIT_STICKERS
+from utils import get_size, is_subscribed, get_poster, temp, get_settings, create_invite_links, clean_filename
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
