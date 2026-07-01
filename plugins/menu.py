@@ -8,30 +8,35 @@ from utils import temp
 
 logger = logging.getLogger(__name__)
 
+# ==========================================
+# 👇 START BUTTONS INGA THAAN IRUKKANUM 👇
+# ==========================================
+START_BUTTONS = [
+    [
+        InlineKeyboardButton("➕  ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ  ➕", url=f"https://t.me/{temp.U_NAME}?startgroup=true")
+    ],
+    [
+        InlineKeyboardButton("📚 ʜᴇʟᴘ", callback_data="help"),
+        InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ", callback_data="about")
+    ],
+    [
+        InlineKeyboardButton("🎭 ᴀɴɪᴍᴇ ᴄʜᴀɴɴᴇʟ", url="https://t.me/Anime_single"), 
+        InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ", url="https://t.me/super_goku_god")
+    ],
+    [
+        InlineKeyboardButton("🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ", url="https://t.me/Tamilmovieslink_bot"),
+        InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴꜱ", callback_data="premium_data")
+    ]
+]
+
 @Client.on_callback_query(filters.regex("^(start|start_data|help|about|source|manual_filter|button|auto_filter|connection)$"))
 async def menu_callbacks_handler(client: Client, query: CallbackQuery):
     data = query.data
     
     if data == "start" or data == "start_data":
-        buttons = [
-            [
-                InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ➕", url=f"https://t.me/{temp.U_NAME}?startgroup=true")
-            ],
-            [
-                InlineKeyboardButton("📚 ʜᴇʟᴘ", callback_data="help"),
-                InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ", callback_data="about")
-            ],
-            [
-                InlineKeyboardButton("🎭 ᴀɴɪᴍᴇ ᴄʜᴀɴɴᴇʟ", url="https://t.me/Anime_single"), 
-                InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ", url="https://t.me/super_goku_god")
-            ],
-            [
-                InlineKeyboardButton("🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ", url="https://t.me/Tamilmovieslink_bot"),
-                InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴꜱ", callback_data="premium_data")
-            ]
-        ]
         
-        reply_markup = InlineKeyboardMarkup(buttons)
+        # Mela irukkura START_BUTTONS ah direct ah call pandrom
+        reply_markup = InlineKeyboardMarkup(START_BUTTONS)
         
         try:
             txt = script.START_TXT.format(query.from_user.mention, temp.U_NAME, temp.B_NAME)
