@@ -5,7 +5,7 @@ from database.filters_mdb import(
    add_filter,
    get_filters,
    delete_filter,
-   count_filters
+   count_filters,
    del_all  # <-- Itha puthusa add pannanum
 )
 
