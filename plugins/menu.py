@@ -15,19 +15,19 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
     if data == "start" or data == "start_data":
         buttons = [
             [
-                InlineKeyboardButton("➕ Add Me To Your Group ➕", url=f"https://t.me/{temp.U_NAME}?startgroup=true")
+                InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ➕", url=f"https://t.me/{temp.U_NAME}?startgroup=true")
             ],
             [
-                InlineKeyboardButton("ℹ️ Help Center", callback_data="help"),
-                InlineKeyboardButton("🤖 About Bot", callback_data="about")
+                InlineKeyboardButton("📚 ʜᴇʟᴘ", callback_data="help"),
+                InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ", callback_data="about")
             ],
             [
-                InlineKeyboardButton("🎭 Anime Channel", url="https://t.me/Anime_single"), 
-                InlineKeyboardButton("📢 Updates Channel", url="https://t.me/super_goku_god")
+                InlineKeyboardButton("🎭 ᴀɴɪᴍᴇ ᴄʜᴀɴɴᴇʟ", url="https://t.me/Anime_single"), 
+                InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ", url="https://t.me/super_goku_god")
             ],
             [
-                InlineKeyboardButton("🧑‍💻 Contact Admin", url="https://t.me/Tamilmovieslink_bot"),
-                InlineKeyboardButton("💎 Premium Plans", callback_data="premium_data")
+                InlineKeyboardButton("🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ", url="https://t.me/Tamilmovieslink_bot"),
+                InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴꜱ", callback_data="premium_data")
             ]
         ]
         
@@ -50,18 +50,16 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
     elif data == "help":
         buttons = [
             [
-                InlineKeyboardButton("🏷 Manual Filter", callback_data="manual_filter"),
-                InlineKeyboardButton("⚙️ Auto Filter", callback_data="auto_filter")
+                InlineKeyboardButton("🏷 ᴍᴀɴᴜᴀʟ ꜰɪʟᴛᴇʀ", callback_data="manual_filter"),
+                InlineKeyboardButton("⚙️ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ", callback_data="auto_filter")
             ],
             [
-                InlineKeyboardButton("🔗 Connections", callback_data="connection"),
+                InlineKeyboardButton("🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ", url="https://t.me/Tamilmovieslink_bot"),
+                InlineKeyboardButton("🔗 ᴄᴏɴɴᴇᴄᴛɪᴏɴꜱ", callback_data="connection")
             ],
             [
-                InlineKeyboardButton("🔙 Return", callback_data="start_data"),
-                InlineKeyboardButton("💎 Premium Plans", callback_data="premium_data")
-            ],
-            [
-                InlineKeyboardButton("🧑‍💻 Contact Admin", url="https://t.me/Tamilmovieslink_bot")
+                InlineKeyboardButton("⬅️ ʙᴀᴄᴋ", callback_data="start_data"),
+                InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴꜱ", callback_data="premium_data")
             ]
         ]
         
@@ -79,8 +77,8 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
 
     elif data == "about":
         buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='start'),
-            InlineKeyboardButton('🧑‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('⬅️ ʙᴀᴄᴋ', callback_data='start'),
+            InlineKeyboardButton('🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -96,8 +94,8 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
 
     elif data == "source":
         buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='about'),
-            InlineKeyboardButton('🧑‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('⬅️ ʙᴀᴄᴋ', callback_data='about'),
+            InlineKeyboardButton('🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -113,9 +111,8 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
 
     elif data == "manual_filter":
         buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='help'),
-            InlineKeyboardButton('🧑‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot'),
-            InlineKeyboardButton('🔘 Button', callback_data='button')
+            InlineKeyboardButton('⬅️ ʙᴀᴄᴋ', callback_data='help'),
+            InlineKeyboardButton('🔘 ʙᴜᴛᴛᴏɴ', callback_data='button')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -131,8 +128,8 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
 
     elif data == "button":
         buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='help'),
-            InlineKeyboardButton('🧑‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('⬅️ ʙᴀᴄᴋ', callback_data='help'),
+            InlineKeyboardButton('🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -148,8 +145,8 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
 
     elif data == "auto_filter":
         buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='help'),
-            InlineKeyboardButton('🧑‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('⬅️ ʙᴀᴄᴋ', callback_data='help'),
+            InlineKeyboardButton('🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
@@ -165,8 +162,8 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
 
     elif data == "connection":
         buttons = [[
-            InlineKeyboardButton('🔙 Back', callback_data='help'),
-            InlineKeyboardButton('🧑‍💻 Contact Admin', url='https://t.me/Tamilmovieslink_bot')
+            InlineKeyboardButton('⬅️ ʙᴀᴄᴋ', callback_data='help'),
+            InlineKeyboardButton('🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ', url='https://t.me/Tamilmovieslink_bot')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
