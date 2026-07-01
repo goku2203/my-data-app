@@ -462,6 +462,9 @@ async def verify_user(user_id):
     
     # Verify status update
     await db.col.update_one({'id': user_id}, {'$set': {'verify_status_v2': {'is_verified': True, 'verify_until': expiry}}}, upsert=True)
+    
+    # PUTHUSA ADD PANNA VENDIYA LINE
+    await db.add_verified_user()
 
 async def check_verification(client, user_id):
     if not IS_VERIFY: return True # IS_VERIFY False-a iruntha check pannathu
