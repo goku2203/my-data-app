@@ -193,11 +193,11 @@ async def start(client, message):
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
             [
-                InlineKeyboardButton("🎬 Anime Channel", url="https://t.me/Anime_single"),
-                InlineKeyboardButton('📢 Main Channel', url='https://t.me/super_goku_god')
+                InlineKeyboardButton("🎬 ᴀɴɪᴍᴇ ᴄʜᴀɴɴᴇʟ", url="https://t.me/Anime_single"),
+                InlineKeyboardButton('📢 ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url='https://t.me/super_goku_god')
             ],
             [
-                InlineKeyboardButton("👨‍💻 Contact Admin", url="https://t.me/Tamilmovieslink_bot")
+                InlineKeyboardButton("👨‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
             
@@ -762,7 +762,6 @@ async def premium_plans(client, message):
                 InlineKeyboardButton("🧾 Send Screenshot", url=admin_link)
             ],
             [
-                InlineKeyboardButton("🔙 Home", callback_data="start_data"),
                 InlineKeyboardButton("❌ Close", callback_data="close_data")
             ]
         ]
