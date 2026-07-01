@@ -24,6 +24,7 @@ import time
 from info import BOT_START_TIME
 from plugins.fsub_manager import send_fsub_prompt
 from utils import clean_filename
+from plugins.menu import START_BUTTONS
 
 logger = logging.getLogger(__name__)
 
@@ -226,24 +227,8 @@ async def start(client, message):
 
     # 🎯 BOT PM-LA START KUDUTHA VARA VENDIYA BUTTONS
     if len(message.command) != 2 or (len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help", "start"]):
-        buttons = [
-            [
-                InlineKeyboardButton("➕ Add Me To Your Group ➕", url=f"http://t.me/{BOT_USERNAME}?startgroup=true")
-            ],
-            [
-                InlineKeyboardButton("🛠️ Help Center", callback_data="help"),
-                InlineKeyboardButton("ℹ️ About Bot", callback_data="about")
-            ],
-            [
-                InlineKeyboardButton("🎬 Anime Channel", url="https://t.me/Anime_single"), 
-                InlineKeyboardButton("📢 Updates Channel", url="https://t.me/super_goku_god")
-            ],
-            [
-                InlineKeyboardButton("👨‍💻 Contact Admin", url="https://t.me/Tamilmovieslink_bot"),
-                InlineKeyboardButton("💎 Premium Plans", callback_data="premium_data")
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(buttons)
+        
+        reply_markup = InlineKeyboardMarkup(START_BUTTONS)
         
         STICKER_ID = "CAACAgIAAxkBAAFGz4Vp14TkEDwLXzANxjQxctqfYSDePgAC0wUAAj-VzAqfWrvSXUfHMTsE"
 
