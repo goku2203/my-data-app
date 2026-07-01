@@ -62,7 +62,7 @@ async def deletemultiplefiles(bot: Client, message: Message):
     
     async for doc in cursor:
         fname = doc.get("file_name", "").lower()
-        # Fix: Caption-um serthu check pandrom (truncated filename problem-kaga)
+        # Fix: Checking caption as well (to handle truncated filename problem)
         caption = doc.get("caption", "")
         if caption is None:
             caption = ""
@@ -70,7 +70,7 @@ async def deletemultiplefiles(bot: Client, message: Message):
         
         check_text = fname + " " + caption
         
-        # Cam words irukkanu check pandrom
+        # Checking if cam words are present
         if any(x in check_text for x in cam_words):
             cam_count += 1
         else:
@@ -83,7 +83,7 @@ async def deletemultiplefiles(bot: Client, message: Message):
         asyncio.create_task(auto_delete_helper(msg, message, 30))
         return
 
-    # Dynamic Buttons Create Pandrom
+    # Creating dynamic buttons
     buttons = []
     if hd_count > 0:
         buttons.append([InlineKeyboardButton(f"🎞 Delete HD Prints ({hd_count})", callback_data=f"deltype#hd#{keyword}")])
@@ -95,12 +95,12 @@ async def deletemultiplefiles(bot: Client, message: Message):
     buttons.append([InlineKeyboardButton("❌ Cancel", callback_data="close_data")])
     
     msg = await status_msg.edit_text(
-        text=f"<b>Movie:</b> `{keyword}`\n<b>Total Files Found:</b> `{total_count}`\n\nEntha category files delete pannanum nu select pannunga. 👇",
+        text=f"<b>Movie:</b> `{keyword}`\n<b>Total Files Found:</b> `{total_count}`\n\nPlease select which category of files you want to delete. 👇",
         reply_markup=InlineKeyboardMarkup(buttons),
         parse_mode=enums.ParseMode.HTML
     )
     
-    # 30 seconds-la menu-a auto delete pandrom
+    # Auto-deleting the menu in 30 seconds
     asyncio.create_task(auto_delete_helper(msg, message, 30))
 
 @Client.on_callback_query(filters.regex(r'^deltype#'), group=-1)
@@ -116,7 +116,7 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     raw_regex = re.compile(raw_pattern, flags=re.IGNORECASE)
     cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
     
-    # Entha button amukunangalo athukku yetha mathiri Query Ready pandrom (Caption checking added)
+    # Preparing query based on the selected button (Caption checking added)
     if del_type == "all":
         filter_query = {'file_name': raw_regex}
     elif del_type == "cam":
@@ -173,7 +173,7 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
 async def ask_clean_cam(client, message):
     if message.chat.type != enums.ChatType.PRIVATE:
         msg = await message.reply_text(
-            "<b>Hey bro, intha command-ah Bot oda PM (Private Message) la mattum use pannunga!</b>",
+            "<b>Hey bro, please use this command only in my PM (Private Message)!</b>",
             parse_mode=enums.ParseMode.HTML
         )
         asyncio.create_task(auto_delete_helper(msg, message, 10))
@@ -184,7 +184,7 @@ async def ask_clean_cam(client, message):
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
     found_files = []
     
-    # Fix: /cleancam-kum caption check pandra mathiri maathiyachu
+    # Fix: Modified /cleancam to check captions as well
     cam_pattern = "|".join(cam_words)
     cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
     
@@ -213,7 +213,7 @@ async def ask_clean_cam(client, message):
     
     doc_msg = await message.reply_document(
         document=file_path,
-        caption=f"⚠️ **Attention!**\n\nNaan database-la thediyathula **{total_found}** Theater/Cam prints kidaichirukku.\n\nMela irukkura `.txt` file-ah open panni entha files nu check pannikonga.\n\n**Itha ellam permanent-ah delete pannanuma?**",
+        caption=f"⚠️ **Attention!**\n\nI searched the database and found **{total_found}** Theater/Cam prints.\n\nPlease open the `.txt` file above to check which files they are.\n\n**Do you want to permanently delete all of these?**",
         reply_markup=markup
     )
     
@@ -221,7 +221,7 @@ async def ask_clean_cam(client, message):
     if os.path.exists(file_path):
         os.remove(file_path)
         
-    # Cleancam message um 30 seconds la delete aagum
+    # Auto-deleting the cleancam message in 30 seconds
     asyncio.create_task(auto_delete_helper(doc_msg, message, 30))
 
 @Client.on_callback_query(filters.regex(r'^confirm_cleancam$'), group=-1)
@@ -235,7 +235,7 @@ async def execute_clean_cam(client, query):
             caption="**Backup File!**\n\nHere is the list of deleted files. Please keep it safe!"
         )
     except Exception as e:
-        print(f"PM ku backup anuppa mudiyala: {e}")
+        print(f"Failed to send backup to PM: {e}")
         
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
     cam_pattern = "|".join(cam_words)
