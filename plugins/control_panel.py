@@ -23,6 +23,8 @@ async def get_panel_data(user_mention):
     total_users = await db.total_users_count()
     total_chats = await db.total_chat_count()
     total_files = await Media.collection.count_documents({})
+
+    monthly_verified = await db.get_verified_count()
     
     now = datetime.now()
     start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
