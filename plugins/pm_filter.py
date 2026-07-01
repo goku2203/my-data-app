@@ -52,7 +52,7 @@ async def auto_delete_msgs(bot_msg, user_msg, delay):
         delete_msg(user_msg)
     )
 
-@Client.on_message((filters.group | filters.private) & filters.text & ~filters.regex(r"^[/\.]")) async def give_filter(client, message):
+@Client.on_message((filters.group | filters.private) & filters.text & ~filters.regex(r"^[/\.]"))
 async def give_filter(client, message):
     
     if message.chat.type == enums.ChatType.PRIVATE:
