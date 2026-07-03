@@ -254,6 +254,7 @@ async def execute_clean_cam(client, query):
 # ==============================================================
 # AUTOMATIC PRINT ANALYZER & CAM DELETER (WITH DETAILS & COMMAND)
 # ==============================================================
+import asyncio # Auto delete kku kandippa ithu theva
 
 # 1. Manual aah pazhaya movies-a check panna pudhu command
 @Client.on_message(filters.command("scanmovie") & filters.user(ADMINS))
@@ -301,11 +302,13 @@ async def analyze_movie_prints(bot: Client, query: CallbackQuery):
     hd_count = await Media.count_documents(hd_query)
 
     if hd_count > 0 and cam_count > 0:
-        # Cam file names aah eduthu kaattura logic
+        # Cam file names aah numbers vachu eduthu kaattura logic
         cam_files_cursor = Media.collection.find(cam_query).limit(10) # 10 files mattum kaattum
         cam_filenames = []
+        count = 1  # Inga thaan number start aaguthu
         async for doc in cam_files_cursor:
-            cam_filenames.append(f"📄 `{doc.get('file_name', 'Unknown')}`")
+            cam_filenames.append(f"**{count}.** 📄 `{doc.get('file_name', 'Unknown')}`")
+            count += 1
         
         file_list_text = "\n".join(cam_filenames)
         
@@ -315,16 +318,38 @@ async def analyze_movie_prints(bot: Client, query: CallbackQuery):
             [InlineKeyboardButton("🗑️ Delete PreDVD/Cam", callback_data=f"delmoviecam#{movie_name}")],
             [InlineKeyboardButton("❌ Cancel", callback_data="close_data")]
         ])
-        await query.message.reply_text(text, reply_markup=btn)
+        msg = await query.message.reply_text(text, reply_markup=btn)
+        
+        # 1 minute la Intha Analyze message auto delete aagidum
+        await asyncio.sleep(60)
+        try:
+            await msg.delete()
+        except:
+            pass
         
     elif hd_count > 0:
-        await query.message.reply_text(f"**Movie:** `{movie_name}`\n\nOnly HD prints (`{hd_count}`) are available. No Cam prints found! 🎉")
+        msg = await query.message.reply_text(f"**Movie:** `{movie_name}`\n\nOnly HD prints (`{hd_count}`) are available. No Cam prints found! 🎉")
+        await asyncio.sleep(10) # 10 seconds la auto delete
+        try:
+            await msg.delete()
+        except:
+            pass
         
     elif cam_count > 0:
-        await query.message.reply_text(f"**Movie:** `{movie_name}`\n\nOnly PreDVD/Cam prints (`{cam_count}`) are available. We need to wait for the HD release! ⏳")
+        msg = await query.message.reply_text(f"**Movie:** `{movie_name}`\n\nOnly PreDVD/Cam prints (`{cam_count}`) are available. We need to wait for the HD release! ⏳")
+        await asyncio.sleep(10) # 10 seconds la auto delete
+        try:
+            await msg.delete()
+        except:
+            pass
         
     else:
-        await query.message.reply_text(f"Could not find files for **{movie_name}**. Spelling check pannunga.")
+        msg = await query.message.reply_text(f"Could not find files for **{movie_name}**. Spelling check pannunga.")
+        await asyncio.sleep(10) # 10 seconds la auto delete
+        try:
+            await msg.delete()
+        except:
+            pass
 
 # 3. Delete button click pannumpothu nadakkura vishayam
 @Client.on_callback_query(filters.regex(r'^delmoviecam#'), group=-1)
@@ -350,7 +375,8 @@ async def delete_specific_cam(bot: Client, query: CallbackQuery):
     
     await query.message.edit_text(f"✅ **Success!**\n\nDeleted `{deleted_result.deleted_count}` PreDVD/Cam prints for **{movie_name}**.")
     
-    await asyncio.sleep(15)
+    # 10 seconds la Intha Success message auto delete aagidum
+    await asyncio.sleep(10)
     try:
         await query.message.delete()
     except:
