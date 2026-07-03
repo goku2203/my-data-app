@@ -121,13 +121,16 @@ async def alert_handler(client, message):
             cam_filenames = []
             count = 1
             async for doc in cam_files_cursor:
-                cam_filenames.append(f"**{count}.** 📄 `{doc.get('file_name', 'Unknown')}`")
+                # Inga bold tags <b> and <code> use panni irukken
+                cam_filenames.append(f"<b>{count}.</b> 📄 <code>{doc.get('file_name', 'Unknown')}</code>")
                 count += 1
             
             file_list_text = "\n".join(cam_filenames)
             
             safe_name = clean_name[:40].strip()
-            delete_text = f"<b> 🚨 Update Alert: {clean_name} 🚨</b>\n\nThe database now has both <b>HD</b> and <b>PreDVD</b> files.\n\n✅ <b>HD count:</b> `{hd_count}`\n🎥 <b>PreDVD count:</b> `{cam_count}`\n\n<b>Cam Files List:</b>\n{file_list_text}\n\nDelete the PreDVD files above?"
+            
+            # Attractive aana HTML Blockquote and Italics design
+            delete_text = f"<blockquote>🚨 <b>Update Alert:</b> <code>{clean_name}</code>\n✅ <b>HD count:</b> <code>{hd_count}</code>\n🎥 <b>PreDVD count:</b> <code>{cam_count}</code></blockquote>\n\n📂 <b><i>Cam Files List:</i></b>\n{file_list_text}\n\n⚠️ <b>Alert:</b> <i>Both versions exist! Intha mela irukka Cam prints aah delete pannidava?</i>"
             
             button = InlineKeyboardMarkup([
                 [InlineKeyboardButton("🗑️ Delete PreDVD/Cam", callback_data=f"delmoviecam#{safe_name}")]
