@@ -268,13 +268,15 @@ async def manual_scan_movie(bot: Client, message: Message):
     btn = InlineKeyboardMarkup([
         [InlineKeyboardButton("🔍 Analyze Prints", callback_data=f"analyze#{safe_name}")]
     ])
-    await message.reply(f"**🔍 Manual Scan for:** `{movie_name}`\n\nClick the button below to check if PreDVD is available.", reply_markup=btn)
+    # Inga 'msg =' nu add pannitten, appo thaan kela delete panna mudiyum
+    msg = await message.reply(f"**🔍 Manual Scan for:** `{movie_name}`\n\nClick the button below to check if PreDVD is available.", reply_markup=btn)
     
     await asyncio.sleep(30)
-        try:
-            await msg.delete()
-        except:
-            pass
+    try:
+        await msg.delete()
+        await message.delete() # Unga '/scanmovie' command-um delete aagidum
+    except:
+        pass
 
 # 2. Analyze button click pannumpothu nadakkura vishayam
 @Client.on_callback_query(filters.regex(r'^analyze#'), group=-1)
