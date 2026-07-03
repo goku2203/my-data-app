@@ -260,7 +260,8 @@ import asyncio # Auto delete kku kandippa ithu theva
 @Client.on_message(filters.command("scanmovie") & filters.user(ADMINS))
 async def manual_scan_movie(bot: Client, message: Message):
     if len(message.command) < 2:
-        return await message.reply("Bro, command apdiye anuppatheenga.\nUsage: `/scanmovie <movie name>`\nExample: `/scanmovie Master`")
+        error_text = "<blockquote>⚠️ <b>Error:</b> Command thappu bro!\n✨ <b>Correct Format:</b> <code>/scanmovie <movie name></code>\n💡 <b>Example:</b> <code>/scanmovie Master</code></blockquote>"
+        return await message.reply(error_text, parse_mode=enums.ParseMode.HTML)
     
     movie_name = message.text.split(" ", 1)[1]
     safe_name = movie_name[:40].strip()
@@ -268,13 +269,14 @@ async def manual_scan_movie(bot: Client, message: Message):
     btn = InlineKeyboardMarkup([
         [InlineKeyboardButton("🔍 Analyze Prints", callback_data=f"analyze#{safe_name}")]
     ])
-    # Inga 'msg =' nu add pannitten, appo thaan kela delete panna mudiyum
-    msg = await message.reply(f"**🔍 Manual Scan for:** `{movie_name}`\n\nClick the button below to check if PreDVD is available.", reply_markup=btn)
+    
+    scan_text = f"<blockquote>🔍 <b>Manual Scan For:</b> <code>{movie_name}</code></blockquote>\n\n<i>Kela irukka button-a click panni PreDVD irukka nu check pannunga bro!</i> ⚡️"
+    msg = await message.reply(scan_text, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
     
     await asyncio.sleep(30)
     try:
         await msg.delete()
-        await message.delete() # Unga '/scanmovie' command-um delete aagidum
+        await message.delete() 
     except:
         pass
 
@@ -282,7 +284,7 @@ async def manual_scan_movie(bot: Client, message: Message):
 @Client.on_callback_query(filters.regex(r'^analyze#'), group=-1)
 async def analyze_movie_prints(bot: Client, query: CallbackQuery):
     movie_name = query.data.split("#")[1]
-    await query.answer("Checking Database...", show_alert=False)
+    await query.answer("🔍 Checking Database... Please wait!", show_alert=False)
 
     raw_pattern = r'(\b|[\.\+\-_])' + re.escape(movie_name) + r'(\b|[\.\+\-_])'
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
@@ -310,25 +312,23 @@ async def analyze_movie_prints(bot: Client, query: CallbackQuery):
     hd_count = await Media.count_documents(hd_query)
 
     if hd_count > 0 and cam_count > 0:
-        # Cam file names aah numbers vachu eduthu kaattura logic
-        cam_files_cursor = Media.collection.find(cam_query).limit(10) # 10 files mattum kaattum
+        cam_files_cursor = Media.collection.find(cam_query).limit(10)
         cam_filenames = []
-        count = 1  # Inga thaan number start aaguthu
+        count = 1 
         async for doc in cam_files_cursor:
-            cam_filenames.append(f"**{count}.** 📄 `{doc.get('file_name', 'Unknown')}`")
+            cam_filenames.append(f"<b>{count}.</b> 📄 <code>{doc.get('file_name', 'Unknown')}</code>")
             count += 1
         
         file_list_text = "\n".join(cam_filenames)
         
-        text = f"**Movie:** `{movie_name}`\n\n✅ **HD Prints Found:** `{hd_count}`\n🎥 **PreDVD/Cam Found:** `{cam_count}`\n\n**Cam Files List:**\n{file_list_text}\n\nBoth versions exist! Intha mela irukka Cam prints aah delete pannidava?"
+        text = f"<blockquote>🎬 <b>Movie Name:</b> <code>{movie_name}</code>\n✅ <b>HD Prints Found:</b> <code>{hd_count}</code>\n🎥 <b>PreDVD / Cam Found:</b> <code>{cam_count}</code></blockquote>\n\n📂 <b><i>Cam Files List:</i></b>\n{file_list_text}\n\n⚠️ <b>Alert:</b> <i>Both versions exist! Intha mela irukka Cam prints aah delete pannidava?</i>"
         
         btn = InlineKeyboardMarkup([
             [InlineKeyboardButton("🗑️ Delete PreDVD/Cam", callback_data=f"delmoviecam#{movie_name}")],
             [InlineKeyboardButton("❌ Cancel", callback_data="close_data")]
         ])
-        msg = await query.message.reply_text(text, reply_markup=btn)
+        msg = await query.message.reply_text(text, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
         
-        # 1 minute la Intha Analyze message auto delete aagidum
         await asyncio.sleep(60)
         try:
             await msg.delete()
@@ -336,24 +336,27 @@ async def analyze_movie_prints(bot: Client, query: CallbackQuery):
             pass
         
     elif hd_count > 0:
-        msg = await query.message.reply_text(f"**🎬 Movie:** `{movie_name}`\n\nOnly HD prints (`{hd_count}`) are available. No Cam prints found! 🎉")
-        await asyncio.sleep(10) # 10 seconds la auto delete
+        text = f"<blockquote>🎬 <b>Movie Name:</b> <code>{movie_name}</code></blockquote>\n\n🌟 <b>Super News!</b> Only <b>HD prints</b> (<code>{hd_count}</code>) are available. \n<i>No Cam prints found!</i> 🎉"
+        msg = await query.message.reply_text(text, parse_mode=enums.ParseMode.HTML)
+        await asyncio.sleep(10) 
         try:
             await msg.delete()
         except:
             pass
         
     elif cam_count > 0:
-        msg = await query.message.reply_text(f"**Movie:** `{movie_name}`\n\nOnly PreDVD/Cam prints (`{cam_count}`) are available. We need to wait for the HD release! ⏳")
-        await asyncio.sleep(10) # 10 seconds la auto delete
+        text = f"<blockquote>🎬 <b>Movie Name:</b> <code>{movie_name}</code></blockquote>\n\n⏳ <b>Status:</b> Only <b>PreDVD/Cam prints</b> (<code>{cam_count}</code>) are available.\n<i>We need to wait for the HD release bro!</i> 🍿"
+        msg = await query.message.reply_text(text, parse_mode=enums.ParseMode.HTML)
+        await asyncio.sleep(10) 
         try:
             await msg.delete()
         except:
             pass
         
     else:
-        msg = await query.message.reply_text(f"Could not find files for **{movie_name}**. Spelling check pannunga.")
-        await asyncio.sleep(10) # 10 seconds la auto delete
+        text = f"<blockquote>❌ <b>Oops!</b> Could not find files for <code>{movie_name}</code>.</blockquote>\n<i>Spelling correct aah irukka nu check pannunga bro.</i> 🔍"
+        msg = await query.message.reply_text(text, parse_mode=enums.ParseMode.HTML)
+        await asyncio.sleep(10) 
         try:
             await msg.delete()
         except:
@@ -363,7 +366,7 @@ async def analyze_movie_prints(bot: Client, query: CallbackQuery):
 @Client.on_callback_query(filters.regex(r'^delmoviecam#'), group=-1)
 async def delete_specific_cam(bot: Client, query: CallbackQuery):
     movie_name = query.data.split("#")[1]
-    await query.answer("Deleting Cam Prints... Please wait!", show_alert=True)
+    await query.answer("🗑️ Deleting Cam Prints... Please wait!", show_alert=True)
 
     raw_pattern = r'(\b|[\.\+\-_])' + re.escape(movie_name) + r'(\b|[\.\+\-_])'
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
@@ -381,9 +384,9 @@ async def delete_specific_cam(bot: Client, query: CallbackQuery):
 
     deleted_result = await Media.collection.delete_many(cam_query)
     
-    await query.message.edit_text(f"✅ **Success!**\n\nDeleted `{deleted_result.deleted_count}` PreDVD/Cam prints for **{movie_name}**.")
+    success_text = f"<blockquote>✅ <b>Mission Success!</b>\n🗑️ <b>Deleted:</b> <code>{deleted_result.deleted_count}</code> PreDVD/Cam prints for <b>{movie_name}</b>.</blockquote>\n\n<i>Database is clean now!</i> ✨"
+    await query.message.edit_text(success_text, parse_mode=enums.ParseMode.HTML)
     
-    # 10 seconds la Intha Success message auto delete aagidum
     await asyncio.sleep(10)
     try:
         await query.message.delete()
