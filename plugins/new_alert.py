@@ -127,7 +127,7 @@ async def alert_handler(client, message):
             file_list_text = "\n".join(cam_filenames)
             
             safe_name = clean_name[:40].strip()
-            delete_text = f"🚨 **Update Alert: {clean_name}** 🚨\n\nDatabase la ippo HD & PreDVD rendu me irukku!\n\n✅ **HD count:** `{hd_count}`\n🎥 **PreDVD count:** `{cam_count}`\n\n**Cam Files List:**\n{file_list_text}\n\nIntha mela irukka Cam prints aah delete pannidava?"
+            delete_text = f"<b> 🚨 Update Alert: {clean_name} 🚨</b>\n\nThe database now has both <b>HD</b> and <b>PreDVD</b> files.\n\n✅ <b>HD count:</b> `{hd_count}`\n🎥 <b>PreDVD count:</b> `{cam_count}`\n\n<b>Cam Files List:</b>\n{file_list_text}\n\nDelete the PreDVD files above?"
             
             button = InlineKeyboardMarkup([
                 [InlineKeyboardButton("🗑️ Delete PreDVD/Cam", callback_data=f"delmoviecam#{safe_name}")]
