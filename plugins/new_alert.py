@@ -62,7 +62,7 @@ async def alert_handler(client, message):
                 return
         LAST_SENT[clean_name] = current_time
 
-        # Puthu logic: Database la HD and Cam rendu me irukka nu check pandrom
+        # Database la HD and Cam rendu me irukka nu check pandrom
         raw_pattern = r'(\b|[\.\+\-_])' + re.escape(clean_name) + r'(\b|[\.\+\-_])'
         regex = re.compile(raw_pattern, flags=re.IGNORECASE)
 
@@ -76,25 +76,41 @@ async def alert_handler(client, message):
         cam_count = await Media.count_documents(cam_query)
         hd_count = await Media.count_documents(hd_query)
 
-        # Rendu print-um iruntha mattum thaan alert message varum
+        safe_name = clean_name[:40].strip()
+
+        # CONDITION 1: Smart Alert (Rendu print-um iruntha varum alert)
         if hd_count > 0 and cam_count > 0:
             text = f"🚨 **Update Alert: {clean_name}** 🚨\n\nDatabase la ippo HD & PreDVD rendu me irukku!\n\n✅ **HD count:** `{hd_count}`\n🎥 **PreDVD count:** `{cam_count}`\n\nPreDVD prints aah delete panna keela click pannunga."
-            
-            safe_name = clean_name[:40].strip()
             button = InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔍 Analyze & Delete Cam", callback_data=f"analyze#{safe_name}")]
             ])
             
-            # Admin PM kku mattum message pogum
-            for admin in ADMINS:
-                try:
-                    await client.send_message(
-                        chat_id=admin, 
-                        text=text, 
-                        reply_markup=button
-                    )
-                except Exception as e:
-                    logger.error(f"⚠️ PM Alert Error for Admin {admin}: {e}")
+        # CONDITION 2: Normal Alert (Pudhu movie / Oru print mattum iruntha varum alert)
+        else:
+            if message.chat.id == USER_REQ_DB_CHANNEL:
+                text = f"<blockquote><b>🎬 User Request Added</b></blockquote>\n\n<b>🍿 {clean_name}</b>"
+            elif message.chat.id == ANIME_CHANNEL_ID:
+                text = f"<blockquote><b>⛩ New Anime Added</b></blockquote>\n\n<b>🍿 {clean_name}</b>"
+            elif message.chat.id == CAM_DB_CHANNEL:
+                text = f"<blockquote><b>🎥 New Movie Added</b></blockquote>\n\n<b>🍿 {clean_name}</b>"
+            else:
+                text = f"<b>{clean_name} Added 🍿</b>"
+                
+            button = InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔍 Analyze Prints", callback_data=f"analyze#{safe_name}")]
+            ])
+            
+        # Admin PM kku mattum message pogum (Rendu condition-kum ithu common)
+        for admin in ADMINS:
+            try:
+                await client.send_message(
+                    chat_id=admin, 
+                    text=text, 
+                    parse_mode=enums.ParseMode.HTML,
+                    reply_markup=button
+                )
+            except Exception as e:
+                logger.error(f"⚠️ PM Alert Error for Admin {admin}: {e}")
         
     except Exception as e:
         logger.error(f"⚠️ Alert Error: {e}")
