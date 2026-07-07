@@ -222,7 +222,7 @@ async def ask_clean_cam(client, message):
         os.remove(file_path)
         
     # Auto-deleting the cleancam message in 30 seconds
-    asyncio.create_task(auto_delete_helper(doc_msg, message, 30))
+    asyncio.create_task(auto_delete_helper(doc_msg, message, 300))
 
 @Client.on_callback_query(filters.regex(r'^confirm_cleancam$'), group=-1)
 async def execute_clean_cam(client, query):
