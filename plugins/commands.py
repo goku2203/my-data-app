@@ -267,19 +267,15 @@ async def start(client, message):
             return
 
     data = message.command[1]
-
+    
     if IS_VERIFY:
         if not await check_verification(client, message.from_user.id):
-
-            try:
-                anim_msg = await message.reply_text("<b>⏳ Please wait...</b>", parse_mode=enums.ParseMode.HTML)
-                await asyncio.sleep(1.2)
-                await anim_msg.delete()
-            except Exception as e:
-                pass
             
+            # --- 1. SMART LOADING MESSAGE (Udane send aagum) ---
+            anim_msg = await message.reply_text("<b>⏳ Fetching File Details... Please wait!</b>", parse_mode=enums.ParseMode.HTML)
+            
+            # --- 2. Background-la details edukkum (No Delay) ---
             verify_url = await get_verify_link(message.from_user.id, data)
-            
             raw_caption = "Unknown Filename"
             
             try:
@@ -290,35 +286,38 @@ async def start(client, message):
                         temp_file_id = data
                 else:
                     temp_file_id = data
-
+                    
                 files_ = await get_file_details(temp_file_id)
                 if files_:
-                    raw_caption = files_[0].caption if files_[0].caption else files_[0].file_name 
+                    raw_caption = files_[0].caption if files_[0].caption else files_[0].file_name
             except Exception as e:
                 print(f"Error getting file details: {e}")
-
+                
             buttons = [
                 [InlineKeyboardButton("✨ Click Here To Verify ✨", url=verify_url)],
                 [InlineKeyboardButton("❓ How to Download ❓", url="https://t.me/howtoo1/7")]
             ]
             
             verify_text = (
-                "<b>🔒 Access Denied : Verification Required!</b>\n\n"
-                "<blockquote><b>📂 File Details:</b>\n\n"
+                "<b>⛔ Access Denied : Verification Required!</b>\n\n"
+                "<blockquote><b>📁 File Details:</b>\n\n"
                 f"{raw_caption}</blockquote>\n\n"
-                "<b>🎯 Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed.👇</i>\n\n"
-                "<blockquote><b>⏳ Time Limit : 10 Minutes!</b></blockquote>"
+                "<b>⚠️ Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed. </i>\n\n"
+                "<blockquote><b>⏱ Time Limit : 10 Minutes!</b></blockquote>"
             )
-
-            verify_msg = await message.reply_text(
+            
+            # --- 3. Pazhaya message-aiye Edit panrom (Smooth Effect) ---
+            await anim_msg.edit_text(
                 text=verify_text,
                 reply_markup=InlineKeyboardMarkup(buttons),
-                protect_content=True,
                 parse_mode=enums.ParseMode.HTML
             )
-            asyncio.create_task(auto_delete_message(client, verify_msg, 600))
+            
+            # 10 minutes (600 seconds) la auto-delete aagidum
+            asyncio.create_task(auto_delete_helper(anim_msg, message, 600))
             return
             
+        # Puthusa add panna lines, verification aana udane update aaga
         await db.col.update_one({'id': message.from_user.id}, {'$set': {'verify_status_v2': {'is_verified': False, 'verify_until': None}}})
 
     try:
