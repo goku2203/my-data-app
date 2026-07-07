@@ -2,7 +2,6 @@ from pyrogram import Client, filters, enums
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from info import ADMINS
 
-
 @Client.on_message(filters.private & filters.command("admin") & filters.user(ADMINS))
 async def master_admin_panel(bot: Client, message: Message):
 
