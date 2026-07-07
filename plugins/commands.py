@@ -659,6 +659,10 @@ async def settings(client, message):
                     callback_data=f'setgs#welcome#{settings["welcome"]}#{grp_id}',
                 ),
             ],
+
+            [
+                InlineKeyboardButton("❌ Close", callback_data="close_data")
+            ],
         ]
 
         reply_markup = InlineKeyboardMarkup(buttons)
