@@ -1,49 +1,51 @@
 from pyrogram import Client, filters, enums
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from info import ADMINS 
+from info import ADMINS
+
 
 @Client.on_message(filters.private & filters.command("admin") & filters.user(ADMINS))
 async def master_admin_panel(bot: Client, message: Message):
-    
-    # 👑 Clean & Simple Admin List
-    admin_text = """<b>👑 Master Admin Command List</b>
 
-<i>Tap on any command below to copy it easily.</i>
+    admin_text = """
+<b>👑 MASTER ADMIN PANEL</b>
+<blockquote>Welcome back, Admin! Choose the command you need below.</blockquote>
 
-<b>🛠 System & Settings</b>
-<code>/panel</code> - Check server status and database info.
-<code>/settings</code> - Open the auto-filter settings menu.
-<code>/broadcast</code> - Reply to any message to send it to all users.
-<code>/restart</code> - Safely reboot the bot system.
-<code>/ping</code> - Check the bot's response speed.
+<b>⚙️ SYSTEM & SETTINGS</b>
+[<code>/panel</code>] — Server status & database details\n
+[<code>/settings</code>] — Auto-filter settings menu\n
+[<code>/broadcast</code>] — Send message to all users\n
+[<code>/restart</code>] — Restart the bot safely\n
+[<code>/ping</code>] — Check bot response speed\n
 
-<b>📂 File Management</b>
-<code>/deletefiles</code> - Delete specific movie files from the DB.
-<code>/cleancam</code> - Automatically find and delete all Cam/PreDVD prints.
-<code>/scanmovie</code> - Check available HD and Cam prints for a movie.
+<b>📁 FILE MANAGEMENT</b>
+[<code>/deletefiles</code>] — Delete selected files from database\n
+[<code>/cleancam</code>] — Remove all Cam / PreDVD prints\n
+[<code>/scanmovie</code>] — Check HD and Cam files for a movie\n
 
-<b>📡 Auto-Index Channels</b>
-<code>/addchannel</code> - Add a new channel to auto-save files.
-<code>/delchannel</code> - Remove an auto-index channel.
-<code>/listchannels</code> - View all connected index channels.
+<b>📡 AUTO-INDEX CHANNELS</b>
+[<code>/addchannel</code>] — Add a new index channel\n
+[<code>/delchannel</code>] — Remove an index channel\n
+[<code>/listchannels</code>] — View all index channels\n
 
-<b>🔐 Force Subscribe (FSub)</b>
-<code>/addfsub</code> - Add a new Force Subscribe channel.
-<code>/delfsub</code> - Remove a Force Subscribe channel.
-<code>/listfsub</code> - View all Force Subscribe channels."""
+<b>🔐 FORCE SUBSCRIBE</b>
+[<code>/addfsub</code>] — Add Force Subscribe channel\n
+[<code>/delfsub</code>] — Remove Force Subscribe channel\n
+[<code>/listfsub</code>] — View all Force Subscribe channels\n
 
-    # --- Back and Close Buttons ---
+<blockquote>💡 Tip: Command mela tap pannina easy-ah copy pannalaam.</blockquote>
+"""
+
     buttons = [
         [
-            InlineKeyboardButton("🔙 Back", callback_data="start_data"),
+            InlineKeyboardButton("🏠 Home", callback_data="start_data"),
             InlineKeyboardButton("❌ Close", callback_data="close_data")
         ]
     ]
 
-    # Fast-a reply anuppum koodave buttons-um varum
     await message.reply_text(
         text=admin_text,
         quote=True,
         parse_mode=enums.ParseMode.HTML,
-        reply_markup=InlineKeyboardMarkup(buttons)
+        reply_markup=InlineKeyboardMarkup(buttons),
+        disable_web_page_preview=True
     )
