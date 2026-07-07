@@ -3,7 +3,7 @@ import random
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from Script import script
-from info import PICS
+from info import PICS, ADMINS
 from utils import temp
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,13 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
     if data == "start" or data == "start_data":
         
         # Mela irukkura START_BUTTONS ah direct ah call pandrom
-        reply_markup = InlineKeyboardMarkup(START_BUTTONS)
+        # --- ADMIN BUTTON ONLY FOR ADMINS ---
+        custom_buttons = list(START_BUTTONS)
+        if query.from_user.id in ADMINS:
+            custom_buttons.append([InlineKeyboardButton("👑 Admin Panel", callback_data="admin_home")])
+            
+        reply_markup = InlineKeyboardMarkup(custom_buttons)
+        # ------------------------------------
         
         try:
             txt = script.START_TXT.format(query.from_user.mention, temp.U_NAME, temp.B_NAME)
