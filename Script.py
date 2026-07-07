@@ -5,17 +5,21 @@ class script(object):
     # ==========================================
 
     START_TXT = """<b>👋 Hello {}!</b>
-    
-<b>I am an Advanced Auto-Filter Bot. 🤖</b>
 
-<i>I can provide Movies, Series, and Anime directly in your groups with high speed! ⚡</i>
+<b>🤖 I am Mikasa, your file search assistant.</b>
 
-<b>👇 How to use me?</b>
+<i>I can help you find Movies, Series, and Anime files quickly in your group. ⚡</i>
+
+<b>How to use me:</b>
+
 1. Add me to your group.
 2. Make me an <b>Admin</b>.
-3. Enjoy unlimited files! 🎬
+3. Search and enjoy unlimited files! 🎬
 
-<i>Click the buttons below to explore more.</i>"""
+<blockquote>❤️ I am always here to help you.</blockquote>
+
+<i>Click the buttons below to learn more.</i>"""
+
 
     HELP_TXT = """<b>⚙️ Help & System Status</b>
 
@@ -33,13 +37,18 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
         "<b>⚠️ Bot is Under Maintenance! 🛠️</b>\n\n<i>5 to 10 minutes wait pannunga. Work nadanthutu irukku!</i>"
     )
 
-    ABOUT_TXT = """<b>✯ 𝙼𝚈 𝙿𝚁𝙾𝙵𝙸𝙻𝙴 ✯</b>
+    ABOUT_TXT = """<b>🤖 ʙᴏᴛ ᴘʀᴏꜰɪʟᴇ</b>
 
-<b>🤖 𝐍𝐚𝐦𝐞: {}</b>
-<b>👑 𝐂𝐫𝐞𝐚𝐭𝐨𝐫: <a href="https://t.me/Goku_Stark">Goku Stark</a></b>
-<b>💻 𝐋𝐚𝐧𝐠𝐮𝐚𝐠𝐞: Python 3</b>
-<b>💾 𝐃𝐚𝐭𝐚𝐛𝐚𝐬𝐞: MongoDB</b>
-<b>📡 𝐒𝐞𝐫𝐯𝐞𝐫: Koyeb</b>"""
+╭─❖ <b>sʏsᴛᴇᴍ ɪɴꜰᴏ</b>
+├ 👤 <b>ᴍʏ ɴᴀᴍᴇ:</b> ᴍɪᴋᴀꜱᴀ ᴀᴄᴋᴇʀᴍᴀɴ
+├ 🤖 <b>ʙᴏᴛ :</b> {}
+├ 👑 <b>ᴄʀᴇᴀᴛᴏʀ :</b> <a href="https://t.me/Goku_Stark">Goku Stark</a>
+├ 💻 <b>ʟᴀɴɢᴜᴀɢᴇ :</b> Python 3
+├ 💾 <b>ᴅᴀᴛᴀʙᴀsᴇ :</b> MongoDB
+╰ ☁️ <b>sᴇʀᴠᴇʀ :</b> Koyeb
+
+<blockquote><b><i>❤️ I’ll always be here when you need me.</i></b></blockquote>"""
+
 
     SOURCE_TXT = """<b>🛠️ Source Code</b>
 
@@ -52,7 +61,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     # 🔵 GUIDES & TUTORIAL TEXTS
     # ==========================================
 
-    MANUALFILTER_TXT = """<b>🛠️ Manual Filters Help</b>
+    MANUALFILTER_TXT = """<blockquote><b>🛠️ Manual Filters Help</b></blockquote>
 
 <i>Filters allow the bot to reply automatically when a specific keyword is detected.</i>
 
@@ -79,7 +88,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b>2️⃣ Alert Button Format:</b>
 <code>[Button Text](buttonalert:This is a pop-up message!)</code>"""
 
-    AUTOFILTER_TXT = """<b>🤖 Auto-Filter Guide</b>
+    AUTOFILTER_TXT = """<blockquote><b>🤖 Auto-Filter Guide</b></blockquote>
 
 <b>1️⃣ For Private Channels:</b>
 • Make me an <b>Admin</b> in your channel.
@@ -93,7 +102,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • Use <code>/settings</code> in PM to enable Auto-Filter.
 """
 
-    CONNECTION_TXT = """<b>🔗 Connection Manager</b>
+    CONNECTION_TXT = """<blockquote><b>🔗 Connection Manager</b></blockquote>
 
 <i>Connect your groups to my PM to manage filters easily and avoid spam.</i>
 
@@ -105,18 +114,37 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     # ==========================================
     # 🔴 ADMIN & SYSTEM LOG TEXTS
     # ==========================================
+    LOG_TEXT_G = """<b>✨ ɴᴇᴡ ɢʀᴏᴜᴘ ᴄᴏɴɴᴇᴄᴛᴇᴅ</b>
 
-    LOG_TEXT_G = """<b>#NewGroupDetected 👥</b>
-    
-<b>🏷 Name:</b> {}
-<b>🆔 ID:</b> <code>{}</code>
-<b>🔢 Members:</b> <code>{}</code>
-<b>👤 Added By:</b> {}"""
+╭─❖ <b>ɢʀᴏᴜᴘ ᴅᴇᴛᴀɪʟs</b>
+├ 📌 <b>sᴛᴀᴛᴜs :</b> Active
+├ 👥 <b>ɢʀᴏᴜᴘ :</b> {}
+├ 🆔 <b>ɢʀᴏᴜᴘ ɪᴅ :</b> <code>{}</code>
+├ 👤 <b>ᴍᴇᴍʙᴇʀs :</b> {}
+╰ ➕ <b>ᴀᴅᴅᴇᴅ ʙʏ :</b> {}
 
-    LOG_TEXT_P = """<b>New User 👤</b>
-    
-<b>🆔 ID:</b> <code>{}</code>
-<b>🏷 Name:</b> {}"""
+<blockquote>⚙️ Waiting for admin setup...</blockquote>"""
+
+    LOG_TEXT_P = """<b>✨ ɴᴇᴡ ᴜsᴇʀ ᴄᴏɴɴᴇᴄᴛᴇᴅ ✨</b>
+
+╭─❖ <b>ᴜsᴇʀ ɪɴꜰᴏ</b>
+├ 🟢 <b>sᴛᴀᴛᴜs :</b> Connected to Bot
+├ 👤 <b>ᴜsᴇʀ :</b> {1}
+╰ 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{0}</code>
+
+<blockquote>⚙️ Waiting for admin verification.</blockquote>"""
+
+
+    MISSING_LOG_TXT = """<b>🚫 ꜰɪʟᴇ ᴍɪssɪɴɢ ᴀʟᴇʀᴛ</b>
+
+╭─❖ <b>ʀᴇǫᴜᴇsᴛ ɪɴꜰᴏ</b>
+├ 📁 <b>ꜰɪʟᴇ :</b> <code>{}</code>
+├ 👤 <b>ᴜsᴇʀ :</b> {}
+├ 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{}</code>
+╰ 🌐 <b>sᴏᴜʀᴄᴇ :</b> {}
+
+<blockquote>⚠️ This file is not available in the database. Please upload it, Admin.</blockquote>"""
+
 
     # ==========================================
     # 🎬 MOVIE SEARCH & RESULTS TEXTS
