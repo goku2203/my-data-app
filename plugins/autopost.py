@@ -261,30 +261,35 @@ async def send_batched_post(client, clean_name):
         f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
         f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n"
         f"<b>⚡️ Available Links:</b>\n"
-        f"╭━━━━━━━━━━━━━━━╮\n"
-    )
+        f"╭───────────────╮\n"
+)
 
-    order = ["HD-Rip", "Only HD", "FULL HD", "4K"]
-    
-    has_files = False
-    for category in order:
-        files = categorized[category]
-        if files:
-            has_files = True
-            files.sort(key=lambda x: x['raw_size'])
-            for f in files:
-                # 1. Size ah function kulla anuppi round panrom
-                rounded_size = round_file_size(f['size'])
-                # 2. Quality text (HD-Rip) remove pannitu "Download" nu add panni irukken
-                caption += f"├ 📥 <a href='{f['link']}'><b>{rounded_size}</b></a>\n"
-                
-    if not has_files:
-        return
+order = ["HD-Rip", "Only HD", "FULL HD", "4K"]
 
-    caption += "╰━━━━━━━━━━━━━━━╯\n\n"
+has_files = False
+
+for category in order:
+    files = categorized[category]
+
+    if files:
+        has_files = True
+        files.sort(key=lambda x: x["raw_size"])
+
+        for f in files:
+            rounded_size = round_file_size(f["size"])
+
+            caption += (
+                f"┣ 📥 <a href='{f['link']}'><b>{rounded_size}</b></a>\n"
+            )
+
+if not has_files:
+    return
+
+caption += (
+    f"╰───────────────╯\n\n"
     caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
     caption += "👉 <b><a href='https://t.me/howtoo1/7'>How to Link Download</a></b>\n\n"
-    caption += "✨ <b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>Anime Single File 📂</a></b>"
+    caption += "✨ <b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>Anime Single File ✨</a></b>"
 
     try:
         if image_url:
