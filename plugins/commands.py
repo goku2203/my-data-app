@@ -215,7 +215,13 @@ async def start(client, message):
     # 🎯 BOT PM-LA START KUDUTHA VARA VENDIYA BUTTONS
     if len(message.command) != 2 or (len(message.command) == 2 and message.command[1] in ["subscribe", "error", "okay", "help", "start"]):
         
-        reply_markup = InlineKeyboardMarkup(START_BUTTONS)
+        # --- ADMIN BUTTON ONLY FOR ADMINS ---
+        custom_buttons = list(START_BUTTONS)
+        if message.from_user.id in ADMINS:
+            custom_buttons.append([InlineKeyboardButton("👑 Admin Panel", callback_data="admin_home")])
+        
+        reply_markup = InlineKeyboardMarkup(custom_buttons)
+        # ------------------------------------
         
         STICKER_ID = "CAACAgIAAxkBAAFGz4Vp14TkEDwLXzANxjQxctqfYSDePgAC0wUAAj-VzAqfWrvSXUfHMTsE"
 
