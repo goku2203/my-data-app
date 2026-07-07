@@ -218,7 +218,7 @@ async def start(client, message):
         # --- ADMIN BUTTON ONLY FOR ADMINS ---
         custom_buttons = list(START_BUTTONS)
         if message.from_user.id in ADMINS:
-            custom_buttons.append([InlineKeyboardButton("👑 Admin Panel", callback_data="admin_home")])
+            custom_buttons.append([InlineKeyboardButton("⚙️ Admin Panel", callback_data="admin_home")])
         
         reply_markup = InlineKeyboardMarkup(custom_buttons)
         # ------------------------------------
