@@ -233,16 +233,35 @@ async def send_batched_post(client, clean_name):
         else:
             categorized["HD-Rip"].append(file)
 
+    def round_file_size(size_str):
+        # File size ah round pandra function
+        try:
+            match = re.search(r"([\d\.]+)\s*([A-Za-z]+)", str(size_str).strip())
+            if match:
+                val = float(match.group(1))
+                unit = match.group(2).upper()
+                if "MB" in unit:
+                    # Rounding to nearest 50 (e.g., 273 -> 250, 429 -> 450, 739 -> 750)
+                    rounded = int(round(val / 50.0) * 50)
+                    return f"{max(50, rounded)}MB"
+                elif "GB" in unit:
+                    # GB kku 1 decimal place mattum vechukkum (e.g., 1.6GB)
+                    return f"{round(val, 1)}GB"
+        except Exception:
+            pass
+        return size_str
+
     safe_title = get_safe_name(clean_name)
     movie_year = first_file['year']
     image_url = await get_tmdb_image(clean_name, movie_year)
 
     caption = (
         f"🎬 <b>{safe_title}</b>\n\n"
-        f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
+        f"<blockquote>📅 <b><i>Year: {first_file['year']}</i></b>\n"
         f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
         f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n"
-        f"━━━━━━━━━━━━━━━━━━━\n"
+        f"<b>⚡️ Available Links:</b>\n"
+        f"╭━━━━━━━━━━━━━━━╮\n"
     )
 
     order = ["HD-Rip", "Only HD", "FULL HD", "4K"]
@@ -254,15 +273,18 @@ async def send_batched_post(client, clean_name):
             has_files = True
             files.sort(key=lambda x: x['raw_size'])
             for f in files:
-                caption += f" ➪ <a href='{f['link']}'><b>{f['short_q']} - {f['size']}</b></a>\n"
-
+                # 1. Size ah function kulla anuppi round panrom
+                rounded_size = round_file_size(f['size'])
+                # 2. Quality text (HD-Rip) remove pannitu "Download" nu add panni irukken
+                caption += f"├ 📥 <a href='{f['link']}'><b>{rounded_size}</b></a>\n"
+                
     if not has_files:
         return
 
-    caption += "━━━━━━━━━━━━━━━━━━━\n"
+    caption += "╰━━━━━━━━━━━━━━━╯\n\n"
     caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
-    caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>\n\n"
-    caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
+    caption += "👉 <b><a href='https://t.me/howtoo1/7'>How to Link Download</a></b>\n\n"
+    caption += "✨ <b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>Anime Single File 📂</a></b>"
 
     try:
         if image_url:
