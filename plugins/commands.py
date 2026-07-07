@@ -271,10 +271,13 @@ async def start(client, message):
     if IS_VERIFY:
         if not await check_verification(client, message.from_user.id):
             
-            # --- 1. SMART LOADING MESSAGE (Udane send aagum) ---
+            # --- 1. INSTANT LOADING MESSAGE (Click panna udane varum) ---
             anim_msg = await message.reply_text("<b>⏳ Fetching File Details... Please wait!</b>", parse_mode=enums.ParseMode.HTML)
             
-            # --- 2. Background-la details edukkum (No Delay) ---
+            # --- 2. THE DELAY (Neenga ketta antha 1.2 seconds wait) ---
+            await asyncio.sleep(1.2)
+            
+            # --- 3. BACKGROUND WORK (Link & File details edukkurathu) ---
             verify_url = await get_verify_link(message.from_user.id, data)
             raw_caption = "Unknown Filename"
             
@@ -306,15 +309,12 @@ async def start(client, message):
                 "<blockquote><b>⏱ Time Limit : 10 Minutes!</b></blockquote>"
             )
             
-            # --- 3. Pazhaya message-aiye Edit panrom (Smooth Effect) ---
+            # --- 4. EDIT MESSAGE (Please wait message ippo Verify message ah maaridum) ---
             await anim_msg.edit_text(
                 text=verify_text,
                 reply_markup=InlineKeyboardMarkup(buttons),
                 parse_mode=enums.ParseMode.HTML
             )
-            
-            # 10 minutes (600 seconds) la auto-delete aagidum
-            asyncio.create_task(auto_delete_helper(anim_msg, message, 600))
             return
             
         # Puthusa add panna lines, verification aana udane update aaga
