@@ -256,12 +256,12 @@ async def send_batched_post(client, clean_name):
     image_url = await get_tmdb_image(clean_name, movie_year)
 
     caption = (
-        f"🎬 <b>{safe_title}</b>\n\n"
-        f"<blockquote>📅 <b><i>Year: {first_file['year']}</i></b>\n"
-        f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
-        f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n"
-        f"<b>⚡️ Available Links:</b>\n"
-        f"╭───────────────╮\n"
+    f"🎬 <b>{safe_title}</b>\n\n"
+    f"<blockquote>📅 <b><i>Year: {first_file['year']}</i></b>\n"
+    f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
+    f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n"
+    f"<b>⚡️ Available Links:</b>\n"
+    f"╭───────────────╮\n"
 )
 
 order = ["HD-Rip", "Only HD", "FULL HD", "4K"]
@@ -285,11 +285,13 @@ for category in order:
 if not has_files:
     return
 
+# Inga thaan syntax error irunthuchu. Ippo ithu fix panniyachu 👇
 caption += (
     f"╰───────────────╯\n\n"
-    caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
-    caption += "👉 <b><a href='https://t.me/howtoo1/7'>How to Link Download</a></b>\n\n"
-    caption += "✨ <b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>Anime Single File ✨</a></b>"
+    "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
+    "👉 <b><a href='https://t.me/howtoo1/7'>How to Link Download</a></b>\n\n"
+    "✨ <b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>Anime Single File ✨</a></b>"
+)
 
     try:
         if image_url:
