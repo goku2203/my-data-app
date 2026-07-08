@@ -177,6 +177,7 @@ async def get_tmdb_image(movie_name, year):
         return None
 
 # --- 2. BATCH SENDER ---
+
 async def send_batched_post(client, clean_name):
     try:
         await asyncio.sleep(30)
@@ -232,75 +233,42 @@ async def send_batched_post(client, clean_name):
         else:
             categorized["HD-Rip"].append(file)
 
-    def round_file_size(size_str):
-        try:
-            match = re.search(r"([\d\.]+)\s*([A-Za-z]+)", str(size_str).strip())
-            if match:
-                val = float(match.group(1))
-                unit = match.group(2).upper()
-                if "MB" in unit:
-                    rounded = int(round(val / 50.0) * 50)
-                    return f"{max(50, rounded)}MB"
-                elif "GB" in unit:
-                    return f"{round(val, 1)}GB"
-        except Exception:
-            pass
-        return size_str
-
     safe_title = get_safe_name(clean_name)
     movie_year = first_file['year']
     image_url = await get_tmdb_image(clean_name, movie_year)
 
-    # --- Compact Link Generator (3 links per row) ---
-    all_sorted_files = []
-    order = ["HD-Rip", "Only HD", "FULL HD", "4K"]
-    for category in order:
-        files = categorized[category]
-        if files:
-            files.sort(key=lambda x: x["raw_size"])
-            for f in files:
-                all_sorted_files.append(f)
-    
-    links_list = [f"<a href='{f['link']}'>{round_file_size(f['size'])}</a>" for f in all_sorted_files]
-    # Split into chunks of 3
-    link_rows = [links_list[i:i+3] for i in range(0, len(links_list), 3)]
-    links_text = "\n".join([" | ".join(row) for row in link_rows])
-
     caption = (
         f"🎬 <b>{safe_title}</b>\n\n"
-        f"<blockquote>📅 <b><i>Year: {movie_year}</i></b>\n"
+        f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
         f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
-        f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n"
-        f"<b>⚡️ Available Links:</b>\n"
-        f"<code>{links_text}</code>\n\n"
+        f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
+        f"⚡ <b>Download Available In:</b>\n\n"
     )
 
-    if not all_sorted_files:
+    # Collect all files to sort them purely by size
+    all_files_to_post = []
+    order = ["HD-Rip", "Only HD", "FULL HD", "4K"]
+    for category in order:
+        if categorized[category]:
+            all_files_to_post.extend(categorized[category])
+
+    if not all_files_to_post:
         return
 
-    caption += (
-        "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
-        "👉 <b><a href='https://t.me/howtoo1/7'>How to Link Download</a></b>\n\n"
-        "✨ <b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>Anime Single File ✨</a></b>"
-    )
+    # Sort files from smallest size to largest size (e.g., 250MB to 2.7GB)
+    all_files_to_post.sort(key=lambda x: x['raw_size'])
 
-    try:
-        if image_url:
-            await client.send_photo(
-                chat_id=UPDATES_CHANNEL,
-                photo=image_url,
-                caption=caption,
-                parse_mode=ParseMode.HTML
-             )
-        else:
-            await client.send_message(
-                chat_id=UPDATES_CHANNEL,
-                text=caption,
-                parse_mode=ParseMode.HTML
-             )
-        logger.info(f"✅ Post Sent: {clean_name}")
-    except Exception as e:
-        logger.error(f"❌ Post Failed: {e}")
+    # Format the new folder template
+    for f in all_files_to_post:
+        caption += f"📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n\n"
+
+    if not has_files:
+        return
+
+    caption += "━━━━━━━━━━━━━━━━━━━\n"
+    caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
+    caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>\n\n"
+    caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
 
     try:
         if image_url:
