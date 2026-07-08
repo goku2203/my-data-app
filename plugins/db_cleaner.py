@@ -77,11 +77,11 @@ async def clean_db(client, message):
         if data["predvd_ids"]: # If PreDVD exists
             if data["hd_exists"]:
                 # Both exist -> Safe to delete PreDVD
-                delete_list.append(f"▪️ {data['display_name']}")
+                delete_list.append(data['display_name'])
                 delete_ids.extend(data["predvd_ids"])
             else:
                 # Only PreDVD exists -> Keep it, needs upgrade
-                only_predvd_list.append(f"▪️ {data['display_name']}")
+                only_predvd_list.append(data['display_name'])
                 
     if not delete_list and not only_predvd_list:
         return await msg.edit("✨ **Database is clean!** No PreDVD or CAM prints found.")
@@ -92,8 +92,8 @@ async def clean_db(client, message):
     if delete_list:
         report += f"🗑️ **Replaceable Early Prints (HD Available):**\n"
         report += "*(Safe to delete these PreDVD files)*\n"
-        for name in delete_list[:30]: 
-            report += f"{name}\n"
+        for i, name in enumerate(delete_list[:30], 1): 
+            report += f"{i}. `{name}`\n"
         if len(delete_list) > 30:
             report += f"... and {len(delete_list) - 30} more movies.\n"
         report += f"\n*Total PreDVD files waiting for deletion: {len(delete_ids)}*\n\n"
@@ -103,8 +103,8 @@ async def clean_db(client, message):
     if only_predvd_list:
         report += f"⚠️ **Pending Upgrades (Only PreDVD Available):**\n"
         report += "*(Waiting for HD releases)*\n"
-        for name in only_predvd_list[:30]:
-            report += f"{name}\n"
+        for i, name in enumerate(only_predvd_list[:30], 1):
+            report += f"{i}. `{name}`\n"
         if len(only_predvd_list) > 30:
             report += f"... and {len(only_predvd_list) - 30} more movies.\n"
 
@@ -113,14 +113,14 @@ async def clean_db(client, message):
     if delete_list:
         full_report += f"🗑️ REPLACEABLE EARLY PRINTS (HD Available) - [{len(delete_ids)} Files]\n"
         full_report += "(Safe to delete these PreDVD files)\n---------------------------------\n"
-        for name in delete_list:
-            full_report += f"{name}\n"
+        for i, name in enumerate(delete_list, 1):
+            full_report += f"{i}. {name}\n"
         full_report += "\n"
     if only_predvd_list:
         full_report += f"⚠️ PENDING UPGRADES (Only PreDVD Available) - [{len(only_predvd_list)} Movies]\n"
         full_report += "(Waiting for HD releases)\n---------------------------------\n"
-        for name in only_predvd_list:
-            full_report += f"{name}\n"
+        for i, name in enumerate(only_predvd_list, 1):
+            full_report += f"{i}. {name}\n"
 
     # Add Interactive Buttons
     buttons = []
