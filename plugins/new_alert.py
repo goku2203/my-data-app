@@ -5,7 +5,6 @@ import logging
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# Inga LOG_CHANNEL aiyum add panni irukken (Delete button message poga)
 from info import MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, ALERT_LOG_CHANNEL_ID, CAM_DB_CHANNEL, LOG_CHANNEL
 from database.ia_filterdb import Media
 
@@ -64,10 +63,10 @@ async def alert_handler(client, message):
         if message.chat.id == ANIME_CHANNEL_ID:
             clean_name = get_anime_name(filename) 
         else:
-            clean_name = get_movie_name(filename) 
+            clean_name = get_movie_name(filename)
             
         if not clean_name: clean_name = "Unknown File"
-            
+        
         current_time = time.time()
         if clean_name in LAST_SENT:
             if current_time - LAST_SENT[clean_name] < 300: 
@@ -78,15 +77,14 @@ async def alert_handler(client, message):
         # STEP 1: EPPOTHUM POLA NORMAL ALERT SEND PANDROM
         # ==========================================
         if message.chat.id == USER_REQ_DB_CHANNEL:
-            normal_text = f"<blockquote><b>✨ User Request Added</b></blockquote>\n\n<b>▸ {clean_name}</b>"
+            normal_text = f"<blockquote><b>🎬 User Request Added</b></blockquote>\n\n<b>🍿 {clean_name}</b>"
         elif message.chat.id == ANIME_CHANNEL_ID:
-            normal_text = f"<blockquote><b>🎬 New Anime Added</b></blockquote>\n\n<b>▸ {clean_name}</b>"
+            normal_text = f"<blockquote><b>⚡ New Anime Added</b></blockquote>\n\n<b>🍿 {clean_name}</b>"
         elif message.chat.id == CAM_DB_CHANNEL:
-            normal_text = f"<blockquote><b>🎬 New Movie Added</b></blockquote>\n\n<b>▸ {clean_name}</b>"
+            normal_text = f"<blockquote><b>🎥 New Movie Added</b></blockquote>\n\n<b>🍿 {clean_name}</b>"
         else:
-            normal_text = f"<b>{clean_name} Added ✅</b>"
+            normal_text = f"<b>{clean_name} Added 🍿</b>"
 
-        # Intha normal alert, button illama ALERT_LOG_CHANNEL_ID kku poyidum
         try:
             await client.send_message(
                 chat_id=ALERT_LOG_CHANNEL_ID, 
@@ -96,58 +94,6 @@ async def alert_handler(client, message):
         except Exception as e:
             logger.error(f"⚠️ Normal Alert Error: {e}")
 
-        # ==========================================
-        # STEP 2: DATABASE CHECK PANNI DELETE BUTTON SEND PANDROM
-        # ==========================================
-        # Puthusa upload aana file database la save aaga oru 2 seconds wait pandrom
-        await asyncio.sleep(2)
-
-        raw_pattern = r'(\b|[\.\+\-_])' + re.escape(clean_name) + r'(\b|[\.\+\-_])'
-        regex = re.compile(raw_pattern, flags=re.IGNORECASE)
-
-        cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
-        cam_pattern = "|".join(cam_words)
-        cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
-
-        cam_query = {'$and': [{'file_name': regex}, {'$or': [{'file_name': cam_regex}, {'caption': cam_regex}]}]}
-        hd_query = {'$and': [{'file_name': regex}, {'file_name': {'$not': cam_regex}}, {'caption': {'$not': cam_regex}}]}
-
-        cam_count = await Media.count_documents(cam_query)
-        hd_count = await Media.count_documents(hd_query)
-
-        # Rendu print-um match aana mattum thaan intha block kulla pogum
-        if hd_count > 0 and cam_count > 0:
-            cam_files_cursor = Media.collection.find(cam_query).limit(10)
-            cam_filenames = []
-            count = 1
-            async for doc in cam_files_cursor:
-                # Inga bold tags <b> and <code> use panni irukken
-                cam_filenames.append(f"<b>{count}.</b> 📄 <code>{doc.get('file_name', 'Unknown')}</code>")
-                count += 1
-            
-            file_list_text = "\n".join(cam_filenames)
-            
-            safe_name = clean_name[:40].strip()
-            
-            # Attractive aana HTML Blockquote and Italics design
-            delete_text = f"<blockquote>🚨 <b>Update Alert:</b> <code>{clean_name}</code>\n✅ <b>HD count:</b> <code>{hd_count}</code>\n🎥 <b>PreDVD count:</b> <code>{cam_count}</code></blockquote>\n\n📂 <b><i>Cam Files List:</i></b>\n{file_list_text}\n\n⚠️ <b>Alert:</b> <i>Both versions exist! Intha mela irukka Cam prints aah delete pannidava?</i>"
-            
-            button = InlineKeyboardMarkup([
-                [InlineKeyboardButton("🗑️ Delete PreDVD/Cam", callback_data=f"delmoviecam#{safe_name}")]
-            ])
-
-            # Intha delete message unga "LOG_CHANNEL" (Admin channel) kku poyidum
-            # Neenga vera ID kku anuppanum na, LOG_CHANNEL aah maathikonga
-            try:
-                await client.send_message(
-                    chat_id=LOG_CHANNEL, 
-                    text=delete_text, 
-                    parse_mode=enums.ParseMode.HTML,
-                    reply_markup=button
-                )
-            except Exception as e:
-                logger.error(f"⚠️ Delete Alert Error: {e}")
-        
     except Exception as e:
         logger.error(f"⚠️ Main Handler Error: {e}")
         if 'clean_name' in locals() and clean_name in LAST_SENT: 
