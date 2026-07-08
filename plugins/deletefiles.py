@@ -154,6 +154,7 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     await query.message.edit_text(
         f"✅ Successfully deleted `{deleted_count}` files for keyword: **'{keyword}'**."
     )
+    asyncio.create_task(auto_delete_helper(query.message, query.message.reply_to_message, 15))
 
 # ==============================================================
 # AUTOMATIC PRINT ANALYZER (WITH DETAILS & COMMAND)
@@ -338,4 +339,4 @@ async def delete_specific_cam(bot: Client, query: CallbackQuery):
     )
     
     await query.message.edit_text(success_text, parse_mode=enums.ParseMode.HTML)
-    asyncio.create_task(auto_delete_helper(query.message, None, 15))
+    asyncio.create_task(auto_delete_helper(query.message, query.message.reply_to_message, 15))
