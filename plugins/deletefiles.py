@@ -243,8 +243,12 @@ async def direct_scan_movie(bot: Client, message: Message):
             c_title = re.sub(r'\s+', ' ', c_title).strip().title()
             if len(c_title) < 2: c_title = movie_name.title()
             
-            # Final Clean Display Format
-            formatted_item = f"<b>{count}.</b> <code>{c_title} ({year})</code> • {quality} • {size_str}"
+            # 6. Extract Print Type (PreDVD, CAM, etc.)
+            p_match = re.search(rf'(?i)\b({cam_pattern})\b', text_to_parse)
+            print_type = p_match.group(1).upper() if p_match else "CAM"
+            
+            # Final Clean Display Format (Added print_type right after year)
+            formatted_item = f"<b>{count}.</b> <code>{c_title} ({year}) {print_type}</code> • {quality} • {size_str}"
             cam_filenames.append(formatted_item)
             count += 1
         
