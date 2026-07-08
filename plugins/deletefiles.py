@@ -10,8 +10,8 @@ from info import ADMINS
 logger = logging.getLogger(__name__)
 
 # Constants for Batch Deletion
-BATCH_SIZE = 20  # Number of files to delete in each batch
-SLEEP_TIME = 2   # Seconds to wait between batches
+BATCH_SIZE = 20
+SLEEP_TIME = 2
 
 # --- 30 Seconds Auto Delete Helper ---
 async def auto_delete_helper(bot_msg, user_msg, delay=30):
@@ -32,7 +32,7 @@ async def deletemultiplefiles(bot: Client, message: Message):
         )
         asyncio.create_task(auto_delete_helper(msg, message, 10))
         return
-        
+    
     try:
         keyword = message.text.split(" ", 1)[1].strip()
         if not keyword:
@@ -45,32 +45,25 @@ async def deletemultiplefiles(bot: Client, message: Message):
         )
         asyncio.create_task(auto_delete_helper(msg, message, 15))
         return
-        
-    status_msg = await message.reply_text("🔎 Checking database... Please wait.")
     
-    # Keyword regex pattern
+    status_msg = await message.reply_text("⏳ Checking database... Please wait.")
+    
     raw_pattern = r'(\b|[\.\+\-_])' + re.escape(keyword) + r'(\b|[\.\+\-_])'
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
-    
-    # Cam/Theater words list
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
     
-    # Check Database
     cursor = Media.collection.find({'file_name': regex})
     hd_count = 0
     cam_count = 0
     
     async for doc in cursor:
         fname = doc.get("file_name", "").lower()
-        # Fix: Checking caption as well (to handle truncated filename problem)
         caption = doc.get("caption", "")
         if caption is None:
             caption = ""
         caption = caption.lower()
         
         check_text = fname + " " + caption
-        
-        # Checking if cam words are present
         if any(x in check_text for x in cam_words):
             cam_count += 1
         else:
@@ -79,19 +72,18 @@ async def deletemultiplefiles(bot: Client, message: Message):
     total_count = hd_count + cam_count
     
     if total_count == 0:
-        msg = await status_msg.edit_text(f"❌ No files found for: **{keyword}**")
+        msg = await status_msg.edit_text(f"😔 No files found for: **{keyword}**")
         asyncio.create_task(auto_delete_helper(msg, message, 30))
         return
 
-    # Creating dynamic buttons
     buttons = []
     if hd_count > 0:
-        buttons.append([InlineKeyboardButton(f"🎞 Delete HD Prints ({hd_count})", callback_data=f"deltype#hd#{keyword}")])
+        buttons.append([InlineKeyboardButton(f"🗑 Delete HD Prints ({hd_count})", callback_data=f"deltype#hd#{keyword}")])
     if cam_count > 0:
-        buttons.append([InlineKeyboardButton(f"🎥 Delete PreDVD/Cam ({cam_count})", callback_data=f"deltype#cam#{keyword}")])
+        buttons.append([InlineKeyboardButton(f"🗑 Delete PreDVD/Cam ({cam_count})", callback_data=f"deltype#cam#{keyword}")])
     if hd_count > 0 and cam_count > 0:
         buttons.append([InlineKeyboardButton(f"🗑 Delete All ({total_count})", callback_data=f"deltype#all#{keyword}")])
-        
+    
     buttons.append([InlineKeyboardButton("❌ Cancel", callback_data="close_data")])
     
     msg = await status_msg.edit_text(
@@ -100,7 +92,6 @@ async def deletemultiplefiles(bot: Client, message: Message):
         parse_mode=enums.ParseMode.HTML
     )
     
-    # Auto-deleting the menu in 30 seconds
     asyncio.create_task(auto_delete_helper(msg, message, 30))
 
 @Client.on_callback_query(filters.regex(r'^deltype#'), group=-1)
@@ -116,7 +107,6 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     raw_regex = re.compile(raw_pattern, flags=re.IGNORECASE)
     cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
     
-    # Preparing query based on the selected button (Caption checking added)
     if del_type == "all":
         filter_query = {'file_name': raw_regex}
     elif del_type == "cam":
@@ -138,16 +128,16 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     initial_count = await Media.count_documents(filter_query)
     
     if initial_count == 0:
-        return await query.message.edit_text("❌ No files found to delete.", reply_markup=None)
+        return await query.message.edit_text("😔 No files found to delete.", reply_markup=None)
 
-    await query.message.edit_text(f"🗑 Deleting `{initial_count}` files... Please wait.", reply_markup=None)
+    await query.message.edit_text(f"⏳ Deleting `{initial_count}` files... Please wait.", reply_markup=None)
     
     deleted_count = 0
     while True:
         documents_to_delete = await Media.collection.find(filter_query, {"_id": 1}).limit(BATCH_SIZE).to_list(length=BATCH_SIZE)
         if not documents_to_delete:
-            break 
-            
+            break
+        
         ids_to_delete = [doc["_id"] for doc in documents_to_delete]
         batch_result = await Media.collection.delete_many({"_id": {"$in": ids_to_delete}})
         
@@ -158,237 +148,190 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
         
         if deleted_count >= initial_count or deleted_in_batch == 0:
             break
-            
-        await asyncio.sleep(SLEEP_TIME)
         
+        await asyncio.sleep(SLEEP_TIME)
+    
     await query.message.edit_text(
         f"✅ Successfully deleted `{deleted_count}` files for keyword: **'{keyword}'**."
     )
 
+# ==============================================================
+# AUTOMATIC PRINT ANALYZER (WITH DETAILS & COMMAND)
+# ==============================================================
 
-# ==============================================================
-# CLEANCAM CODE (SAFE VERSION WITH TEXT FILE & AUTO-DELETE)
-# ==============================================================
-@Client.on_message(filters.command("cleancam") & filters.user(ADMINS))
-async def ask_clean_cam(client, message):
-    if message.chat.type != enums.ChatType.PRIVATE:
-        msg = await message.reply_text(
-            "<b>Hey bro, please use this command only in my PM (Private Message)!</b>",
-            parse_mode=enums.ParseMode.HTML
-        )
-        asyncio.create_task(auto_delete_helper(msg, message, 10))
-        return
-        
-    status = await message.reply("🔎 Checking Database for Theater/Cam prints... Please wait.")
-    
-    cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
-    found_files = []
-    
-    # Fix: Modified /cleancam to check captions as well
-    cam_pattern = "|".join(cam_words)
-    cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
-    
-    cursor = Media.collection.find({'$or': [{'file_name': cam_regex}, {'caption': cam_regex}]})
-    async for doc in cursor:
-        found_files.append(doc.get("file_name", "Unknown File"))
-            
-    found_files = list(set(found_files))
-    total_found = len(found_files)
-    
-    if total_found == 0:
-        msg = await status.edit("✅ Database clean! No Theater/Cam prints found.")
+@Client.on_message(filters.command("scanmovie") & filters.user(ADMINS))
+async def direct_scan_movie(bot: Client, message: Message):
+    if len(message.command) < 2:
+        error_text = "<b>⚠️ Error:</b> Invalid command format!\n👉 <b>Format:</b> <code>/scanmovie <movie name></code>\n💡 <b>Example:</b> <code>/scanmovie Master</code>"
+        msg = await message.reply(error_text, parse_mode=enums.ParseMode.HTML)
         asyncio.create_task(auto_delete_helper(msg, message, 15))
         return
-        
-    file_path = "cam_prints_to_delete.txt"
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(f"🛑 FOUND {total_found} THEATER/CAM PRINTS:\n")
-        f.write("======================================\n\n")
-        for name in found_files:
-            f.write(f"- {name}\n")
-            
-    confirm_button = InlineKeyboardButton("🗑 Yes, Delete All", callback_data="confirm_cleancam")
-    abort_button = InlineKeyboardButton("❌ No, Cancel", callback_data="close_data")
-    markup = InlineKeyboardMarkup([[confirm_button], [abort_button]])
-    
-    doc_msg = await message.reply_document(
-        document=file_path,
-        caption=f"⚠️ **Attention!**\n\nI searched the database and found **{total_found}** Theater/Cam prints.\n\nPlease open the `.txt` file above to check which files they are.\n\n**Do you want to permanently delete all of these?**",
-        reply_markup=markup
-    )
-    
-    await status.delete()
-    if os.path.exists(file_path):
-        os.remove(file_path)
-        
-    # Auto-deleting the cleancam message in 30 seconds
-    asyncio.create_task(auto_delete_helper(doc_msg, message, 300))
-
-@Client.on_callback_query(filters.regex(r'^confirm_cleancam$'), group=-1)
-async def execute_clean_cam(client, query):
-    await query.answer("Deleting Cam Prints... Please wait!", show_alert=True)
-    
-    try:
-        await client.send_document(
-            chat_id=query.from_user.id,
-            document=query.message.document.file_id,
-            caption="**Backup File!**\n\nHere is the list of deleted files. Please keep it safe!"
-        )
-    except Exception as e:
-        print(f"Failed to send backup to PM: {e}")
-        
-    cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam"]
-    cam_pattern = "|".join(cam_words)
-    cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
-    
-    await Media.collection.delete_many({'$or': [{'file_name': cam_regex}, {'caption': cam_regex}]})
-        
-    await query.message.edit_caption(
-        caption="**✅ Success!**\n\nAll Theater/Cam prints have been deleted from the database. This message will auto-delete shortly.",
-        reply_markup=None 
-    )
-    
-    await asyncio.sleep(10)
-    await query.message.delete()
-
-# ==============================================================
-# AUTOMATIC PRINT ANALYZER & CAM DELETER (WITH DETAILS & COMMAND)
-# ==============================================================
-import asyncio # Auto delete kku kandippa ithu theva
-
-# 1. Manual aah pazhaya movies-a check panna pudhu command
-@Client.on_message(filters.command("scanmovie") & filters.user(ADMINS))
-async def manual_scan_movie(bot: Client, message: Message):
-    if len(message.command) < 2:
-        error_text = "<blockquote>⚠️ <b>Error:</b> Command thappu bro!\n✨ <b>Correct Format:</b> <code>/scanmovie <movie name></code>\n💡 <b>Example:</b> <code>/scanmovie Master</code></blockquote>"
-        return await message.reply(error_text, parse_mode=enums.ParseMode.HTML)
     
     movie_name = message.text.split(" ", 1)[1]
     safe_name = movie_name[:40].strip()
     
-    btn = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔍 Analyze Prints", callback_data=f"analyze#{safe_name}")]
-    ])
+    status_msg = await message.reply("🔍 <i>Scanning database for prints... Please wait.</i>")
     
-    scan_text = f"<blockquote>🔍 <b>Manual Scan For:</b> <code>{movie_name}</code></blockquote>\n\n<i>Kela irukka button-a click panni PreDVD irukka nu check pannunga bro!</i> ⚡️"
-    msg = await message.reply(scan_text, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
-    
-    await asyncio.sleep(30)
-    try:
-        await msg.delete()
-        await message.delete() 
-    except:
-        pass
-
-# 2. Analyze button click pannumpothu nadakkura vishayam
-@Client.on_callback_query(filters.regex(r'^analyze#'), group=-1)
-async def analyze_movie_prints(bot: Client, query: CallbackQuery):
-    movie_name = query.data.split("#")[1]
-    await query.answer("🔍 Checking Database... Please wait!", show_alert=False)
-
-    raw_pattern = r'(\b|[\.\+\-_])' + re.escape(movie_name) + r'(\b|[\.\+\-_])'
+    # Accurate Match Pattern (Matches dots, brackets, hyphens)
+    raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + re.escape(movie_name) + r'(\b|[\.\+\-_\[\]\(\)])'
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
-
-    cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
+    
+    # Updated Cam words based on your database
+    cam_words = ["camrip", "hdcam", "predvd", "predvdrip", "prehd", "tsrip", "hdts", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
     cam_pattern = "|".join(cam_words)
     cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
 
+    # Check BOTH file_name and caption for accurate results
+    movie_query = {'$or': [{'file_name': regex}, {'caption': regex}]}
+    
+    # Queries for Cam and HD
     cam_query = {
         '$and': [
-            {'file_name': regex},
+            movie_query,
             {'$or': [{'file_name': cam_regex}, {'caption': cam_regex}]}
         ]
     }
     
     hd_query = {
         '$and': [
-            {'file_name': regex},
+            movie_query,
             {'file_name': {'$not': cam_regex}},
             {'caption': {'$not': cam_regex}}
         ]
     }
 
+    # Getting document counts
     cam_count = await Media.count_documents(cam_query)
     hd_count = await Media.count_documents(hd_query)
 
+    # Logic 1: Both HD and Cam prints exist
     if hd_count > 0 and cam_count > 0:
-        cam_files_cursor = Media.collection.find(cam_query).limit(10)
+        cam_files_cursor = Media.collection.find(cam_query).limit(15)
         cam_filenames = []
-        count = 1 
+        count = 1
+        
         async for doc in cam_files_cursor:
-            cam_filenames.append(f"<b>{count}.</b> 📄 <code>{doc.get('file_name', 'Unknown')}</code>")
+            raw_fname = doc.get('file_name', '')
+            raw_cap = doc.get('caption', '')
+            f_size = doc.get('file_size', 0)
+            
+            text_to_parse = str(raw_cap) if raw_cap else str(raw_fname)
+            
+            # 1. Clean Prefix Tags
+            text_to_parse = re.sub(r'(?i)(@[\w_]+|\[CF\]|@CC\.|@WMR_|@MM_New|@DVDWOALL|@Movies_Arc)\s*[-_]*\s*', '', text_to_parse)
+            
+            # 2. Extract Year
+            y_match = re.search(r'\b(19\d{2}|20\d{2})\b', text_to_parse)
+            year = y_match.group(1) if y_match else "N/A"
+            
+            # 3. Extract Quality
+            q_match = re.search(r'(?i)\b(1080p|720p|480p|360p|2160p|4k)\b', text_to_parse)
+            quality = q_match.group(1).lower() if q_match else "N/A"
+            
+            # 4. Extract Size
+            if f_size:
+                s_mb = f_size / (1024 * 1024)
+                size_str = f"{s_mb/1024:.1f}GB" if s_mb >= 1024 else f"{int(s_mb)}MB"
+            else:
+                s_match = re.search(r'(?i)(\d+(?:\.\d+)?\s*(?:GB|MB))', text_to_parse)
+                size_str = s_match.group(1).upper().replace(' ', '') if s_match else "N/A"
+            
+            # 5. Extract Clean Movie Name
+            c_title = text_to_parse.split(year)[0] if year != "N/A" else text_to_parse
+            c_title = re.sub(r'[\(\)\[\]\.\-_]', ' ', c_title)
+            c_title = re.sub(r'(?i)(tamil|telugu|hindi|malayalam|kannada|hq|predvd|cam|dvdscr|hdcam|hdrip|true|web|dl|avc|dd|aac|\bline\b|\baudio\b|remastered)', '', c_title)
+            c_title = re.sub(r'\s+', ' ', c_title).strip().title()
+            if len(c_title) < 2: c_title = movie_name.title()
+            
+            # Final Clean Display Format
+            formatted_item = f"<b>{count}.</b> <code>{c_title} ({year})</code> • {quality} • {size_str}"
+            cam_filenames.append(formatted_item)
             count += 1
         
         file_list_text = "\n".join(cam_filenames)
         
-        text = f"<blockquote>🎬 <b>Movie Name:</b> <code>{movie_name}</code>\n✅ <b>HD Prints Found:</b> <code>{hd_count}</code>\n🎥 <b>PreDVD / Cam Found:</b> <code>{cam_count}</code></blockquote>\n\n📂 <b><i>Cam Files List:</i></b>\n{file_list_text}\n\n⚠️ <b>Alert:</b> <i>Both versions exist! Intha mela irukka Cam prints aah delete pannidava?</i>"
+        text = (
+            f"<b>📊 DATABASE SCAN REPORT</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"<b>🎬 Movie:</b> <code>{movie_name}</code>\n"
+            f"<b>✅ HD Prints:</b> <code>{hd_count}</code>\n"
+            f"<b>⚠️ PreDVD/Cam:</b> <code>{cam_count}</code>\n\n"
+            f"<b>🗑️ CAM FILES TO DELETE:</b>\n"
+            f"{file_list_text}\n\n"
+            f"<i>💡 Low quality prints detected! Proceed with deletion?</i>"
+        )
         
         btn = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🗑️ Delete PreDVD/Cam", callback_data=f"delmoviecam#{movie_name}")],
-            [InlineKeyboardButton("❌ Cancel", callback_data="close_data")]
+            [InlineKeyboardButton("🗑 Wipe Cam Prints", callback_data=f"delmoviecam#{safe_name}")],
+            [InlineKeyboardButton("❌ Close", callback_data="close_data")]
         ])
-        msg = await query.message.reply_text(text, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
-        
-        await asyncio.sleep(60)
-        try:
-            await msg.delete()
-        except:
-            pass
-        
-    elif hd_count > 0:
-        text = f"<blockquote>🎬 <b>Movie Name:</b> <code>{movie_name}</code></blockquote>\n\n🌟 <b>Super News!</b> Only <b>HD prints</b> (<code>{hd_count}</code>) are available. \n<i>No Cam prints found!</i> 🎉"
-        msg = await query.message.reply_text(text, parse_mode=enums.ParseMode.HTML)
-        await asyncio.sleep(10) 
-        try:
-            await msg.delete()
-        except:
-            pass
-        
-    elif cam_count > 0:
-        text = f"<blockquote>🎬 <b>Movie Name:</b> <code>{movie_name}</code></blockquote>\n\n⏳ <b>Status:</b> Only <b>PreDVD/Cam prints</b> (<code>{cam_count}</code>) are available.\n<i>We need to wait for the HD release bro!</i> 🍿"
-        msg = await query.message.reply_text(text, parse_mode=enums.ParseMode.HTML)
-        await asyncio.sleep(10) 
-        try:
-            await msg.delete()
-        except:
-            pass
-        
-    else:
-        text = f"<blockquote>❌ <b>Oops!</b> Could not find files for <code>{movie_name}</code>.</blockquote>\n<i>Spelling correct aah irukka nu check pannunga bro.</i> 🔍"
-        msg = await query.message.reply_text(text, parse_mode=enums.ParseMode.HTML)
-        await asyncio.sleep(10) 
-        try:
-            await msg.delete()
-        except:
-            pass
 
-# 3. Delete button click pannumpothu nadakkura vishayam
+        await status_msg.edit_text(text, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
+    
+    # Logic 2: Only HD prints exist
+    elif hd_count > 0:
+        text = (
+            f"<b>📊 DATABASE SCAN REPORT</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"<b>🎬 Movie:</b> <code>{movie_name}</code>\n\n"
+            f"<b>✅ Superb!</b> Only <b>HD prints</b> (<code>{hd_count}</code> files) exist in the database.\n"
+            f"<i>No messy cam prints found!</i> ✨"
+        )
+        await status_msg.edit_text(text, parse_mode=enums.ParseMode.HTML)
+        asyncio.create_task(auto_delete_helper(status_msg, message, 30))
+    
+    # Logic 3: Only Cam prints exist
+    elif cam_count > 0:
+        text = (
+            f"<b>📊 DATABASE SCAN REPORT</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"<b>🎬 Movie:</b> <code>{movie_name}</code>\n\n"
+            f"<b>⚠️ Warning:</b> Only <b>PreDVD/Cam</b> (<code>{cam_count}</code> files) are available right now.\n"
+            f"<i>Let's wait for the HD release before deleting these.</i> ⏳"
+        )
+        await status_msg.edit_text(text, parse_mode=enums.ParseMode.HTML)
+        asyncio.create_task(auto_delete_helper(status_msg, message, 30))
+    
+    # Logic 4: Movie not found
+    else:
+        text = (
+            f"<b>📊 DATABASE SCAN REPORT</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"<b>❌ Error:</b> No files found for <code>{movie_name}</code>.\n"
+            f"<i>Please double-check the spelling!</i> 🧐"
+        )
+        await status_msg.edit_text(text, parse_mode=enums.ParseMode.HTML)
+        asyncio.create_task(auto_delete_helper(status_msg, message, 30))
+
 @Client.on_callback_query(filters.regex(r'^delmoviecam#'), group=-1)
 async def delete_specific_cam(bot: Client, query: CallbackQuery):
     movie_name = query.data.split("#")[1]
-    await query.answer("🗑️ Deleting Cam Prints... Please wait!", show_alert=True)
+    await query.answer("⏳ Wiping Cam Prints... Please wait!", show_alert=True)
 
-    raw_pattern = r'(\b|[\.\+\-_])' + re.escape(movie_name) + r'(\b|[\.\+\-_])'
+    raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + re.escape(movie_name) + r'(\b|[\.\+\-_\[\]\(\)])'
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
-
-    cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
+    
+    cam_words = ["camrip", "hdcam", "predvd", "predvdrip", "prehd", "tsrip", "hdts", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
     cam_pattern = "|".join(cam_words)
     cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
 
+    movie_query = {'$or': [{'file_name': regex}, {'caption': regex}]}
+    
     cam_query = {
         '$and': [
-            {'file_name': regex},
+            movie_query,
             {'$or': [{'file_name': cam_regex}, {'caption': cam_regex}]}
         ]
     }
 
     deleted_result = await Media.collection.delete_many(cam_query)
     
-    success_text = f"<blockquote>✅ <b>Mission Success!</b>\n🗑️ <b>Deleted:</b> <code>{deleted_result.deleted_count}</code> PreDVD/Cam prints for <b>{movie_name}</b>.</blockquote>\n\n<i>Database is clean now!</i> ✨"
-    await query.message.edit_text(success_text, parse_mode=enums.ParseMode.HTML)
+    success_text = (
+        f"<b>✅ WIPE COMPLETE</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━\n"
+        f"🗑 <b>Deleted:</b> <code>{deleted_result.deleted_count}</code> Cam prints for <b>{movie_name}</b>.\n\n"
+        f"<i>The database is clean now!</i> ✨"
+    )
     
-    await asyncio.sleep(10)
-    try:
-        await query.message.delete()
-    except:
-        pass
+    await query.message.edit_text(success_text, parse_mode=enums.ParseMode.HTML)
+    asyncio.create_task(auto_delete_helper(query.message, None, 15))
