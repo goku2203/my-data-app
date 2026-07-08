@@ -184,93 +184,90 @@ async def send_batched_post(client, clean_name):
     except asyncio.CancelledError:
         return 
 
-    if clean_name not in BATCH_DATA:
-        return
-
-    raw_files_list = BATCH_DATA.pop(clean_name)
-    if clean_name in BATCH_TASKS:
-        del BATCH_TASKS[clean_name]
-
-    unique_files = []
-    seen_sizes = set()
-    for f in raw_files_list:
-        if f['size'] not in seen_sizes:
-            unique_files.append(f)
-            seen_sizes.add(f['size'])
-            
-    if not unique_files:
-        return
-
-    all_audios = set()
-    first_file = unique_files[0]
-    
-    for f in unique_files:
-        langs = f['audio'].split(' - ')
-        for l in langs:
-            if l != "Original Audio":
-                all_audios.add(l)
-    
-    if all_audios:
-        priority = ['Tamil', 'Telugu', 'Hindi', 'Malayalam', 'Kannada', 'English']
-        sorted_audios = sorted(all_audios, key=lambda x: priority.index(x) if x in priority else 99)
-        final_audio_str = " - ".join(sorted_audios)
-    else:
-        final_audio_str = first_file['audio']
-
-    all_prints = set()
-    for f in unique_files:
-        if f['print_q']:
-            all_prints.add(f['print_q'])
-            
-    final_print_str = " | ".join(all_prints) if all_prints else "HD Print"
-
-    categorized = { "4K": [], "FULL HD": [], "Only HD": [], "HD-Rip": [] }
-    
-    for file in unique_files:
-        cat = file['category']
-        if cat in categorized:
-            categorized[cat].append(file)
-        else:
-            categorized["HD-Rip"].append(file)
-
-    safe_title = get_safe_name(clean_name)
-    movie_year = first_file['year']
-    image_url = await get_tmdb_image(clean_name, movie_year)
-
-    caption = (
-        f"🎬 <b>{safe_title}</b>\n\n"
-        f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
-        f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
-        f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
-        f"⚡ <b>Download Available In:</b>\n\n"
-    )
-
-    # Collect all files to sort them purely by size
-    all_files_to_post = []
-    order = ["HD-Rip", "Only HD", "FULL HD", "4K"]
-    for category in order:
-        if categorized[category]:
-            all_files_to_post.extend(categorized[category])
-
-    if not all_files_to_post:
-        return
-
-    # Sort files from smallest size to largest size (e.g., 250MB to 2.7GB)
-    all_files_to_post.sort(key=lambda x: x['raw_size'])
-
-    # Format the new folder template
-    for f in all_files_to_post:
-        caption += f"📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n\n"
-
-    if not has_files:
-        return
-
-    caption += "━━━━━━━━━━━━━━━━━━━\n"
-    caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
-    caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>\n\n"
-    caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
-
+    # Adding a MASTER TRY-CATCH to catch any silent crashes
     try:
+        if clean_name not in BATCH_DATA:
+            return
+
+        raw_files_list = BATCH_DATA.pop(clean_name)
+        if clean_name in BATCH_TASKS:
+            del BATCH_TASKS[clean_name]
+
+        unique_files = []
+        seen_sizes = set()
+        for f in raw_files_list:
+            if f['size'] not in seen_sizes:
+                unique_files.append(f)
+                seen_sizes.add(f['size'])
+                
+        if not unique_files:
+            return
+
+        all_audios = set()
+        first_file = unique_files[0]
+        
+        for f in unique_files:
+            langs = f['audio'].split(' - ')
+            for l in langs:
+                if l != "Original Audio":
+                    all_audios.add(l)
+        
+        if all_audios:
+            priority = ['Tamil', 'Telugu', 'Hindi', 'Malayalam', 'Kannada', 'English']
+            sorted_audios = sorted(all_audios, key=lambda x: priority.index(x) if x in priority else 99)
+            final_audio_str = " - ".join(sorted_audios)
+        else:
+            final_audio_str = first_file['audio']
+
+        all_prints = set()
+        for f in unique_files:
+            if f['print_q']:
+                all_prints.add(f['print_q'])
+                
+        final_print_str = " | ".join(all_prints) if all_prints else "HD Print"
+
+        categorized = { "4K": [], "FULL HD": [], "Only HD": [], "HD-Rip": [] }
+        
+        for file in unique_files:
+            cat = file['category']
+            if cat in categorized:
+                categorized[cat].append(file)
+            else:
+                categorized["HD-Rip"].append(file)
+
+        safe_title = get_safe_name(clean_name)
+        movie_year = first_file['year']
+        
+        # TMDB Image fetch
+        image_url = await get_tmdb_image(clean_name, movie_year)
+
+        caption = (
+            f"🎬 <b>{safe_title}</b>\n\n"
+            f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
+            f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
+            f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
+            f"⚡ <b>Download Available In:</b>\n\n"
+        )
+
+        all_files_to_post = []
+        order = ["HD-Rip", "Only HD", "FULL HD", "4K"]
+        for category in order:
+            if categorized[category]:
+                all_files_to_post.extend(categorized[category])
+
+        if not all_files_to_post:
+            return
+
+        all_files_to_post.sort(key=lambda x: x['raw_size'])
+
+        for f in all_files_to_post:
+            caption += f"📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n\n"
+
+        caption += "━━━━━━━━━━━━━━━━━━━\n"
+        caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
+        caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>\n\n"
+        caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
+
         if image_url:
             await client.send_photo(
                 chat_id=UPDATES_CHANNEL,
@@ -285,8 +282,10 @@ async def send_batched_post(client, clean_name):
                 parse_mode=ParseMode.HTML 
             )
         logger.info(f"✅ Post Sent: {clean_name}")
+        
     except Exception as e:
-        logger.error(f"❌ Post Failed: {e}")
+        # This will catch ANY silent error and print it to the Render Logs!
+        logger.error(f"❌ CRITICAL ERROR in Autopost: {e}", exc_info=True)
 
 # --- 3. MAIN LISTENER ---
 
