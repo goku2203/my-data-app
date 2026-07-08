@@ -1,89 +1,127 @@
 import re
+import io
 import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database.ia_filterdb import Media
 from info import ADMINS
 
-# Regex Patterns for finding Movie Name, Year, and Quality
-YEAR_REGEX = re.compile(r"(?i)(.*?)[\.\-\s\[\(]*(19\d{2}|20\d{2})")
-PREDVD_REGEX = re.compile(r"(?i)(predvd|camrip|hdcam|hdtc|dvdscr|scr|pdvd|cam|predvbd)")
-HD_REGEX = re.compile(r"(?i)(1080p|720p|bluray|web-dl|webrip|hdrip|hq|hd|4k)")
-
 # Temp memory to store IDs waiting for confirmation
 TEMP_DELETE_DATA = {}
 
+def clean_movie_title(filename):
+    """Cleans prefixes, tags, and extracts a neat Title and Year."""
+    # Remove Telegram usernames (e.g., @Goku_Stark) and channel tags (e.g., [CF])
+    cleaned = re.sub(r'@[\w_]+', '', filename)
+    cleaned = re.sub(r'^\[.*?\]\s*', '', cleaned)
+    cleaned = cleaned.replace('.', ' ').replace('_', ' ')
+    
+    # Extract Title and Year
+    match = re.search(r'(.*?)\b((?:19|20)\d{2})\b', cleaned)
+    if match:
+        title = match.group(1).strip()
+        year = match.group(2)
+        # Remove trailing hyphens or brackets
+        title = re.sub(r'[\(\[\-\s]+$', '', title).strip()
+        display_name = f"{title.title()} ({year})"
+        unique_key = f"{title.lower()}_{year}"
+        return display_name, unique_key
+    else:
+        # Fallback if no year is found
+        title = cleaned.split('-')[0].split('[')[0].strip().title()
+        return title, title.lower()
+
+def check_quality(filename):
+    """Determines if a file is an early print (CAM) or HD."""
+    filename_lower = filename.lower()
+    cam_keywords = ['cam', 'hdcam', 'hq cam', 'hdts', 'hdtc', 'tsrip', 'predvd', 'predvdrip', 'theater', 'theatre', 'scr', 'dvdscr', 'pdvd', 'predvbd']
+    if any(kw in filename_lower for kw in cam_keywords):
+        return "CAM"
+    return "HD"
+
+
 @Client.on_message(filters.command("cleandb") & filters.user(ADMINS))
 async def clean_db(client, message):
-    msg = await message.reply("`Database scan start pandren... Konjam wait pannunga bro ⏳`")
+    msg = await message.reply("⏳ **Scanning Database for PreDVD & HD prints... Please wait!**")
     
     movies_data = {}
     
-    # Database la irukka eppadi files-aiyum check pandrom (Memory efficient cursor)
+    # Database scan
     cursor = Media.collection.find({})
     async for file in cursor:
         file_name = file.get("file_name", "")
+        if not file_name: continue
         _id = file.get("_id")
         
-        # Name and Year extract pandrom
-        match = YEAR_REGEX.search(file_name)
-        if match:
-            raw_name = match.group(1).replace(".", " ").replace("_", " ").strip()
-            year = match.group(2)
-            movie_key = f"{raw_name.lower()}_{year}" # E.g., "leo_2023"
+        display_name, movie_key = clean_movie_title(file_name)
+        quality = check_quality(file_name)
+        
+        if movie_key not in movies_data:
+            movies_data[movie_key] = {
+                "display_name": display_name,
+                "predvd_ids": [],
+                "hd_exists": False
+            }
+        
+        if quality == "CAM":
+            movies_data[movie_key]["predvd_ids"].append(_id)
+        else:
+            movies_data[movie_key]["hd_exists"] = True
             
-            if movie_key not in movies_data:
-                movies_data[movie_key] = {
-                    "display_name": raw_name.title(),
-                    "year": year,
-                    "predvd_ids": [],
-                    "hd_exists": False
-                }
-            
-            # PreDVD ah illati HD ah nu check pandrom
-            if PREDVD_REGEX.search(file_name):
-                movies_data[movie_key]["predvd_ids"].append(_id)
-            elif HD_REGEX.search(file_name):
-                movies_data[movie_key]["hd_exists"] = True
-                
     # Filter the scanned results
     delete_list = []
     only_predvd_list = []
     delete_ids = []
     
     for key, data in movies_data.items():
-        if data["predvd_ids"]: # PreDVD irunthal
+        if data["predvd_ids"]: # If PreDVD exists
             if data["hd_exists"]:
-                # Rendum Irukku -> List for Deletion
-                delete_list.append(f"▪️ {data['display_name']} ({data['year']})")
+                # Both exist -> Safe to delete PreDVD
+                delete_list.append(f"▪️ {data['display_name']}")
                 delete_ids.extend(data["predvd_ids"])
             else:
-                # PreDVD Mattum Irukku
-                only_predvd_list.append(f"▪️ {data['display_name']} ({data['year']})")
+                # Only PreDVD exists -> Keep it, needs upgrade
+                only_predvd_list.append(f"▪️ {data['display_name']}")
                 
+    if not delete_list and not only_predvd_list:
+        return await msg.edit("✨ **Database is clean!** No PreDVD or CAM prints found.")
+
     # Text Report Building
-    text = "**📊 Database PreDVD Scan Report**\n\n"
+    report = "📊 **Database PreDVD Scan Report**\n\n"
     
     if delete_list:
-        text += f"**🗑️ HD & PreDVD Rendum Irukku (Delete Pannalam):**\n"
-        for i, name in enumerate(delete_list[:30]): # First 30 movies mattum kaatum (message perusa poga koodathu)
-            text += f"{i+1}. {name}\n"
+        report += f"🗑️ **Replaceable Early Prints (HD Available):**\n"
+        report += "*(Safe to delete these PreDVD files)*\n"
+        for name in delete_list[:30]: 
+            report += f"{name}\n"
         if len(delete_list) > 30:
-            text += f"... and {len(delete_list) - 30} more movies.\n"
-        text += f"\n*Total PreDVD files waiting for deletion: {len(delete_ids)}*\n\n"
+            report += f"... and {len(delete_list) - 30} more movies.\n"
+        report += f"\n*Total PreDVD files waiting for deletion: {len(delete_ids)}*\n\n"
     else:
-        text += "**🗑️ Delete panna entha old PreDVD files-um illai.**\n\n"
+        report += "🗑️ **No replaceable PreDVD files found.**\n\n"
         
     if only_predvd_list:
-        text += f"**⚠️ PreDVD Mattum Irukku (HD Illai - Update Pannanum):**\n"
-        for i, name in enumerate(only_predvd_list[:30]):
-            text += f"{i+1}. {name}\n"
+        report += f"⚠️ **Pending Upgrades (Only PreDVD Available):**\n"
+        report += "*(Waiting for HD releases)*\n"
+        for name in only_predvd_list[:30]:
+            report += f"{name}\n"
         if len(only_predvd_list) > 30:
-            text += f"... and {len(only_predvd_list) - 30} more movies.\n"
-            
-    if not delete_list and not only_predvd_list:
-        return await msg.edit("Database romba clean aah irukku bro! PreDVD files ethuvum illai. ✨")
-        
+            report += f"... and {len(only_predvd_list) - 30} more movies.\n"
+
+    # Export to .txt if the report is too long 
+    full_report = "📊 DATABASE PREDVD SCAN REPORT\n=================================\n\n"
+    if delete_list:
+        full_report += f"🗑️ REPLACEABLE EARLY PRINTS (HD Available) - [{len(delete_ids)} Files]\n"
+        full_report += "(Safe to delete these PreDVD files)\n---------------------------------\n"
+        for name in delete_list:
+            full_report += f"{name}\n"
+        full_report += "\n"
+    if only_predvd_list:
+        full_report += f"⚠️ PENDING UPGRADES (Only PreDVD Available) - [{len(only_predvd_list)} Movies]\n"
+        full_report += "(Waiting for HD releases)\n---------------------------------\n"
+        for name in only_predvd_list:
+            full_report += f"{name}\n"
+
     # Add Interactive Buttons
     buttons = []
     if delete_ids:
@@ -91,7 +129,20 @@ async def clean_db(client, message):
         buttons.append([InlineKeyboardButton("✅ Confirm & Delete PreDVDs", callback_data="confirm_delete_predvd")])
     buttons.append([InlineKeyboardButton("❌ Cancel", callback_data="cancel_delete")])
     
-    await msg.edit(text, reply_markup=InlineKeyboardMarkup(buttons))
+    reply_markup = InlineKeyboardMarkup(buttons)
+
+    # If the list is large, send the full report as a .txt file
+    if len(report) > 4000 or len(delete_list) > 30 or len(only_predvd_list) > 30:
+        with io.BytesIO(str.encode(full_report)) as report_file:
+            report_file.name = "PreDVD_Scan_Report.txt"
+            await message.reply_document(
+                document=report_file,
+                caption=report,
+                reply_markup=reply_markup
+            )
+        await msg.delete()
+    else:
+        await msg.edit(report, reply_markup=reply_markup)
 
 
 @Client.on_callback_query(filters.regex(r"^(confirm_delete_predvd|cancel_delete)$"))
@@ -99,6 +150,8 @@ async def confirm_delete_cb(client, query):
     if query.data == "cancel_delete":
         if query.from_user.id in TEMP_DELETE_DATA:
             del TEMP_DELETE_DATA[query.from_user.id]
+        if query.message.document:
+            return await query.message.edit_caption("**❌ Deletion Cancelled! Database is untouched.**", reply_markup=None)
         return await query.message.edit("**❌ Deletion Cancelled! Database is untouched.**")
         
     if query.data == "confirm_delete_predvd":
@@ -106,16 +159,28 @@ async def confirm_delete_cb(client, query):
         if not delete_ids:
             return await query.answer("Session expired! Please run /cleandb again.", show_alert=True)
             
-        await query.message.edit("**🗑️ Deleting PreDVD files... Konjam wait pannunga...**")
+        if query.message.document:
+            await query.message.edit_caption("**🗑️ Deleting PreDVD files... Please wait...**", reply_markup=None)
+        else:
+            await query.message.edit("**🗑️ Deleting PreDVD files... Please wait...**")
         
-        # Database-la irunthu bulk ah delete panrom (Fast & Safe)
+        # Fast & Safe Bulk Deletion
         try:
             result = await Media.collection.delete_many({"_id": {"$in": delete_ids}})
             deleted_count = result.deleted_count
-            await query.message.edit(f"**✅ Cleanup Success!**\n\nTotally **{deleted_count}** duplicate PreDVD files safely deleted from database.")
+            success_text = f"**✅ Cleanup Success!**\n\nTotally **{deleted_count}** replaceable PreDVD files safely deleted from the database.\n*(Pending upgrades were kept safe)*"
+            
+            if query.message.document:
+                await query.message.edit_caption(success_text, reply_markup=None)
+            else:
+                await query.message.edit(success_text)
         except Exception as e:
-            await query.message.edit(f"**❌ Error during deletion:** `{e}`")
+            error_text = f"**❌ Error during deletion:** `{e}`"
+            if query.message.document:
+                await query.message.edit_caption(error_text, reply_markup=None)
+            else:
+                await query.message.edit(error_text)
         finally:
-            # Memory clear panrom
+            # Clear Memory
             if query.from_user.id in TEMP_DELETE_DATA:
                 del TEMP_DELETE_DATA[query.from_user.id]
