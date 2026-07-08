@@ -21,7 +21,7 @@ class script(object):
 <i>Click the buttons below to learn more.</i>"""
 
 
-    HELP_TXT = """<b>⚙️ Help & System Status</b>
+    HELP_TXT = """<blockquote><b>⚙️ Help & System Status</b></blockquote>
 
 <b>👤 User:</b> {}
 <b>📡 Server:</b> Free Tier (Experimental) ⚠️
@@ -37,7 +37,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
         "<b>⚠️ Bot is Under Maintenance! 🛠️</b>\n\n<i>5 to 10 minutes wait pannunga. Work nadanthutu irukku!</i>"
     )
 
-    ABOUT_TXT = """<b>🤖 ʙᴏᴛ ᴘʀᴏꜰɪʟᴇ</b>
+    ABOUT_TXT = """<blockquote><b>🤖 ʙᴏᴛ ᴘʀᴏꜰɪʟᴇ</b></blockquote>
 
 ╭─❖ <b>sʏsᴛᴇᴍ ɪɴꜰᴏ</b>
 ├ 👤 <b>ᴍʏ ɴᴀᴍᴇ:</b> ᴍɪᴋᴀꜱᴀ ᴀᴄᴋᴇʀᴍᴀɴ
@@ -50,7 +50,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <blockquote><b><i>❤️ I’ll always be here when you need me.</i></b></blockquote>"""
 
 
-    SOURCE_TXT = """<b>🛠️ Source Code</b>
+    SOURCE_TXT = """<blockquote><b>🛠️ Source Code</b></blockquote>
 
 <i>This project is Open Source. You can find the code below.</i>
 
@@ -76,7 +76,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 • /del - <code>Delete a specific filter</code>
 • /delall - <code>Delete all filters (Owner only)</code>"""
 
-    BUTTON_TXT = """<b>🔘 Button Formatting Help</b>
+    BUTTON_TXT = """<blockquote><b>🔘 Button Formatting Help</b></blockquote>
 
 <i>I support both URL and Alert (Pop-up) buttons.</i>
 
@@ -125,14 +125,11 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
 <blockquote>⚙️ Waiting for admin setup...</blockquote>"""
 
-    LOG_TEXT_P = """<b>✨ ɴᴇᴡ ᴜsᴇʀ ᴄᴏɴɴᴇᴄᴛᴇᴅ ✨</b>
+    LOG_TEXT_P = """<b>✨ ɴᴇᴡ ᴜsᴇʀ ✨</b>
 
 ╭─❖ <b>ᴜsᴇʀ ɪɴꜰᴏ</b>
-├ 🟢 <b>sᴛᴀᴛᴜs :</b> Connected to Bot
 ├ 👤 <b>ᴜsᴇʀ :</b> {1}
-╰ 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{0}</code>
-
-<blockquote>⚙️ Waiting for admin verification.</blockquote>"""
+╰ 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{0}</code>"""
 
 
     MISSING_LOG_TXT = """<b>🚫 ꜰɪʟᴇ ᴍɪssɪɴɢ ᴀʟᴇʀᴛ</b>
