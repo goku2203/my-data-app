@@ -314,7 +314,7 @@ async def start(client, message):
             )
             
             # 10 minutes (600 seconds) la auto-delete aagidum
-            asyncio.create_task(auto_delete_helper(anim_msg, message, 600))
+            asyncio.create_task(auto_delete_helper(anim_msg, 600))
             return
             
         # Puthusa add panna lines, verification aana udane update aaga
@@ -757,9 +757,11 @@ async def premium_plans(client, message):
     except Exception as e:
         print(f"Plan Command Error: {e}")
 
-async def auto_delete_helper(msg, delay):
+async def auto_delete_helper(bot_msg, delay, user_msg=None):
     try:
         await asyncio.sleep(delay)
-        await msg.delete()
+        await bot_msg.delete()
+        if user_msg:
+            await user_msg.delete()
     except:
         pass
