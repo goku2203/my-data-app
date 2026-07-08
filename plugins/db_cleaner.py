@@ -10,11 +10,37 @@ from info import ADMINS
 TEMP_DELETE_DATA = {}
 
 def clean_movie_title(filename):
-    """Cleans prefixes, tags, and extracts a neat Title and Year."""
-    # Remove Telegram usernames (e.g., @Goku_Stark) and channel tags (e.g., [CF])
-    cleaned = re.sub(r'@[\w_]+', '', filename)
-    cleaned = re.sub(r'^\[.*?\]\s*', '', cleaned)
-    cleaned = cleaned.replace('.', ' ').replace('_', ' ')
+    """Clean usernames, websites, tags and unwanted filename junk."""
+
+    # Hidden / non-breaking spaces fix
+    cleaned = filename.replace("\xa0", " ")
+
+    # Remove any Telegram username:
+    # @Goku_Stark
+    # @goku_stark
+    # @kickass_torrents
+    # @Goku_StarkDemon  -> known Goku_Stark prefix first remove
+    cleaned = re.sub(r'(?i)@goku[_\s]*stark', '', cleaned)
+    cleaned = re.sub(r'@[\w_]+', '', cleaned)
+
+    # Remove website names:
+    # www.1TamilMV.cafe
+    # 1TamilMV.cafe
+    cleaned = re.sub(
+        r'(?i)\b(?:www\.)?[\w-]+\.(?:com|net|org|in|me|io|co|cafe|xyz|site|link)\b',
+        '',
+        cleaned
+    )
+
+    # Remove starting tags: [CF], [Movies], etc.
+    cleaned = re.sub(r'^\s*\[[^\]]*\]\s*', '', cleaned)
+
+    # Remove common separators
+    cleaned = cleaned.replace('_', ' ').replace('.', ' ')
+
+    # Clean extra symbols and spaces
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+    cleaned = re.sub(r'^[\s\-_•|]+|[\s\-_•|]+$', '', cleaned)
     
     # Extract Title and Year
     match = re.search(r'(.*?)\b((?:19|20)\d{2})\b', cleaned)
