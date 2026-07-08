@@ -343,14 +343,7 @@ async def auto_filter(client, msg, spoll=False):
                         user_mention = message.from_user.mention if message.from_user else 'Anonymous'
                         user_id = message.from_user.id if message.from_user else 'Unknown'
                         
-                        log_msg = (
-                            f"⚠️ **Missing Movie Detected!**\n\n"
-                            f"🔍 **Query:** `{search}`\n"
-                            f"👤 **User:** {user_mention}\n"
-                            f"📁 **Group:** {message.chat.title}\n"
-                            f"🆔 **User ID:** `{user_id}`\n\n"
-                            f"Please upload this movie soon! #Missing_Request"
-                        )
+                        log_msg = script.MISSING_LOG_TXT.format(search, user_mention, user_id, message.chat.title)
                         
                         if MISSING_LOG_CHANNEL:
                             try:
