@@ -13,6 +13,13 @@ logger = logging.getLogger(__name__)
 BATCH_SIZE = 20
 SLEEP_TIME = 2
 
+# --- Safe Regex Helper for Brackets and Spaces ---
+def make_safe_regex(keyword):
+    """Safely format the user input to avoid regex crash and allow spaces/symbols."""
+    safe_string = re.escape(keyword)
+    # Replace escaped spaces with a wildcard to match spaces, dots, or hyphens in DB
+    return safe_string.replace(r'\ ', r'[\s\.\-_]*')
+
 # --- 30 Seconds Auto Delete Helper ---
 async def auto_delete_helper(bot_msg, user_msg, delay=30):
     await asyncio.sleep(delay)
@@ -48,8 +55,11 @@ async def deletemultiplefiles(bot: Client, message: Message):
     
     status_msg = await message.reply_text("⏳ Checking database... Please wait.")
     
-    raw_pattern = r'(\b|[\.\+\-_])' + re.escape(keyword) + r'(\b|[\.\+\-_])'
+    # Applied Safe Regex Here
+    flexible_keyword = make_safe_regex(keyword)
+    raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + flexible_keyword + r'(\b|[\.\+\-_\[\]\(\)])'
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
+    
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
     
     cursor = Media.collection.find({'file_name': regex})
@@ -100,7 +110,10 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     
     _, del_type, keyword = query.data.split("#", 2)
     
-    raw_pattern = r'(\b|[\.\+\-_])' + re.escape(keyword) + r'(\b|[\.\+\-_])'
+    # Applied Safe Regex Here
+    flexible_keyword = make_safe_regex(keyword)
+    raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + flexible_keyword + r'(\b|[\.\+\-_\[\]\(\)])'
+    
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
     cam_pattern = "|".join(cam_words)
     
@@ -168,14 +181,20 @@ async def direct_scan_movie(bot: Client, message: Message):
         asyncio.create_task(auto_delete_helper(msg, message, 15))
         return
     
-    movie_name = message.text.split(" ", 1)[1]
+    movie_name = message.text.split(" ", 1)[1].strip()
     safe_name = movie_name[:40].strip()
     
     status_msg = await message.reply("🔍 <i>Scanning database for prints... Please wait.</i>")
     
-    # Accurate Match Pattern (Matches dots, brackets, hyphens)
-    raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + re.escape(movie_name) + r'(\b|[\.\+\-_\[\]\(\)])'
-    regex = re.compile(raw_pattern, flags=re.IGNORECASE)
+    # Accurate Match Pattern (Applied Safe Regex Here)
+    flexible_pattern = make_safe_regex(movie_name)
+    raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + flexible_pattern + r'(\b|[\.\+\-_\[\]\(\)])'
+    
+    try:
+        regex = re.compile(raw_pattern, flags=re.IGNORECASE)
+    except Exception as e:
+        await status_msg.edit_text(f"<b>❌ Error in search pattern:</b> <code>{e}</code>")
+        return
     
     # Updated Cam words based on your database
     cam_words = ["camrip", "hdcam", "predvd", "predvdrip", "prehd", "tsrip", "hdts", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
@@ -248,7 +267,7 @@ async def direct_scan_movie(bot: Client, message: Message):
             p_match = re.search(rf'(?i)\b({cam_pattern})\b', text_to_parse)
             print_type = p_match.group(1).upper() if p_match else "CAM"
             
-            # Final Clean Display Format (Added print_type right after year)
+            # Final Clean Display Format
             formatted_item = f"<b>{count}.</b> <code>{c_title} ({year}) {print_type}</code> • {quality} • {size_str}"
             cam_filenames.append(formatted_item)
             count += 1
@@ -313,7 +332,9 @@ async def delete_specific_cam(bot: Client, query: CallbackQuery):
     movie_name = query.data.split("#")[1]
     await query.answer("⏳ Wiping Cam Prints... Please wait!", show_alert=True)
 
-    raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + re.escape(movie_name) + r'(\b|[\.\+\-_\[\]\(\)])'
+    # Applied Safe Regex Here
+    flexible_pattern = make_safe_regex(movie_name)
+    raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + flexible_pattern + r'(\b|[\.\+\-_\[\]\(\)])'
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
     
     cam_words = ["camrip", "hdcam", "predvd", "predvdrip", "prehd", "tsrip", "hdts", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
