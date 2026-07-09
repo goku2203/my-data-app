@@ -13,12 +13,16 @@ logger = logging.getLogger(__name__)
 BATCH_SIZE = 20
 SLEEP_TIME = 2
 
-# --- Safe Regex Helper for Brackets and Spaces ---
+# --- Safe Regex Helper for Brackets and Spaces (UPDATED FIX) ---
 def make_safe_regex(keyword):
     """Safely format the user input to avoid regex crash and allow spaces/symbols."""
-    safe_string = re.escape(keyword)
-    # Replace escaped spaces with a wildcard to match spaces, dots, or hyphens in DB
-    return safe_string.replace(r'\ ', r'[\s\.\-_]*')
+    # 1. User search-la irunthu () [] maathiri symbols-a eduthuttu letters & numbers mattum vekkidrom
+    clean_keyword = re.sub(r'[^\w\s]', ' ', keyword)
+    clean_keyword = re.sub(r'\s+', ' ', clean_keyword).strip()
+    
+    # 2. Escape pannittu, space irukkura edathula dot, hyphen, brackets ethu irunthalum match aagura maari set pandrom
+    safe_string = re.escape(clean_keyword)
+    return safe_string.replace(r'\ ', r'[\s\.\-\_\+\(\)\[\]]*')
 
 # --- 30 Seconds Auto Delete Helper ---
 async def auto_delete_helper(bot_msg, user_msg, delay=30):
