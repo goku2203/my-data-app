@@ -42,7 +42,18 @@ def get_clean_size(size):
     if size >= 1024**3:
         return f"{size / 1024**3:.1f}GB".replace(".0", "")
     elif size >= 1024**2:
-        return f"{int(size / 1024**2)}MB"
+        mb = int(size / 1024**2)
+        # Neenga ketta rounding logic
+        if 250 <= mb <= 290:
+            mb = 250
+        elif 550 <= mb <= 590:
+            mb = 550
+        elif 720 <= mb <= 740:
+            mb = 730
+        elif mb > 100:
+            # Matha periya MB size ellam nearest 10-kku round aagum (e.g., 412 -> 410)
+            mb = int(round(mb / 10.0) * 10)
+        return f"{mb}MB"
     elif size >= 1024:
         return f"{int(size / 1024)}KB"
     else:
@@ -241,12 +252,13 @@ async def send_batched_post(client, clean_name):
         # TMDB Image fetch
         image_url = await get_tmdb_image(clean_name, movie_year)
 
+        # Intha edathula thaan template change pannirukken
         caption = (
             f"🎬 <b>{safe_title}</b>\n\n"
             f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
             f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
             f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
-            f"⚡ <b>Download Available In:</b>\n\n"
+            f"📥 <b>Download Links:-</b>\n"
         )
 
         all_files_to_post = []
@@ -260,8 +272,13 @@ async def send_batched_post(client, clean_name):
 
         all_files_to_post.sort(key=lambda x: x['raw_size'])
 
-        for f in all_files_to_post:
-            caption += f"📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
+        # Files add panra logic with ├ and └
+        total_files = len(all_files_to_post)
+        for i, f in enumerate(all_files_to_post):
+            if i == total_files - 1:
+                caption += f"└ 📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
+            else:
+                caption += f"├ 📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
 
         caption += "━━━━━━━━━━━━━━━━━━━\n"
         caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
