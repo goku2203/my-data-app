@@ -261,7 +261,7 @@ async def send_batched_post(client, clean_name):
         all_files_to_post.sort(key=lambda x: x['raw_size'])
 
         for f in all_files_to_post:
-            caption += f"📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n\n"
+            caption += f"📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
 
         caption += "━━━━━━━━━━━━━━━━━━━\n"
         caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
