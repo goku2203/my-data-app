@@ -99,7 +99,7 @@ async def clean_db(client, message):
         
         if predvd_count > 0: 
             # Inga thaan update pannirukken: Movie name mattum copy aagura maari backticks (`)
-            formatted_name = f"`{data['display_name']}` [PreDVD: {predvd_count} | HD: {hd_count}]"
+            formatted_name = f"`{data['display_name']}` \n<blockquote><b>[PreDVD: {predvd_count} | HD: {hd_count}]</b></blockquote>"
             
             if hd_count > 0:
                 delete_list.append(formatted_name)
