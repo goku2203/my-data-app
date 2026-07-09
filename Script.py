@@ -127,9 +127,8 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
     LOG_TEXT_P = """<b>✨ ɴᴇᴡ ᴜsᴇʀ ✨</b>
 
-╭─❖ <b>ᴜsᴇʀ ɪɴꜰᴏ</b>
-├ 👤 <b>ᴜsᴇʀ :</b> {1}
-╰ 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{0}</code>"""
+👤 <b>ᴜsᴇʀ :</b> {1}
+🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{0}</code>"""
 
 
     MISSING_LOG_TXT = """<b>🚫 ꜰɪʟᴇ ᴍɪssɪɴɢ ᴀʟᴇʀᴛ</b>
