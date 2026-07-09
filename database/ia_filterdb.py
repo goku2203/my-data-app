@@ -1,5 +1,6 @@
 #  @MrMNTG @MusammilN
 #please give credits https://github.com/MN-BOTS/ShobanaFilterBot
+
 import logging
 from struct import pack
 import re
@@ -33,10 +34,8 @@ class Media(Document):
         indexes = ('$file_name', )
         collection_name = COLLECTION_NAME
 
-
 async def save_file(media):
     """Save file in database"""
-
     # TODO: Find better way to get same file_id for same media to avoid duplicates
     file_id, file_ref = unpack_new_file_id(media.file_id)
     file_name = re.sub(r"(_|\-|\.|\+)", " ", str(media.file_name))
@@ -60,7 +59,6 @@ async def save_file(media):
             logger.warning(
                 f'{getattr(media, "file_name", "NO_FILE")} is already saved in database'
             )
-
             return False, 0
         else:
             logger.info(f'{getattr(media, "file_name", "NO_FILE")} is saved to database')
@@ -74,21 +72,27 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
     junk_words = r"\b(movie|movies|download|tamil|telugu|malayalam|hindi|english|dubbed|hd|hq|1080p|720p|480p|4k|print|full|file|link|send|give|please|plz|bro|pro|sir|update)\b"
     clean_query = re.sub(junk_words, "", query, flags=re.IGNORECASE).strip()
     
+    # FIX: Remove brackets () [] from query so that Year searches match accurately
+    clean_query = re.sub(r'[\[\]\(\)\{\}]', ' ', clean_query).strip()
+    clean_query = re.sub(r'\s+', ' ', clean_query).strip()
+    
     if not clean_query:
-        clean_query = query 
+        clean_query = query
 
     keywords = clean_query.split()
     if not keywords:
         raw_pattern = '.'
     else:
         raw_pattern = "".join([f"(?=.*{re.escape(word)})" for word in keywords])
-            
+        
     try:
         regex = re.compile(raw_pattern, flags=re.IGNORECASE)
     except:
         return [], '', 0
 
-    filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]} if USE_CAPTION_FILTER else {'file_name': regex}
+    # FIX: Unga idea padi epavume Filename & Caption check aaganum
+    filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]}
+    
     if file_type:
         filter_db['file_type'] = file_type
 
@@ -107,7 +111,7 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
         fuzzy_pattern = "".join([f"(?=.*{word})" for word in fuzzy_keywords])
         try:
             regex = re.compile(fuzzy_pattern, flags=re.IGNORECASE)
-            filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]} if USE_CAPTION_FILTER else {'file_name': regex}
+            filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]}
             if file_type: filter_db['file_type'] = file_type
             total_results = await Media.count_documents(filter_db)
         except:
@@ -128,7 +132,7 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
             raw_pattern_2 = "".join([f"(?=.*{word})" for word in fn_keywords])
             try:
                 regex = re.compile(raw_pattern_2, flags=re.IGNORECASE)
-                filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]} if USE_CAPTION_FILTER else {'file_name': regex}
+                filter_db = {'$or': [{'file_name': regex}, {'caption': regex}]}
                 if file_type: filter_db['file_type'] = file_type
                 total_results = await Media.count_documents(filter_db)
             except:
@@ -152,11 +156,9 @@ async def get_file_details(query):
     filedetails = await cursor.to_list(length=1)
     return filedetails
 
-
 def encode_file_id(s: bytes) -> str:
     r = b""
     n = 0
-
     for i in s + bytes([22]) + bytes([4]):
         if i == 0:
             n += 1
@@ -164,15 +166,11 @@ def encode_file_id(s: bytes) -> str:
             if n:
                 r += b"\x00" + bytes([n])
                 n = 0
-
             r += bytes([i])
-
     return base64.urlsafe_b64encode(r).decode().rstrip("=")
-
 
 def encode_file_ref(file_ref: bytes) -> str:
     return base64.urlsafe_b64encode(file_ref).decode().rstrip("=")
-
 
 def unpack_new_file_id(new_file_id):
     """Return file_id, file_ref"""
@@ -193,7 +191,6 @@ async def get_movie_list(limit=20):
     cursor = Media.find().sort("$natural", -1).limit(100)
     files = await cursor.to_list(length=100)
     results = []
-
     for file in files:
         name = getattr(file, "file_name", "")
         if not re.search(r"(s\d{1,2}|season\s*\d+).*?(e\d{1,2}|episode\s*\d+)", name, re.I):
@@ -206,7 +203,6 @@ async def get_series_grouped(limit=30):
     cursor = Media.find().sort("$natural", -1).limit(150)
     files = await cursor.to_list(length=150)
     grouped = defaultdict(list)
-
     for file in files:
         name = getattr(file, "file_name", "")
         match = re.search(r"(.*?)(?:S\d{1,2}|Season\s*\d+).*?(?:E|Ep|Episode)?(\d{1,2})", name, re.I)
