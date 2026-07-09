@@ -31,7 +31,7 @@ HYPER_MODE = is_enabled(environ.get('HYPER_MODE', 'False'), False)
 REQUEST_FSUB_MODE = is_enabled(environ.get('REQUEST_FSUB_MODE', 'True'), True)
 BOT_START_TIME = time()
 CACHE_TIME = int(environ.get('CACHE_TIME', 300))
-USE_CAPTION_FILTER = is_enabled(environ.get('USE_CAPTION_FILTER', 'False'), False)
+USE_CAPTION_FILTER = is_enabled(environ.get('USE_CAPTION_FILTER', 'True'), True)
 
 PICS = environ.get('PICS', 'https://i.ibb.co/p6SmhYv3/photo.jpg https://i.ibb.co/k6M0CyGs/photo.jpg https://i.ibb.co/JRDZjtwT/photo.jpg https://i.ibb.co/prB7zBV0/photo.jpg https://i.ibb.co/SDjyjk4M/photo.jpg https://i.ibb.co/mFbGL4yW/photo.jpg https://i.ibb.co/23TMfwyF/photo.jpg').split()
 
