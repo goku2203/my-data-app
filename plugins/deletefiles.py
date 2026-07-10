@@ -13,18 +13,14 @@ logger = logging.getLogger(__name__)
 BATCH_SIZE = 20
 SLEEP_TIME = 2
 
-# --- Safe Regex Helper for Brackets and Spaces (UPDATED FIX) ---
 def make_safe_regex(keyword):
     """Safely format the user input to avoid regex crash and allow spaces/symbols."""
-    # 1. User search-la irunthu () [] maathiri symbols-a eduthuttu letters & numbers mattum vekkidrom
     clean_keyword = re.sub(r'[^\w\s]', ' ', keyword)
     clean_keyword = re.sub(r'\s+', ' ', clean_keyword).strip()
     
-    # 2. Escape pannittu, space irukkura edathula dot, hyphen, brackets ethu irunthalum match aagura maari set pandrom
     safe_string = re.escape(clean_keyword)
     return safe_string.replace(r'\ ', r'[\s\.\-\_\+\(\)\[\]]*')
 
-# --- 30 Seconds Auto Delete Helper ---
 async def auto_delete_helper(bot_msg, user_msg, delay=30):
     await asyncio.sleep(delay)
     try:
@@ -59,14 +55,14 @@ async def deletemultiplefiles(bot: Client, message: Message):
     
     status_msg = await message.reply_text("⏳ Checking database... Please wait.")
     
-    # Applied Safe Regex Here
     flexible_keyword = make_safe_regex(keyword)
     raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + flexible_keyword + r'(\b|[\.\+\-_\[\]\(\)])'
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
     
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
     
-    cursor = Media.collection.find({'file_name': regex})
+    # FIX: Fetching documents by checking BOTH file_name and caption
+    cursor = Media.collection.find({'$or': [{'file_name': regex}, {'caption': regex}]})
     hd_count = 0
     cam_count = 0
     
@@ -114,7 +110,6 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     
     _, del_type, keyword = query.data.split("#", 2)
     
-    # Applied Safe Regex Here
     flexible_keyword = make_safe_regex(keyword)
     raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + flexible_keyword + r'(\b|[\.\+\-_\[\]\(\)])'
     
@@ -124,19 +119,22 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     raw_regex = re.compile(raw_pattern, flags=re.IGNORECASE)
     cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
     
+    # FIX: Applying BOTH file_name and caption logic to the delete filter
+    movie_match = {'$or': [{'file_name': raw_regex}, {'caption': raw_regex}]}
+    
     if del_type == "all":
-        filter_query = {'file_name': raw_regex}
+        filter_query = movie_match
     elif del_type == "cam":
         filter_query = {
             '$and': [
-                {'file_name': raw_regex},
+                movie_match,
                 {'$or': [{'file_name': cam_regex}, {'caption': cam_regex}]}
             ]
         }
     elif del_type == "hd":
         filter_query = {
             '$and': [
-                {'file_name': raw_regex},
+                movie_match,
                 {'file_name': {'$not': cam_regex}},
                 {'caption': {'$not': cam_regex}}
             ]
@@ -173,6 +171,7 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     )
     asyncio.create_task(auto_delete_helper(query.message, query.message.reply_to_message, 15))
 
+
 # ==============================================================
 # AUTOMATIC PRINT ANALYZER (WITH DETAILS & COMMAND)
 # ==============================================================
@@ -190,7 +189,6 @@ async def direct_scan_movie(bot: Client, message: Message):
     
     status_msg = await message.reply("🔍 <i>Scanning database for prints... Please wait.</i>")
     
-    # Accurate Match Pattern (Applied Safe Regex Here)
     flexible_pattern = make_safe_regex(movie_name)
     raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + flexible_pattern + r'(\b|[\.\+\-_\[\]\(\)])'
     
@@ -200,15 +198,12 @@ async def direct_scan_movie(bot: Client, message: Message):
         await status_msg.edit_text(f"<b>❌ Error in search pattern:</b> <code>{e}</code>")
         return
     
-    # Updated Cam words based on your database
     cam_words = ["camrip", "hdcam", "predvd", "predvdrip", "prehd", "tsrip", "hdts", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
     cam_pattern = "|".join(cam_words)
     cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
 
-    # Check BOTH file_name and caption for accurate results
     movie_query = {'$or': [{'file_name': regex}, {'caption': regex}]}
     
-    # Queries for Cam and HD
     cam_query = {
         '$and': [
             movie_query,
@@ -224,11 +219,9 @@ async def direct_scan_movie(bot: Client, message: Message):
         ]
     }
 
-    # Getting document counts
     cam_count = await Media.count_documents(cam_query)
     hd_count = await Media.count_documents(hd_query)
 
-    # Logic 1: Both HD and Cam prints exist
     if hd_count > 0 and cam_count > 0:
         cam_files_cursor = Media.collection.find(cam_query).limit(15)
         cam_filenames = []
@@ -241,18 +234,14 @@ async def direct_scan_movie(bot: Client, message: Message):
             
             text_to_parse = str(raw_cap) if raw_cap else str(raw_fname)
             
-            # 1. Clean Prefix Tags
             text_to_parse = re.sub(r'(?i)(@[\w_]+|\[CF\]|@CC\.|@WMR_|@MM_New|@DVDWOALL|@Movies_Arc)\s*[-_]*\s*', '', text_to_parse)
             
-            # 2. Extract Year
             y_match = re.search(r'\b(19\d{2}|20\d{2})\b', text_to_parse)
             year = y_match.group(1) if y_match else "N/A"
             
-            # 3. Extract Quality
             q_match = re.search(r'(?i)\b(1080p|720p|480p|360p|2160p|4k)\b', text_to_parse)
             quality = q_match.group(1).lower() if q_match else "N/A"
             
-            # 4. Extract Size
             if f_size:
                 s_mb = f_size / (1024 * 1024)
                 size_str = f"{s_mb/1024:.1f}GB" if s_mb >= 1024 else f"{int(s_mb)}MB"
@@ -260,18 +249,15 @@ async def direct_scan_movie(bot: Client, message: Message):
                 s_match = re.search(r'(?i)(\d+(?:\.\d+)?\s*(?:GB|MB))', text_to_parse)
                 size_str = s_match.group(1).upper().replace(' ', '') if s_match else "N/A"
             
-            # 5. Extract Clean Movie Name
             c_title = text_to_parse.split(year)[0] if year != "N/A" else text_to_parse
             c_title = re.sub(r'[\(\)\[\]\.\-_]', ' ', c_title)
             c_title = re.sub(r'(?i)(tamil|telugu|hindi|malayalam|kannada|hq|predvd|cam|dvdscr|hdcam|hdrip|true|web|dl|avc|dd|aac|\bline\b|\baudio\b|remastered)', '', c_title)
             c_title = re.sub(r'\s+', ' ', c_title).strip().title()
             if len(c_title) < 2: c_title = movie_name.title()
             
-            # 6. Extract Print Type (PreDVD, CAM, etc.)
             p_match = re.search(rf'(?i)\b({cam_pattern})\b', text_to_parse)
             print_type = p_match.group(1).upper() if p_match else "CAM"
             
-            # Final Clean Display Format
             formatted_item = f"<b>{count}.</b> <code>{c_title} ({year}) {print_type}</code> • {quality} • {size_str}"
             cam_filenames.append(formatted_item)
             count += 1
@@ -296,7 +282,6 @@ async def direct_scan_movie(bot: Client, message: Message):
 
         await status_msg.edit_text(text, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
     
-    # Logic 2: Only HD prints exist
     elif hd_count > 0:
         text = (
             f"<b>📊 DATABASE SCAN REPORT</b>\n"
@@ -308,7 +293,6 @@ async def direct_scan_movie(bot: Client, message: Message):
         await status_msg.edit_text(text, parse_mode=enums.ParseMode.HTML)
         asyncio.create_task(auto_delete_helper(status_msg, message, 30))
     
-    # Logic 3: Only Cam prints exist
     elif cam_count > 0:
         text = (
             f"<b>📊 DATABASE SCAN REPORT</b>\n"
@@ -320,7 +304,6 @@ async def direct_scan_movie(bot: Client, message: Message):
         await status_msg.edit_text(text, parse_mode=enums.ParseMode.HTML)
         asyncio.create_task(auto_delete_helper(status_msg, message, 30))
     
-    # Logic 4: Movie not found
     else:
         text = (
             f"<b>📊 DATABASE SCAN REPORT</b>\n"
@@ -336,7 +319,6 @@ async def delete_specific_cam(bot: Client, query: CallbackQuery):
     movie_name = query.data.split("#")[1]
     await query.answer("⏳ Wiping Cam Prints... Please wait!", show_alert=True)
 
-    # Applied Safe Regex Here
     flexible_pattern = make_safe_regex(movie_name)
     raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + flexible_pattern + r'(\b|[\.\+\-_\[\]\(\)])'
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
