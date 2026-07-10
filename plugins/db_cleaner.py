@@ -60,7 +60,7 @@ def check_quality(check_text):
     return "HD"
 
 
-@Client.on_message(filters.command("cleandb") & filters.user(ADMINS))
+@Client.on_message(filters.command(["cleandb", "cd"]) & filters.user(ADMINS))
 async def clean_db(client, message):
     msg = await message.reply("⏳ **Scanning Database for PreDVD & HD prints... Please wait!**")
     
