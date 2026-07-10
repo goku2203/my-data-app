@@ -341,6 +341,14 @@ async def media_handler(client, message):
         if not UPDATES_CHANNEL:
             return
 
+        # ===============================================
+        # CHECKING AUTOPOST TOGGLE (PUTHUSA ADD PANNATHU)
+        # ===============================================
+        is_autopost_on = await db.get_autopost()
+        if not is_autopost_on:
+            return  # Autopost OFF-la iruntha, index aagum aana channel-ku varathu
+        # ===============================================
+
         clean_name = get_clean_name(raw_name)
         
         file_data = {
