@@ -7,18 +7,38 @@ from database.channel_db import get_all_index_channels
 from pyrogram import enums
 from pyrogram import Client, filters
 from database.ia_filterdb import save_file, unpack_new_file_id
+from database.users_chats_db import db
 from utils import temp, get_size
 from pyrogram.enums import ParseMode
-from info import CHANNELS, UPDATES_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, TMDB_API_KEY
+from info import CHANNELS, UPDATES_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, TMDB_API_KEY, ADMINS
 
 logger = logging.getLogger(__name__)
 
 # --- BATCH STORAGE ---
 BATCH_DATA = {}
-BATCH_TASKS = {} 
+BATCH_TASKS = {}
+
+# --- AUTOPOST COMMAND FOR ADMIN ---
+@Client.on_message(filters.command("autopost") & filters.user(ADMINS))
+async def toggle_autopost(client, message):
+    if len(message.command) == 1:
+        current_status = await db.get_autopost()
+        state = "ON ✅" if current_status else "OFF ❌"
+        await message.reply(f"**Autopost Status:** `{state}`\n\nTo change, use:\n`/autopost on`\n`/autopost off`")
+        return
+    
+    cmd = message.command[1].lower()
+    if cmd == "on":
+        await db.set_autopost(True)
+        await message.reply("✅ **Autopost has been ENABLED!**\nNew files will be posted to the Updates Channel.")
+    elif cmd == "off":
+        await db.set_autopost(False)
+        await message.reply("❌ **Autopost has been DISABLED!**\nNew files will NOT be posted to the Updates Channel.\n*(Files will still be saved to the database normally)*")
+    else:
+        await message.reply("Invalid command! Use `/autopost on` or `/autopost off`")
+
 
 # --- 1. SMART INFO EXTRACTORS ---
-
 def get_audio(filename):
     if not filename: return "Original Audio"
     filename = filename.lower()
@@ -32,9 +52,9 @@ def get_audio(filename):
     if re.search(r'\b(kan|kannada)\b', filename): audio.append("Kannada")
     if re.search(r'\b(eng|english)\b', filename): audio.append("English")
     
-    if "multi" in filename or "dual" in filename: 
+    if "multi" in filename or "dual" in filename:
         if not audio: audio.append("Multi Audio")
-    
+        
     return " - ".join(audio) if audio else "Original Audio"
 
 def get_clean_size(size):
@@ -43,7 +63,6 @@ def get_clean_size(size):
         return f"{size / 1024**3:.1f}GB".replace(".0", "")
     elif size >= 1024**2:
         mb = int(size / 1024**2)
-        # Neenga ketta rounding logic
         if 250 <= mb <= 290:
             mb = 250
         elif 550 <= mb <= 590:
@@ -51,7 +70,6 @@ def get_clean_size(size):
         elif 720 <= mb <= 740:
             mb = 730
         elif mb > 100:
-            # Matha periya MB size ellam nearest 10-kku round aagum (e.g., 412 -> 410)
             mb = int(round(mb / 10.0) * 10)
         return f"{mb}MB"
     elif size >= 1024:
@@ -62,7 +80,6 @@ def get_clean_size(size):
 def get_print_quality(filename):
     if not filename: return "HD Print"
     clean = filename.lower()
-
     if any(x in clean for x in ["bluray", "blu-ray", "brrip", "bdrip"]):
         return "Blu-Ray"
     elif any(x in clean for x in ["web-dl", "webrip", "web", "true web-dl"]):
@@ -75,7 +92,7 @@ def get_print_quality(filename):
         return "DVDScr"
     elif any(x in clean for x in ["1080p", "720p", "4k", "2160p"]):
         return "HD Print"
-    
+        
     return "Original Print"
 
 def get_clean_name(name):
@@ -84,8 +101,8 @@ def get_clean_name(name):
     
     year_match = re.search(r'\b(19|20)\d{2}\b', clean)
     if year_match:
-        clean = clean[:year_match.start()] 
-    
+        clean = clean[:year_match.start()]
+        
     clean = re.sub(r'\.(mkv|mp4|avi|flv|webm)$', '', clean)
     
     junk_list = [
@@ -94,11 +111,9 @@ def get_clean_name(name):
     ]
     for junk in junk_list:
         clean = clean.replace(junk, "")
-
     clean = re.sub(r'[\[\(\{].*?[\]\)\}]', '', clean)
     clean = re.sub(r'\b\d{3,4}mb\b', '', clean)
     clean = re.sub(r'\b\d+(\.\d+)?gb\b', '', clean)
-
     junk_words = [
         "2160p", "4k", "1080p", "720p", "480p", "360p", 
         "hdrip", "hq", "hd", "bd", "bluray", "blu-ray", "br-rip", "brrip", "web-dl", "web",
@@ -110,11 +125,9 @@ def get_clean_name(name):
     
     for word in junk_words:
         clean = re.sub(r'\b' + re.escape(word) + r'\b', '', clean)
-
     langs = ["tamil", "telugu", "hindi", "english", "tam", "tel", "hin", "eng", "malayalam", "kannada", "hqaud"]
     for lang in langs:
         clean = re.sub(r'\b' + re.escape(lang) + r'\b', '', clean)
-
     clean = re.sub(r'[\[\]\(\)\{\}\-_./@|:+]', ' ', clean)
     clean = re.sub(r'\s+', ' ', clean).strip()
     
@@ -152,7 +165,6 @@ async def get_tmdb_image(movie_name, year):
                 data = await response.json()
                 if not data.get('results'):
                     return None
-
                 movie = None
                 if year and year != "N/A":
                     for result in data['results']:
@@ -160,10 +172,10 @@ async def get_tmdb_image(movie_name, year):
                         if res_year == year:
                             movie = result
                             break
-                
+                            
                 if not movie:
                     movie = data['results'][0]
-                
+                    
                 movie_id = movie['id']
                 fallback_poster = f"https://image.tmdb.org/t/p/original{movie['poster_path']}" if movie.get('poster_path') else None
 
@@ -176,30 +188,26 @@ async def get_tmdb_image(movie_name, year):
                     for backdrop in img_data['backdrops']:
                         if backdrop.get('iso_639_1') == 'ta':
                             return f"https://image.tmdb.org/t/p/original{backdrop['file_path']}"
-                    
+                            
                     for backdrop in img_data['backdrops']:
                         if backdrop.get('iso_639_1') == 'en':
                             return f"https://image.tmdb.org/t/p/original{backdrop['file_path']}"
         
         return fallback_poster
-
     except Exception as e:
         logger.error(f"TMDB Error: {e}")
         return None
 
 # --- 2. BATCH SENDER ---
-
 async def send_batched_post(client, clean_name):
     try:
         await asyncio.sleep(30)
     except asyncio.CancelledError:
         return 
 
-    # Adding a MASTER TRY-CATCH to catch any silent crashes
     try:
         if clean_name not in BATCH_DATA:
             return
-
         raw_files_list = BATCH_DATA.pop(clean_name)
         if clean_name in BATCH_TASKS:
             del BATCH_TASKS[clean_name]
@@ -210,7 +218,7 @@ async def send_batched_post(client, clean_name):
             if f['size'] not in seen_sizes:
                 unique_files.append(f)
                 seen_sizes.add(f['size'])
-                
+        
         if not unique_files:
             return
 
@@ -234,7 +242,7 @@ async def send_batched_post(client, clean_name):
         for f in unique_files:
             if f['print_q']:
                 all_prints.add(f['print_q'])
-                
+        
         final_print_str = " | ".join(all_prints) if all_prints else "HD Print"
 
         categorized = { "4K": [], "FULL HD": [], "Only HD": [], "HD-Rip": [] }
@@ -252,12 +260,11 @@ async def send_batched_post(client, clean_name):
         # TMDB Image fetch
         image_url = await get_tmdb_image(clean_name, movie_year)
 
-        # Intha edathula thaan template change pannirukken
         caption = (
             f"🎬 <b>{safe_title}</b>\n\n"
-            f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
+            f"<blockquote>📅 <b><i>Year: {first_file['year']}</i></b>\n"
             f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
-            f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
+            f"💽 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
             f"📥 <b>Download Links:-</b>\n"
         )
 
@@ -272,18 +279,17 @@ async def send_batched_post(client, clean_name):
 
         all_files_to_post.sort(key=lambda x: x['raw_size'])
 
-        # Files add panra logic with ├ and └
         total_files = len(all_files_to_post)
         for i, f in enumerate(all_files_to_post):
             if i == total_files - 1:
-                caption += f"└ 📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
+                caption += f"👉 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
             else:
-                caption += f"├ 📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
+                caption += f"👉 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
 
-        caption += "━━━━━━━━━━━━━━━━━━━\n"
+        caption += "〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️〰️\n"
         caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
-        caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>\n\n"
-        caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
+        caption += "<b><a href='https://t.me/howtoo1/7'>🔰 How to Link Download</a></b>\n\n"
+        caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>🔥 Anime Single File ⚡️</a></b>"
 
         if image_url:
             await client.send_photo(
@@ -298,15 +304,14 @@ async def send_batched_post(client, clean_name):
                 text=caption,
                 parse_mode=ParseMode.HTML 
             )
+
         logger.info(f"✅ Post Sent: {clean_name}")
         
     except Exception as e:
-        # This will catch ANY silent error and print it to the Render Logs!
         logger.error(f"❌ CRITICAL ERROR in Autopost: {e}", exc_info=True)
 
-# --- 3. MAIN LISTENER ---
 
-# Removed CHANNELS filter. Now it triggers dynamically based on the DB check below.
+# --- 3. MAIN LISTENER ---
 @Client.on_message((filters.document | filters.video | filters.audio), group=1)
 async def media_handler(client, message):
     
@@ -327,13 +332,14 @@ async def media_handler(client, message):
         
         raw_name = message.caption if message.caption else media.file_name
         
+        # Files-a eppovume database-la save panniduvom
         try:
             media.file_type = message.media.value
             media.caption = message.caption
             
             await save_file(media)
         except:
-            pass 
+            pass
 
         if message.chat.id in [ANIME_CHANNEL_ID, USER_REQ_DB_CHANNEL]:
             return
