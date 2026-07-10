@@ -31,7 +31,10 @@ async def toggle_autopost(client, message):
     callback_data = "autopost_off" if current_status else "autopost_on"
     
     reply_markup = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(button_text, callback_data=callback_data)]]
+        [
+            [InlineKeyboardButton(button_text, callback_data=callback_data)],
+            [InlineKeyboardButton("Close ✖️", callback_data="close_data")]
+        ]
     )
     
     await message.reply(
@@ -57,7 +60,10 @@ async def autopost_callback(client, query: CallbackQuery):
     callback_data = "autopost_off" if new_status else "autopost_on"
     
     reply_markup = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(button_text, callback_data=callback_data)]]
+        [
+            [InlineKeyboardButton(button_text, callback_data=callback_data)],
+            [InlineKeyboardButton("Close ✖️", callback_data="close_data")]
+        ]
     )
     
     await query.message.edit_text(
@@ -287,30 +293,35 @@ async def send_batched_post(client, clean_name):
         # Intha edathula thaan template change pannirukken
         caption = (
             f"🎬 <b>{safe_title}</b>\n\n"
-            f"<blockquote>📅 <b><i>Year: {first_file['year']}</i></b>\n"
+            f"<blockquote>🗓️  <b><i>Year: {first_file['year']}</i></b>\n"
             f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
-            f"💿 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
+            f"📀 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
             f"📥 <b>Download Links:-</b>\n"
         )
+
         all_files_to_post = []
         order = ["HD-Rip", "Only HD", "FULL HD", "4K"]
         for category in order:
             if categorized[category]:
                 all_files_to_post.extend(categorized[category])
+
         if not all_files_to_post:
             return
+
         all_files_to_post.sort(key=lambda x: x['raw_size'])
-        # Files add panra logic with 🖇 and 🔗
+
+        # Files add panra logic with ├ and └
         total_files = len(all_files_to_post)
         for i, f in enumerate(all_files_to_post):
             if i == total_files - 1:
-                caption += f"🔗 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
+                caption += f"└ 📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
             else:
-                caption += f"🖇 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
-        caption += "➖➖➖➖➖➖➖➖➖➖➖➖\n"
+                caption += f"├ 📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
+
+        caption += "━━━━━━━━━━━━━━━━━━━\n"
         caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
         caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>\n\n"
-        caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>🍿 Anime Single File 🍿 </a></b>"
+        caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
         if image_url:
             await client.send_photo(
                 chat_id=UPDATES_CHANNEL,
