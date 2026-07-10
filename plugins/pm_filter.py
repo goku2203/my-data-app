@@ -109,7 +109,9 @@ async def next_page(bot, query):
         if settings['button']:
             btn = []
             for file in files:
-                disp_name = clean_filename(file.file_name) 
+                disp_name = clean_filename(file.file_name)
+                if not disp_name or disp_name.lower() == "none":
+                    disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
                 btn.append([
                     InlineKeyboardButton(
                         text=f"📂[{get_size(file.file_size)}] ➵ {disp_name}", callback_data=f'files#{file.file_id}'
@@ -118,7 +120,9 @@ async def next_page(bot, query):
         else:
             btn = []
             for file in files:
-                disp_name = clean_filename(file.file_name) 
+                disp_name = clean_filename(file.file_name)
+                if not disp_name or disp_name.lower() == "none":
+                    disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
                 btn.append([
                     InlineKeyboardButton(
                         text=f"{disp_name}", callback_data=f'files#{file.file_id}'
@@ -387,7 +391,9 @@ async def auto_filter(client, msg, spoll=False):
         if HYPER_MODE:
             cap_lines = []
             for file in files:
-                disp_name = clean_filename(file.file_name) 
+                disp_name = clean_filename(file.file_name)
+                if not disp_name or disp_name.lower() == "none":
+                    disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
                 file_link = f"https://t.me/{temp.U_NAME}?start={pre}_{file.file_id}"
                 cap_lines.append(f"📁 {get_size(file.file_size)} - [{disp_name}]({file_link})")
             cap_text = "\n".join(cap_lines)
@@ -408,7 +414,9 @@ async def auto_filter(client, msg, spoll=False):
             if settings["button"]:
                 btn = []
                 for file in files:
-                    disp_name = clean_filename(file.file_name) 
+                    disp_name = clean_filename(file.file_name)
+                    if not disp_name or disp_name.lower() == "none":
+                        disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
                     btn.append([
                         InlineKeyboardButton(
                             text=f"📁 [{get_size(file.file_size)}] ➵ {disp_name}", 
@@ -418,7 +426,9 @@ async def auto_filter(client, msg, spoll=False):
             else:
                 btn = []
                 for file in files:
-                    disp_name = clean_filename(file.file_name) 
+                    disp_name = clean_filename(file.file_name)
+                    if not disp_name or disp_name.lower() == "none":
+                        disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
                     btn.append([
                         InlineKeyboardButton(
                             text=f"{disp_name}",
