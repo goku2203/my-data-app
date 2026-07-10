@@ -188,6 +188,10 @@ async def advantage_spoll_choker(bot, query):
         return await query.answer("Search for Yourself🔎", show_alert=True)
     if movie_ == "close_spellcheck":
         return await query.message.delete()
+        
+    if not query.message.reply_to_message:
+        return await query.answer("Original message has been deleted!", show_alert=True)
+        
     movies = SPELL_CHECK.get(query.message.reply_to_message.id)
     if not movies:
         return await query.answer(script.OLD_MES, show_alert=True)
@@ -304,7 +308,6 @@ async def auto_filter(client, msg, spoll=False):
             if message.text.startswith("/"): return
             if re.findall(r"((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
                 return
-            # Inside auto_filter function, replace the old junk/spam checking code with this:
             
             if 2 < len(message.text) < 100:
                 search = message.text
@@ -380,7 +383,7 @@ async def auto_filter(client, msg, spoll=False):
             if not settings:
                  settings = {"button": True, "botpm": False, "file_secure": False, "imdb": False, "spell_check": False, "template": IMDB_TEMPLATE, "welcome": False}
             
-            message = msg.message.reply_to_message
+            message = msg.message.reply_to_message or msg.message
             search, files, offset, total_results = spoll
 
         if files:
@@ -541,7 +544,6 @@ async def advantage_spell_chok(client, msg):
     mv_id = msg.id
     mv_rqst = msg.text
     reqstr1 = msg.from_user.id if msg.from_user else 0
-    reqstr = await client.get_users(reqstr1)
     
     settings = await get_settings(msg.chat.id)
     if not settings:
@@ -596,8 +598,6 @@ async def advantage_spell_chok(client, msg):
         asyncio.create_task(auto_delete_msgs(k, msg, 60))
         return
         
-    # NOTE: I completely removed the difflib.get_close_matches block that loads 3000 files!
-
     movielist = list(dict.fromkeys(movielist)) 
     
     SPELL_CHECK[mv_id] = movielist
