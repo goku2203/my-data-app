@@ -30,7 +30,7 @@ async def auto_delete_helper(bot_msg, user_msg, delay=30):
         if user_msg: await user_msg.delete()
     except: pass
 
-@Client.on_message(filters.command("deletefiles") & filters.user(ADMINS))
+@Client.on_message(filters.command(["deletefiles", "df"]) & filters.user(ADMINS))
 async def deletemultiplefiles(bot: Client, message: Message):
     if message.chat.type != enums.ChatType.PRIVATE:
         msg = await message.reply_text(
@@ -176,7 +176,7 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
 # AUTOMATIC PRINT ANALYZER (WITH DETAILS & COMMAND)
 # ==============================================================
 
-@Client.on_message(filters.command("scanmovie") & filters.user(ADMINS))
+@Client.on_message(filters.command(["scanmovie", "sm"]) & filters.user(ADMINS))
 async def direct_scan_movie(bot: Client, message: Message):
     if len(message.command) < 2:
         error_text = "<b>⚠️ Error:</b> Invalid command format!\n👉 <b>Format:</b> <code>/scanmovie <movie name></code>\n💡 <b>Example:</b> <code>/scanmovie Master</code>"
