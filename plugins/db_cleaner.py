@@ -51,11 +51,11 @@ def clean_movie_title(filename):
         title = cleaned.split('-')[0].split('[')[0].strip().title()
         return title, title.lower()
 
-def check_quality(filename):
-    """Determines if a file is an early print (CAM) or HD."""
-    filename_lower = filename.lower()
+def check_quality(check_text):
+    """Determines if a file is an early print (CAM) or HD by checking text."""
+    text_lower = check_text.lower()
     cam_keywords = ['cam', 'hdcam', 'hq cam', 'hdts', 'hdtc', 'tsrip', 'predvd', 'predvdrip', 'theater', 'theatre', 'scr', 'dvdscr', 'pdvd', 'predvbd']
-    if any(kw in filename_lower for kw in cam_keywords):
+    if any(kw in text_lower for kw in cam_keywords):
         return "CAM"
     return "HD"
 
@@ -70,11 +70,17 @@ async def clean_db(client, message):
     cursor = Media.collection.find({})
     async for file in cursor:
         file_name = file.get("file_name", "")
+        caption = file.get("caption", "")
+        
         if not file_name: continue
         _id = file.get("_id")
         
+        # Display name-kku filename mattum use pandrom
         display_name, movie_key = clean_movie_title(file_name)
-        quality = check_quality(file_name)
+        
+        # Quality check panna filename + caption rendaiyum use pandrom (FIXED)
+        check_text = f"{file_name} {caption if caption else ''}"
+        quality = check_quality(check_text)
         
         if movie_key not in movies_data:
             movies_data[movie_key] = {
@@ -98,7 +104,6 @@ async def clean_db(client, message):
         hd_count = data["hd_count"]
         
         if predvd_count > 0: 
-            # Inga thaan update pannirukken: Movie name mattum copy aagura maari backticks (`)
             formatted_name = f"`{data['display_name']}` \n<blockquote><b>[PreDVD: {predvd_count} | HD: {hd_count}]</b></blockquote>"
             
             if hd_count > 0:
@@ -110,14 +115,13 @@ async def clean_db(client, message):
     if not delete_list and not only_predvd_list:
         return await msg.edit("✨ **Database is clean!** No PreDVD or CAM prints found.")
 
-    # Text Report Building - Unga formatting apdiye irukku
+    # Text Report Building
     report = "<blockquote>📊 <b>Database PreDVD Scan Report</b></blockquote>\n\n"
     
     if delete_list:
         report += f"<blockquote>🗑️ <b>Replaceable Early Prints (HD Available):</b></blockquote>\n"
         report += "(Safe to delete these PreDVD files)\n\n"
         for i, name in enumerate(delete_list[:30], 1): 
-            # Backticks mela irukkara naala inga theva illa
             report += f"{i}. {name}\n"
         if len(delete_list) > 30:
             report += f"... and {len(delete_list) - 30} more movies.\n"
@@ -139,7 +143,6 @@ async def clean_db(client, message):
         full_report += f"🗑️ REPLACEABLE EARLY PRINTS (HD Available) - [{len(delete_ids)} Files]\n"
         full_report += "(Safe to delete these PreDVD files)\n---------------------------------\n"
         for i, name in enumerate(delete_list, 1):
-            # txt file-la backticks venam nu athai remove pannirukken
             full_report += f"{i}. {name.replace('`', '')}\n"
         full_report += "\n"
     if only_predvd_list:
@@ -176,7 +179,6 @@ async def confirm_delete_cb(client, query):
         if query.from_user.id in TEMP_DELETE_DATA:
             del TEMP_DELETE_DATA[query.from_user.id]
         
-        # Bot & User rendu peroda messages-um delete pandra logic
         try:
             await query.message.delete()
             if query.message.reply_to_message:
@@ -184,7 +186,8 @@ async def confirm_delete_cb(client, query):
         except:
             pass
             
-        return await query.answer("❌ Deletion Cancelled!", show_alert=True)
+        # FIX: Changed show_alert to False to remove the popup issue on mobile
+        return await query.answer("❌ Deletion Cancelled!", show_alert=False)
         
     if query.data == "confirm_delete_predvd":
         delete_ids = TEMP_DELETE_DATA.get(query.from_user.id)
@@ -203,7 +206,6 @@ async def confirm_delete_cb(client, query):
             deleted_count = result.deleted_count
             success_text = f"**✅ Cleanup Success!**\n\nTotally **{deleted_count}** replaceable PreDVD files safely deleted from the database.\n*(Pending upgrades were kept safe)*"
             
-            # DB la delete aanathum rendu side message-a delete pannrom
             try:
                 await query.message.delete()
                 if query.message.reply_to_message:
@@ -211,7 +213,6 @@ async def confirm_delete_cb(client, query):
             except:
                 pass
                 
-            # Pudusa confirmation anuprom
             await client.send_message(query.message.chat.id, success_text)
             
         except Exception as e:
@@ -221,6 +222,5 @@ async def confirm_delete_cb(client, query):
                 pass
             await client.send_message(query.message.chat.id, f"**❌ Error during deletion:** `{e}`")
         finally:
-            # Clear Memory
             if query.from_user.id in TEMP_DELETE_DATA:
                 del TEMP_DELETE_DATA[query.from_user.id]
