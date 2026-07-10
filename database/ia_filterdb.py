@@ -39,6 +39,13 @@ async def save_file(media):
     # TODO: Find better way to get same file_id for same media to avoid duplicates
     file_id, file_ref = unpack_new_file_id(media.file_id)
     file_name = re.sub(r"(_|\-|\.|\+)", " ", str(media.file_name))
+    # Fix: Handle Pyrogram string caption error safely
+    cap_text = getattr(media, "caption", None)
+    if cap_text and hasattr(cap_text, "html"):
+        cap_text = cap_text.html
+    elif cap_text:
+        cap_text = str(cap_text)
+
     try:
         file = Media(
             file_id=file_id,
@@ -47,7 +54,7 @@ async def save_file(media):
             file_size=media.file_size,
             file_type=media.file_type,
             mime_type=media.mime_type,
-            caption=media.caption.html if media.caption else None,
+            caption=cap_text,
         )
     except ValidationError:
         logger.exception('Error occurred while saving file in database')
