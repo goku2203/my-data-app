@@ -62,10 +62,13 @@ async def save_file(media):
     else:
         try:
             await file.commit()
-        except DuplicateKeyError:      
+        except DuplicateKeyError:
             logger.warning(
                 f'{getattr(media, "file_name", "NO_FILE")} is already saved in database'
             )
+            # If file already exists, update its caption so search works perfectly
+            if cap_text:
+                await Media.collection.update_one({'_id': file_id}, {'$set': {'caption': cap_text}})
             return False, 0
         else:
             logger.info(f'{getattr(media, "file_name", "NO_FILE")} is saved to database')
