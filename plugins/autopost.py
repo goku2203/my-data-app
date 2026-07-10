@@ -309,7 +309,7 @@ async def send_batched_post(client, clean_name):
                 caption += f"🖇 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
         caption += "➖➖➖➖➖➖➖➖➖➖➖➖\n"
         caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
-        caption += "<b><a href='https://t.me/howtoo1/7'>⚠️ How to Link Download</a></b>\n\n"
+        caption += "<b><a href='https://t.me/howtoo1/7'>👉 How to Link Download</a></b>\n\n"
         caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>🍿 Anime Single File 🍿 </a></b>"
         if image_url:
             await client.send_photo(
