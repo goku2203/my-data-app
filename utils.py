@@ -1,11 +1,8 @@
-#  @MrMNTG @MusammilN
-#please give credits https://github.com/MN-BOTS/ShobanaFilterBot
 import re
 import logging
 import asyncio
 import os
 import aiohttp
-import requests
 import time
 from datetime import datetime, timedelta
 from typing import Union, List
@@ -16,7 +13,6 @@ from pyrogram import enums
 from pyrogram.enums import ChatMemberStatus
 
 from imdb import IMDb
-from bs4 import BeautifulSoup
 
 from info import LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, VERIFY_EXPIRE, IS_VERIFY, SHORTLINK_URL, SHORTLINK_API, REQUEST_FSUB_MODE
 from database.users_chats_db import db
@@ -197,19 +193,6 @@ async def broadcast_messages(user_id, message):
     except Exception as e:
         return False, "Error"
 
-async def search_gagala(text):
-    usr_agent = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-        'Chrome/61.0.3163.100 Safari/537.36'
-        }
-    text = text.replace(" ", '+')
-    url = f'https://www.google.com/search?q={text}'
-    response = requests.get(url, headers=usr_agent)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, 'html.parser')
-    titles = soup.find_all( 'h3' )
-    return [title.getText() for title in titles]
-
 async def get_settings(group_id):
     settings = temp.SETTINGS.get(group_id)
     if not settings:
@@ -237,10 +220,6 @@ def get_size(size):
         return f"{int(round(size))} MB"
     else:
         return "%.2f %s" % (size, units[i])
-
-def split_list(l, n):
-    for i in range(0, len(l), n):
-        yield l[i:i + n]  
 
 def get_file_id(msg: Message):
     if msg.media:
@@ -298,25 +277,6 @@ def list_to_str(k):
         return ' '.join(f'{elem}, ' for elem in k)
     else:
         return ' '.join(f'{elem}, ' for elem in k)
-
-def last_online(from_user):
-    time = ""
-    if from_user.is_bot:
-        time += "🤖 Bot :("
-    elif from_user.status == enums.UserStatus.RECENTLY:
-        time += "Recently"
-    elif from_user.status == enums.UserStatus.LAST_WEEK:
-        time += "Within the last week"
-    elif from_user.status == enums.UserStatus.LAST_MONTH:
-        time += "Within the last month"
-    elif from_user.status == enums.UserStatus.LONG_AGO:
-        time += "A long time ago :("
-    elif from_user.status == enums.UserStatus.ONLINE:
-        time += "Currently Online"
-    elif from_user.status == enums.UserStatus.OFFLINE:
-        time += from_user.last_online_date.strftime("%a, %d %b %Y, %H:%M:%S")
-    return time
-
 
 def split_quotes(text: str) -> List:
     if not any(text.startswith(char) for char in START_CHAR):
