@@ -165,7 +165,7 @@ async def clean_db(client, message):
             report_file.name = "PreDVD_Scan_Report.txt"
             await message.reply_document(
                 document=report_file,
-                caption=report,
+                caption=report[:950] + "...\n\n**(Full report is inside the attached text file)**",
                 reply_markup=reply_markup
             )
         await msg.delete()
