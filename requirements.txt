@@ -1,17 +1,13 @@
 aiofiles
 aiohttp
 apscheduler
-bs4
 cinemagoer
 colorama
 countryinfo
-datetime
 dnspython>=2.3.0
-ffmpeg
 ffmpeg-python>=0.2.0
 fuzzywuzzy
 hachoir
-Heroku3
 humanize>=4.6.0
 httpx[http2]
 itsdangerous>=2.0.0
@@ -41,4 +37,3 @@ ujson
 wget
 wheel
 git+https://github.com/agronholm/anyio
-git+https://github.com/Joelkb/cinemagoer
