@@ -83,12 +83,13 @@ class Bot(Client):
     async def kulasthree(self):
         while True:
             await asyncio.sleep(24 * 60 * 60)
-            logging.info("🔄 Bot is restarting")
+            logging.info("✅ Bot is Online and Running!")
             try:
-                await self.send_message(chat_id=LOG_CHANNEL, text="🔄 Bot is restarting ...")
+                # Restart-ku bathila verum Online status update anuppum
+                await self.send_message(chat_id=LOG_CHANNEL, text="✅ **Daily Status:** Bot is Online and Running normally! 🚀")
             except:
                 pass
-            os.execl(sys.executable, sys.executable, *sys.argv)
+            # Inga iruntha os.execl line-a thookiyachu, so bot switch off aagathu!
 
     async def start(self, **kwargs):
         # Bot start aagum pothu maintenance status edukka
