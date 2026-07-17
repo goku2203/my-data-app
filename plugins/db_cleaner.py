@@ -161,14 +161,15 @@ async def clean_db(client, message):
     reply_markup = InlineKeyboardMarkup(buttons)
 
     if len(report) > 4000 or len(delete_list) > 30 or len(only_predvd_list) > 30:
-        with io.BytesIO(str.encode(full_report)) as report_file:
-            report_file.name = "PreDVD_Scan_Report.txt"
-            await message.reply_document(
-                document=report_file,
-                caption=report[:950] + "...\n\n**(Full report is inside the attached text file)**",
-                reply_markup=reply_markup
-            )
-        await msg.delete()
+        chunk_size = 4000
+        total_chunks = (len(full_report) // chunk_size) + 1
+        for i in range(total_chunks):
+            chunk = full_report[i * chunk_size : (i + 1) * chunk_size]
+            if chunk.strip():
+                await client.send_message(LOG_CHANNEL, f"**PreDVD Scan Report Part {i + 1}:**\n\n{chunk}")
+        
+        summary = "  **Database Scan Complete!**\n\nFull detailed list has been sent to your **Log Channel**.\n\nPlease check the logs and use the buttons below to take action."
+        await msg.edit(summary, reply_markup=reply_markup)
     else:
         await msg.edit(report, reply_markup=reply_markup)
 
