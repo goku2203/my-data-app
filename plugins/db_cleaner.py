@@ -4,7 +4,7 @@ import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database.ia_filterdb import Media
-from info import ADMINS
+from info import ADMINS, LOG_CHANNEL
 
 # Temp memory to store IDs waiting for confirmation
 TEMP_DELETE_DATA = {}
