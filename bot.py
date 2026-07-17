@@ -45,7 +45,7 @@ routes = webserver.RouteTableDef()
 
 @routes.get("/", allow_head=True)
 async def root_route_handler(request):
-    return webserver.json_response("Bot is Running on Render! ✅")
+    return webserver.json_response("Bot is Running on Render!")
 
 async def web_server():
     web_app = webserver.Application(client_max_size=30000000)
