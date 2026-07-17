@@ -94,7 +94,7 @@ async def deletemultiplefiles(bot: Client, message: Message):
     if hd_count > 0 and cam_count > 0:
         buttons.append([InlineKeyboardButton(f"🗑 Delete All ({total_count})", callback_data=f"deltype#all#{keyword}")])
     
-    buttons.append([InlineKeyboardButton("❌ Cancel", callback_data="close_data")])
+    buttons.append([InlineKeyboardButton("❌ Cancel", callback_data="close_delete_data")])
     
     msg = await status_msg.edit_text(
         text=f"<b>Movie:</b> `{keyword}`\n<b>Total Files Found:</b> `{total_count}`\n\nPlease select which category of files you want to delete. 👇",
@@ -166,10 +166,16 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
         
         await asyncio.sleep(SLEEP_TIME)
     
+    try:
+        if query.message.reply_to_message:
+            await query.message.reply_to_message.delete()
+    except:
+        pass
+    
     await query.message.edit_text(
-        f"✅ Successfully deleted `{deleted_count}` files for keyword: **'{keyword}'**."
+        f"  Successfully deleted `{deleted_count}` files for keyword: **'{keyword}'**."
     )
-    asyncio.create_task(auto_delete_helper(query.message, query.message.reply_to_message, 15))
+    asyncio.create_task(auto_delete_helper(query.message, None, 15))
 
 
 # ==============================================================
@@ -277,7 +283,7 @@ async def direct_scan_movie(bot: Client, message: Message):
         
         btn = InlineKeyboardMarkup([
             [InlineKeyboardButton("🗑 Wipe Cam Prints", callback_data=f"delmoviecam#{safe_name}")],
-            [InlineKeyboardButton("❌ Close", callback_data="close_data")]
+            [InlineKeyboardButton("❌ Close", callback_data="close_delete_data")]
         ])
 
         await status_msg.edit_text(text, reply_markup=btn, parse_mode=enums.ParseMode.HTML)
@@ -345,5 +351,20 @@ async def delete_specific_cam(bot: Client, query: CallbackQuery):
         f"<i>The database is clean now!</i> ✨"
     )
     
+    try:
+        if query.message.reply_to_message:
+            await query.message.reply_to_message.delete()
+    except:
+        pass
+        
     await query.message.edit_text(success_text, parse_mode=enums.ParseMode.HTML)
-    asyncio.create_task(auto_delete_helper(query.message, query.message.reply_to_message, 15))
+    asyncio.create_task(auto_delete_helper(query.message, None, 15))
+
+@Client.on_callback_query(filters.regex(r"^close_delete_data$"))
+async def close_delete_data_cb(bot: Client, query: CallbackQuery):
+    try:
+        await query.message.delete()
+        if query.message.reply_to_message:
+            await query.message.reply_to_message.delete()
+    except:
+        pass
