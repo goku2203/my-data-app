@@ -36,4 +36,5 @@ pyrofork
 ujson
 wget
 wheel
+pytz
 git+https://github.com/agronholm/anyio
