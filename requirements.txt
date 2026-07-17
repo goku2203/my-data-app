@@ -1,7 +1,7 @@
 aiofiles
 aiohttp
 apscheduler
-cinemagoer
+cinemagoer==2023.5.1
 colorama
 countryinfo
 dnspython>=2.3.0
