@@ -131,10 +131,10 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{1}</code>"""
 
 
-    MISSING_LOG_TXT = """<b>⚠️ 𝐅𝐢𝐥𝐞 𝐌𝐢𝐬𝐬𝐢𝐧𝐠</b>
+    MISSING_LOG_TXT = """<b>⚠️ MISSING FILE</b>
 
 📁 <b>ꜰɪʟᴇ :</b> <code>{2}</code>
-|
+
 ├ 👤 <b>ᴜsᴇʀ :</b> {0}
 ├ 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{1}</code>
 └ 🌐 <b>sᴏᴜʀᴄᴇ :</b> {3}"""
