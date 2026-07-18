@@ -15,6 +15,7 @@ def clean_movie_title(filename):
     cleaned = re.sub(r'(?i)@[\w_]+', '', cleaned)
     # Remove website names and extra domains
     cleaned = re.sub(r'(?i)\b(?:www\.)?[\w-]+\.(?:com|net|org|in|me|io|co|cafe|xyz|site|link|pw|fun|tk|club)\b', '', cleaned)
+    cleaned = re.sub(r'(?i)\b(stark|goku\s*stark)\b', '', cleaned)
     
     # NEW: Remove annoying release tags that cause split/duplicate entries
     cleaned = re.sub(r'(?i)\b(www|1tamilmv|tamilmv|tamilblasters|hdt|cam|hd|hq|mkv|mp4|avi)\b', '', cleaned)
