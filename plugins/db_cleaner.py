@@ -11,51 +11,38 @@ TEMP_DELETE_DATA = {}
 
 def clean_movie_title(filename):
     """Clean usernames, websites, tags and unwanted filename junk."""
-
-    # Hidden / non-breaking spaces fix
     cleaned = filename.replace("\xa0", " ")
-
-    # Remove any Telegram username
-    cleaned = re.sub(r'(?i)@goku[_\s]*stark', '', cleaned)
-    cleaned = re.sub(r'@[\w_]+', '', cleaned)
-
-    # Remove website names
-    cleaned = re.sub(
-        r'(?i)\b(?:www\.)?[\w-]+\.(?:com|net|org|in|me|io|co|cafe|xyz|site|link)\b',
-        '',
-        cleaned
-    )
-
-    # Remove starting tags: [CF], [Movies], etc.
+    cleaned = re.sub(r'(?i)@[\w_]+', '', cleaned)
+    # Remove website names and extra domains
+    cleaned = re.sub(r'(?i)\b(?:www\.)?[\w-]+\.(?:com|net|org|in|me|io|co|cafe|xyz|site|link|pw|fun|tk|club)\b', '', cleaned)
+    
+    # NEW: Remove annoying release tags that cause split/duplicate entries
+    cleaned = re.sub(r'(?i)\b(www|1tamilmv|tamilmv|tamilblasters|hdt|cam|hd|hq|mkv|mp4|avi)\b', '', cleaned)
+    
     cleaned = re.sub(r'^\s*\[[^\]]*\]\s*', '', cleaned)
-
-    # Remove common separators
     cleaned = cleaned.replace('_', ' ').replace('.', ' ')
-
-    # Clean extra symbols and spaces
     cleaned = re.sub(r'\s+', ' ', cleaned)
-    cleaned = re.sub(r'^[\s\-_•|]+|[\s\-_•|]+$', '', cleaned)
+    cleaned = re.sub(r'^[\s\-_ |]+|[\s\-_ |]+$', '', cleaned)
     
     # Extract Title and Year
     match = re.search(r'(.*?)\b((?:19|20)\d{2})\b', cleaned)
     if match:
         title = match.group(1).strip()
         year = match.group(2)
-        # Remove trailing hyphens or brackets
         title = re.sub(r'[\(\[\-\s]+$', '', title).strip()
         display_name = f"{title.title()} ({year})"
         unique_key = f"{title.lower()}_{year}"
         return display_name, unique_key
     else:
-        # Fallback if no year is found
         title = cleaned.split('-')[0].split('[')[0].strip().title()
         return title, title.lower()
 
 def check_quality(check_text):
     """Determines if a file is an early print (CAM) or HD by checking text."""
     text_lower = check_text.lower()
-    cam_keywords = ['cam', 'hdcam', 'hq cam', 'hdts', 'hdtc', 'tsrip', 'predvd', 'predvdrip', 'theater', 'theatre', 'scr', 'dvdscr', 'pdvd', 'predvbd']
-    if any(kw in text_lower for kw in cam_keywords):
+    # NEW: Used word boundaries (\b) so it only matches exact words, preventing 'scr' from matching inside 'subscribe'
+    cam_pattern = r'\b(cam|hdcam|hq\s*cam|hdts|hdtc|tsrip|predvd|pre-dvd|predvdrip|theater|theatre|scr|dvdscr|pdvd|predvbd|camrip|hqcam|hcrip)\b'
+    if re.search(cam_pattern, text_lower):
         return "CAM"
     return "HD"
 
