@@ -148,6 +148,13 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 # {2} = Query (Search)
 # {3} = Source
 
+    # ==========================================
+    #   DELETED / MISSING FILE ALERT
+    # ==========================================
+    
+    DELETED_FILE_TXT = """<b>  File Not Found! (Deleted)</b>\n
+<blockquote><b>Eng:</b><i>Sorry! This file was deleted because the HD version is available. Please search the channel or bot to get the HD file.
+</i></blockquote>\n<blockquote><b>Tan:</b><i>Sorry! HD version vanthathunala intha file delete panniyachu. HD file-ku channel or bot-la search pannunga.</i>"""
 
     # ==========================================
     # 🎬 MOVIE SEARCH & RESULTS TEXTS
