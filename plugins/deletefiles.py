@@ -60,6 +60,8 @@ async def deletemultiplefiles(bot: Client, message: Message):
     regex = re.compile(raw_pattern, flags=re.IGNORECASE)
     
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
+    cam_pattern_str = r'\b(' + '|'.join(cam_words) + r')\b'
+    cam_check_regex = re.compile(cam_pattern_str, flags=re.IGNORECASE)
     
     # FIX: Fetching documents by checking BOTH file_name and caption
     cursor = Media.collection.find({'$or': [{'file_name': regex}, {'caption': regex}]})
@@ -74,7 +76,7 @@ async def deletemultiplefiles(bot: Client, message: Message):
         caption = caption.lower()
         
         check_text = fname + " " + caption
-        if any(x in check_text for x in cam_words):
+        if cam_check_regex.search(check_text):
             cam_count += 1
         else:
             hd_count += 1
@@ -114,7 +116,7 @@ async def confirm_and_delete_files_by_keyword(bot: Client, query: CallbackQuery)
     raw_pattern = r'(\b|[\.\+\-_\[\]\(\)])' + flexible_keyword + r'(\b|[\.\+\-_\[\]\(\)])'
     
     cam_words = ["camrip", "hdcam", "predvd", "tsrip", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
-    cam_pattern = "|".join(cam_words)
+    cam_pattern = r'\b(' + '|'.join(cam_words) + r')\b'
     
     raw_regex = re.compile(raw_pattern, flags=re.IGNORECASE)
     cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
@@ -205,7 +207,7 @@ async def direct_scan_movie(bot: Client, message: Message):
         return
     
     cam_words = ["camrip", "hdcam", "predvd", "predvdrip", "prehd", "tsrip", "hdts", "hqcam", "hcrip", "theater print", "cam", "dvdscr", "scr"]
-    cam_pattern = "|".join(cam_words)
+    cam_pattern = r'\b(' + '|'.join(cam_words) + r')\b'
     cam_regex = re.compile(cam_pattern, flags=re.IGNORECASE)
 
     movie_query = {'$or': [{'file_name': regex}, {'caption': regex}]}
