@@ -286,8 +286,15 @@ async def start(client, message):
                         temp_file_id = data
                 else:
                     temp_file_id = data
-                    
+
                 files_ = await get_file_details(temp_file_id)
+                
+                # --- NEW FIX: Check if file is deleted ---
+                if not files_:
+                    await anim_msg.edit_text(script.DELETED_FILE_TXT, parse_mode=enums.ParseMode.HTML)
+                    asyncio.create_task(auto_delete_helper(anim_msg, 30))
+                    return
+                # -----------------------------------------
                 if files_:
                     raw_caption = files_[0].caption if files_[0].caption else files_[0].file_name
             except Exception as e:
@@ -434,7 +441,10 @@ async def start(client, message):
             return
         except:
             pass
-        return await message.reply('No such file exist.')
+        
+        msg = await message.reply(script.DELETED_FILE_TXT, parse_mode=enums.ParseMode.HTML)
+        asyncio.create_task(auto_delete_helper(msg, message, 30))
+        return
         
     files = files_[0]
     title = files.file_name
