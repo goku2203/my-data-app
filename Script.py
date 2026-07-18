@@ -139,6 +139,15 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 ├ 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{1}</code>
 └ 🌐 <b>sᴏᴜʀᴄᴇ :</b> {3}"""
 
+# ==========================================
+    # MISSING LOG - Number List
+# ==========================================
+
+# {0} = User Name
+# {1} = User ID
+# {2} = Query (Search)
+# {3} = Source
+
 
     # ==========================================
     # 🎬 MOVIE SEARCH & RESULTS TEXTS
