@@ -54,13 +54,13 @@ async def auto_delete_msgs(bot_msg, user_msg, delay):
 
 @Client.on_message((filters.group | filters.private) & filters.text & ~filters.regex(r"^[/\.]"))
 async def give_filter(client, message):
-    
-    if message.chat.type == enums.ChatType.PRIVATE:
-        if not await is_subscribed(message.from_user.id, client):
-            from plugins.fsub_manager import send_fsub_prompt
-            await send_fsub_prompt(client, message)
-            return
-
+         
+    # Ippo Private & Group rendukkum Fsub check aagum
+    if not await is_subscribed(message.from_user.id, client):
+        from plugins.fsub_manager import send_fsub_prompt
+        await send_fsub_prompt(client, message)
+        return
+        
     k = await manual_filters(client, message)
     if k == False:
         await auto_filter(client, message)
