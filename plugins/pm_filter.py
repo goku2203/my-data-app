@@ -350,7 +350,19 @@ async def auto_filter(client, msg, spoll=False):
                         user_mention = message.from_user.mention if message.from_user else 'Anonymous'
                         user_id = message.from_user.id if message.from_user else 'Unknown'
                         
-                        log_msg = script.MISSING_LOG_TXT.format(search, user_mention, user_id, message.chat.title)
+                        # NEW: Generate clickable link for Source Chat
+                        if message.chat.type == enums.ChatType.PRIVATE:
+                            source_link = "Bot PM"
+                        else:
+                            chat_title = message.chat.title or "Unknown"
+                            if getattr(message.chat, "username", None):
+                                source_link = f"<a href='https://t.me/{message.chat.username}'>{chat_title}</a>"
+                            else:
+                                chat_id_str = str(message.chat.id).replace("-100", "")
+                                source_link = f"<a href='https://t.me/c/{chat_id_str}/1'>{chat_title}</a>"
+                        
+                        # FIX: Corrected the order (User Name, User ID, Query, Source Chat Link)
+                        log_msg = script.MISSING_LOG_TXT.format(user_mention, user_id, search, source_link)
                         
                         if MISSING_LOG_CHANNEL:
                             try:
