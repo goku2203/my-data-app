@@ -64,8 +64,8 @@ async def send_fsub_prompt(client, message, payload="start"):
             parse_mode=enums.ParseMode.HTML
         )
     
-    # 60 seconds-la auto delete
-    asyncio.create_task(auto_delete_helper(force_msg, message, 60))
+    # 10 seconds-la auto delete
+    asyncio.create_task(auto_delete_helper(force_msg, message, 10))
     
     return force_msg
 
