@@ -131,15 +131,13 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{0}</code>"""
 
 
-    MISSING_LOG_TXT = """<b>🚫 ꜰɪʟᴇ ᴍɪssɪɴɢ ᴀʟᴇʀᴛ</b>
+    MISSING_LOG_TXT = """<b>⚠️ 𝐅𝐢𝐥𝐞 𝐌𝐢𝐬𝐬𝐢𝐧𝐠</b>
 
-╭─❖ <b>ʀᴇǫᴜᴇsᴛ ɪɴꜰᴏ</b>
-├ 📁 <b>ꜰɪʟᴇ :</b> <code>{}</code>
+📁 <b>ꜰɪʟᴇ :</b> <code>{}</code>
+|
 ├ 👤 <b>ᴜsᴇʀ :</b> {}
 ├ 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{}</code>
-╰ 🌐 <b>sᴏᴜʀᴄᴇ :</b> {}
-
-<blockquote>⚠️ This file is not available in the database. Please upload it, Admin.</blockquote>"""
+└ 🌐 <b>sᴏᴜʀᴄᴇ :</b> {}"""
 
 
     # ==========================================
