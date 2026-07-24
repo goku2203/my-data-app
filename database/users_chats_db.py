@@ -147,20 +147,43 @@ class Database:
     # ==========================================
     #   SMART COUNTER CODE ADDED HERE
     # ==========================================
-    async def add_verified_user(self):
-        current_month = datetime.datetime.now().strftime("%Y-%m")
-        await self.config.update_one(
-            {"_id": "smart_counter"},
-            {"$inc": {f"verified_{current_month}": 1}},
-            upsert=True
-        )
+# INTHA PUDHU CODE-A ATHE IDATHULA REPLACE PANNUNGA
+async def add_verified_user(self):
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    current_month = datetime.datetime.now().strftime("%Y-%m")
+    await self.config.update_one(
+        {"_id": "smart_counter"},
+        {
+            "$inc": {
+                f"daily_{today}": 1,
+                f"verified_{current_month}": 1,
+                "total_verified": 1
+            }
+        },
+        upsert=True
+    )
 
-    async def get_verified_count(self):
-        current_month = datetime.datetime.now().strftime("%Y-%m")
-        stats = await self.config.find_one({"_id": "smart_counter"})
-        if stats:
-            return stats.get(f"verified_{current_month}", 0)
-        return 0
+async def get_verified_count(self):
+    current_month = datetime.datetime.now().strftime("%Y-%m")
+    stats = await self.config.find_one({"_id": "smart_counter"})
+    if stats:
+        return stats.get(f"verified_{current_month}", 0)
+    return 0
+
+async def get_all_verify_stats(self):
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    current_month = datetime.datetime.now().strftime("%Y-%m")
+    stats = await self.config.find_one({"_id": "smart_counter"}) or {}
+    
+    daily = stats.get(f"daily_{today}", 0)
+    monthly = stats.get(f"verified_{current_month}", 0)
+    total = stats.get("total_verified", 0)
+    
+    # Right now active verified users (10 mins limit kulla irukkavanga)
+    now = datetime.datetime.now()
+    active_now = await self.col.count_documents({"verify_status_v2.verify_until": {"$gte": now}})
+    
+    return daily, monthly, total, active_now
 
     # ==========================================
     #   MAINTENANCE DB FUNCTIONS
