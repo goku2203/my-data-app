@@ -47,6 +47,21 @@ routes = webserver.RouteTableDef()
 async def root_route_handler(request):
     return webserver.json_response("Bot is Running on Render!")
 
+@routes.get("/verify", allow_head=True)
+async def verify_route_handler(request):
+    code = request.query.get("code", "")
+    if not code:
+        return webserver.Response(text="Invalid Security Token!", status=400)
+    
+    try:
+        with open("verify.html", "r", encoding="utf-8") as f:
+            html_content = f.read()
+        html_content = html_content.replace("{{CODE}}", code)
+    except Exception as e:
+        return webserver.Response(text=f"Error loading verification file: {e}", status=500)
+        
+    return webserver.Response(text=html_content, content_type="text/html")
+
 async def web_server():
     web_app = webserver.Application(client_max_size=30000000)
     web_app.add_routes(routes)
