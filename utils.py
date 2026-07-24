@@ -6,6 +6,7 @@ import aiohttp
 import time
 from datetime import datetime, timedelta
 from typing import Union, List
+import base64
 
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
 from pyrogram.types import Message, InlineKeyboardButton
@@ -393,28 +394,40 @@ async def get_short(link):
 
 # ----- START OF NEW UTILS CODE -----
 
+# INTHA PUDHU CODE-A REPLACE PANNUNGA
 async def get_verify_link(user_id, file_id=None):
-    # Dynamic bot username fix
     bot_username = temp.U_NAME if temp.U_NAME else "Mikasa_Lovely_bot"
-    
-    # File ID iruntha, atha link kulla serthu anuppurom
+         
     if file_id:
         link = f"https://telegram.me/{bot_username}?start=verify_{user_id}_{file_id}"
     else:
         link = f"https://telegram.me/{bot_username}?start=verify_{user_id}"
-        
+             
     api_url = f"https://{SHORTLINK_URL}/api?api={SHORTLINK_API}&url={link}&format=text"
-    
+         
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(api_url) as response:
                 if response.status == 200:
-                    return await response.text()
+                    short_link = await response.text()
                 else:
-                    return link
+                    short_link = link
     except Exception as e:
         print(f"Shortener URL Error: {e}")
-        return link
+        short_link = link
+
+    # Arolinks URL-a Base64 la hide panni unga Render Verify Page-kku anuppurom
+    try:
+        clean_short_link = short_link.strip()
+        encoded_url = base64.b64encode(clean_short_link.encode('utf-8')).decode('utf-8')
+        
+        # Unga exact Render URL inga hardcode panniyachu (Entha error-um varathu)
+        render_base_url = "https://my-data-app.onrender.com"
+            
+        return f"{render_base_url}/verify?code={encoded_url}"
+    except Exception as e:
+        print(f"Verify Route Error: {e}")
+        return short_link
 
 async def verify_user(user_id):
     # Time: 10 Minutes (600 seconds - from info.py)
