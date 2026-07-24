@@ -1,6 +1,9 @@
+from database.users_chats_db import db
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram import Client, filters, enums
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from info import ADMINS
+
 
 @Client.on_message(filters.private & filters.command("admin") & filters.user(ADMINS))
 async def master_admin_panel(bot: Client, message: Message):
@@ -47,4 +50,31 @@ async def master_admin_panel(bot: Client, message: Message):
         parse_mode=enums.ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(buttons),
         disable_web_page_preview=True
+    )
+
+# INTHA COMPLETE UPDATED CODE-A FILE KADEISILA PODUNGA
+@Client.on_message(filters.private & filters.command(["vstats", "verifystats"]) & filters.user(ADMINS))
+async def verify_stats_command(bot: Client, message: Message):
+    msg = await message.reply_text("⏳ **Fetching Verification Statistics... Please wait!**")
+    
+    daily, monthly, total, active_now = await db.get_all_verify_stats()
+    
+    stats_text = (
+        "<blockquote><b>📊 VERIFICATION TRACKER STATS</b></blockquote>\n\n"
+        f"<b>⚡ Today Verified:</b> <code>{daily}</code>\n"
+        f"<b>📅 This Month Verified:</b> <code>{monthly}</code>\n"
+        f"<b>🏆 All-Time Total Verified:</b> <code>{total}</code>\n\n"
+        f"<b>🟢 Currently Active Users:</b> <code>{active_now}</code> <i>(10 mins limit kulla irukkavanga)</i>\n\n"
+        "<i>💡 Use this data to check your Arolinks daily performance!</i>"
+    )
+    
+    # Close button inga create pannirukkom
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("❌ Close", callback_data="close_data")]
+    ])
+    
+    await msg.edit_text(
+        stats_text, 
+        parse_mode=enums.ParseMode.HTML, 
+        reply_markup=buttons
     )
