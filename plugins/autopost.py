@@ -236,7 +236,7 @@ async def get_tmdb_image(movie_name, year):
 # --- 2. BATCH SENDER ---
 async def send_batched_post(client, clean_name):
     try:
-        await asyncio.sleep(30)
+        await asyncio.sleep(10)
     except asyncio.CancelledError:
         return
         
