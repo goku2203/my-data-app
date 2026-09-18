@@ -127,17 +127,17 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
     LOG_TEXT_P = """<b>✨ ɴᴇᴡ ᴜsᴇʀ ✨</b>
 
-👤 <b>ᴜsᴇʀ :</b> {1}
-🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{0}</code>"""
+<blockquote>👤 <b>ᴜsᴇʀ :</b> {1}
+🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{0}</code></blockquote>"""
 
 
-    MISSING_LOG_TXT = """<b>⚠️ MISSING FILE</b>
+    MISSING_LOG_TXT = """<b>❌ MISSING FILE ❌</b>
 
-📁 <b>ꜰɪʟᴇ :</b> <code>{2}</code>
+<blockquote>📁 <b>ꜰɪʟᴇ :</b> <code>{2}</code>
 
-├ 👤 <b>ᴜsᴇʀ :</b> {0}
-├ 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{1}</code>
-└ 🌐 <b>sᴏᴜʀᴄᴇ :</b> {3}"""
+👤 <b>ᴜsᴇʀ :</b> {0}
+🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{1}</code>
+🌐 <b>sᴏᴜʀᴄᴇ :</b> {3}</blockquote>"""
 
 # ==========================================
     # MISSING LOG - Number List
