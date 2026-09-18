@@ -208,6 +208,27 @@ class Database:
             return config.get('autopost', True) # By default True
         return True
 
+# ==========================================
+    #   VERIFY & AUTO-DELETE SETTINGS 
+    # ==========================================
+    async def get_verify_settings(self):
+        config = await self.col.find_one({'id': 'bot_settings'})
+        if config and 'verify' in config:
+            return config['verify']
+        return {'mode': 'time', 'hours': 4}
+
+    async def set_verify_settings(self, mode, hours):
+        await self.col.update_one({'id': 'bot_settings'}, {'$set': {'verify': {'mode': mode, 'hours': hours}}}, upsert=True)
+
+    async def get_autodelete_settings(self):
+        config = await self.col.find_one({'id': 'bot_settings'})
+        if config and 'autodelete' in config:
+            return config['autodelete']
+        return {'enabled': False, 'time': 5}
+
+    async def set_autodelete_settings(self, enabled, time_mins):
+        await self.col.update_one({'id': 'bot_settings'}, {'$set': {'autodelete': {'enabled': enabled, 'time': time_mins}}}, upsert=True)
+
 
 # ==========================================
 # Ithu file kadeisila thaan varanum
