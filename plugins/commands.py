@@ -284,15 +284,15 @@ async def start(client, message):
 
     
     if IS_VERIFY:
-            if not await check_verification(client, message.from_user.id):
-                
-                # --- FETCH ADMIN AUTO DELETE TIME ---
-                ad_settings = await db.get_autodelete_settings()
-                del_time = ad_settings['time']
-                del_seconds = del_time * 60
-                
-                # --- 1. SMART LOADING MESSAGE (Udane send aagum) ---
-                anim_msg = await message.reply_text("<b>  Fetching File Details... Please wait!</b>", parse_mode=enums.ParseMode.HTML)
+        if not await check_verification(client, message.from_user.id):
+            
+            # --- FETCH ADMIN AUTO DELETE TIME ---
+            ad_settings = await db.get_autodelete_settings()
+            del_time = ad_settings['time']
+            del_seconds = del_time * 60
+            
+            # --- 1. SMART LOADING MESSAGE (Udane send aagum) ---
+            anim_msg = await message.reply_text("<b>  Fetching File Details... Please wait!</b>", parse_mode=enums.ParseMode.HTML)
             
             # --- 2. Background-la details edukkum (No Delay) ---
             verify_url = await get_verify_link(message.from_user.id, data)
@@ -342,7 +342,6 @@ async def start(client, message):
             
             asyncio.create_task(auto_delete_helper(anim_msg, del_seconds))
             return
-            
 
     try:
         pre, file_id = data.split('_', 1)
