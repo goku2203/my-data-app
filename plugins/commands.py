@@ -246,14 +246,15 @@ async def start(client, message):
             check_id = link_parts[1]
             
             if str(message.from_user.id) == check_id:
-                await verify_user(message.from_user.id)
-                
-                v_msg = await message.reply_text(
-                    "<b>✅ Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>", 
-                    protect_content=True
-                )
-                
-                asyncio.create_task(auto_delete_helper(v_msg, 5))
+                v_settings = await verify_user(message.from_user.id)
+
+                if v_settings['mode'] == 'time':
+                            success_msg = f"<b> Verification Successful!</b>\n\n<i>  Your access is activated for {v_settings['hours']} Hours. File Uploading... Please wait...</i>"
+                        else:
+                            success_msg = "<b> Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>"
+
+                v_msg = await message.reply_text(success_msg, protect_content=True)
+                        asyncio.create_task(auto_delete_helper(v_msg, 5))
                 
                 if len(link_parts) > 2:
                     message.command[1] = link_parts[2]
