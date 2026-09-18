@@ -117,7 +117,10 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 parse_mode=enums.ParseMode.HTML,
                 protect_content=False,
             )
-            asyncio.create_task(auto_delete_file(client, msg, 120)) 
+            # DB la admin auto-delete on panniruntha mattum delete aagum
+            ad_settings = await db.get_autodelete_settings()
+            if ad_settings['enabled']:
+                asyncio.create_task(auto_delete_file(client, msg, ad_settings['time'] * 60))
             
     except Exception as e:
         logger.error(f"File send HTML error: {e}")
@@ -130,7 +133,10 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 parse_mode=enums.ParseMode.DEFAULT, 
                 protect_content=False,
             )
-            asyncio.create_task(auto_delete_file(client, msg, 120))
+            # DB la admin auto-delete on panniruntha mattum delete aagum
+            ad_settings = await db.get_autodelete_settings()
+            if ad_settings['enabled']:
+                asyncio.create_task(auto_delete_file(client, msg, ad_settings['time'] * 60))
         except:
             pass
 
