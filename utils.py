@@ -430,29 +430,32 @@ async def get_verify_link(user_id, file_id=None):
         return short_link
 
 async def verify_user(user_id):
-    # Time: 10 Minutes (600 seconds - from info.py)
-    expiry = datetime.now() + timedelta(seconds=VERIFY_EXPIRE)
+    # Admin set panna hours ah DB la irunthu edukkum
+    settings = await db.get_verify_settings()
+    hours = settings['hours']
+    expiry = datetime.now() + timedelta(hours=hours)
     
-    # Verify status update
     await db.col.update_one({'id': user_id}, {'$set': {'verify_status_v2': {'is_verified': True, 'verify_until': expiry}}}, upsert=True)
-    
-    # PUTHUSA ADD PANNA VENDIYA LINE
     await db.add_verified_user()
+    return settings # Settings ah return pandrom success message kku
 
 async def check_verification(client, user_id):
-    if not IS_VERIFY: return True # IS_VERIFY False-a iruntha check pannathu
+    if not IS_VERIFY: return True
     
+    settings = await db.get_verify_settings()
+    if settings['mode'] == 'everytime':
+        return False # Everytime mode on la iruntha always false
+        
     user = await db.col.find_one({'id': user_id})
     if not user: return False
     
-    # Inga yum 'verify_status_v2' nu mathanum
-    verify_status = user.get('verify_status_v2', {}) 
+    verify_status = user.get('verify_status_v2', {})
     expiry = verify_status.get('verify_until')
     
     if expiry and datetime.now() < expiry:
-        return True # Time iruntha True
-    
-    return False # Illana False (Verify Button Varum)
+        return True # Time mudiyala na access kedaikkum
+        
+    return False
 
 # ----- PUTHUSA ADD PANNA FUNCTION (get_clean_size) -----
 def get_clean_size(size):
