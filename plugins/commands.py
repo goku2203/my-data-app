@@ -75,6 +75,10 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
         safe_file_name = html.escape(file_name) if file_name else "Unknown File"
         safe_file_size = html.escape(file_size) if file_size else "Unknown Size"
         
+        # Admin auto-delete time edukkum
+        ad_settings = await db.get_autodelete_settings()
+        del_time = ad_settings['time']
+        
         caption = None
         if CUSTOM_FILE_CAPTION:
             try:
@@ -83,6 +87,8 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                     file_size=safe_file_size,
                     file_caption=file_caption if file_caption else ""
                 )
+                # Hardcoded 10 Minute-a admin time vachu replace pandrom
+                caption = caption.replace("10 Minute", f"{del_time} Minute")
             except Exception as e:
                 logger.error(f"Error formatting caption: {e}")
                 caption = f"<b>📂 File:</b> <code>{safe_file_name}</code>\n<b>💾 Size:</b> <code>{safe_file_size}</code>"
@@ -278,10 +284,15 @@ async def start(client, message):
 
     
     if IS_VERIFY:
-        if not await check_verification(client, message.from_user.id):
-            
-            # --- 1. SMART LOADING MESSAGE (Udane send aagum) ---
-            anim_msg = await message.reply_text("<b>⏳ Fetching File Details... Please wait!</b>", parse_mode=enums.ParseMode.HTML)
+            if not await check_verification(client, message.from_user.id):
+                
+                # --- FETCH ADMIN AUTO DELETE TIME ---
+                ad_settings = await db.get_autodelete_settings()
+                del_time = ad_settings['time']
+                del_seconds = del_time * 60
+                
+                # --- 1. SMART LOADING MESSAGE (Udane send aagum) ---
+                anim_msg = await message.reply_text("<b>  Fetching File Details... Please wait!</b>", parse_mode=enums.ParseMode.HTML)
             
             # --- 2. Background-la details edukkum (No Delay) ---
             verify_url = await get_verify_link(message.from_user.id, data)
@@ -319,7 +330,7 @@ async def start(client, message):
                 "<blockquote><b>📁 File Details:</b>\n\n"
                 f"{raw_caption}</blockquote>\n\n"
                 "<b>⚠️ Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed. </i>\n\n"
-                "<blockquote><b>⏱ Time Limit : 10 Minutes!</b></blockquote>"
+                f"<blockquote><b>  Time Limit : {del_time} Minutes!</b></blockquote>"
             )
             
             # --- 3. Pazhaya message-aiye Edit panrom (Smooth Effect) ---
@@ -329,12 +340,9 @@ async def start(client, message):
                 parse_mode=enums.ParseMode.HTML
             )
             
-            # 10 minutes (600 seconds) la auto-delete aagidum
-            asyncio.create_task(auto_delete_helper(anim_msg, 600))
+            asyncio.create_task(auto_delete_helper(anim_msg, del_seconds))
             return
             
-        # Puthusa add panna lines, verification aana udane update aaga
-        await db.col.update_one({'id': message.from_user.id}, {'$set': {'verify_status_v2': {'is_verified': False, 'verify_until': None}}})
 
     try:
         pre, file_id = data.split('_', 1)
