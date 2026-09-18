@@ -252,6 +252,8 @@ async def start(client, message):
         await auto_filter(client, message) 
         return
 
+    is_just_verified = False
+    
     if len(message.command) == 2 and message.command[1].startswith('verify_'):
         try:
             link_parts = message.command[1].split("_", 2)
@@ -268,6 +270,9 @@ async def start(client, message):
                 v_msg = await message.reply_text(success_msg, protect_content=True)
                 asyncio.create_task(auto_delete_helper(v_msg, 5))
                 
+                # Inga flag-a True aakkidrom, so kelaye check pannaathu
+                is_just_verified = True
+                
                 if len(link_parts) > 2:
                     message.command[1] = link_parts[2]
                 else:
@@ -282,8 +287,8 @@ async def start(client, message):
             
     data = message.command[1]
 
-    
-    if IS_VERIFY:
+    # Flag True-a iruntha intha box loop aagathu, direct-a file send aagidum
+    if IS_VERIFY and not is_just_verified:
         if not await check_verification(client, message.from_user.id):
             
             # --- FETCH ADMIN AUTO DELETE TIME ---
