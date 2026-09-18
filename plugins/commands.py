@@ -246,19 +246,19 @@ async def start(client, message):
         await auto_filter(client, message) 
         return
 
-if len(message.command) == 2 and message.command[1].startswith('verify_'):
+    if len(message.command) == 2 and message.command[1].startswith('verify_'):
         try:
             link_parts = message.command[1].split("_", 2)
             check_id = link_parts[1]
             
             if str(message.from_user.id) == check_id:
                 v_settings = await verify_user(message.from_user.id)
-
+                
                 if v_settings['mode'] == 'time':
-                    success_msg = f"<b> Verification Successful!</b>\n\n<i>  Your access is activated for {v_settings['hours']} Hours. File Uploading... Please wait...</i>"
+                    success_msg = f"<b>  Verification Successful!</b>\n\n<i>Your access is activated for {v_settings['hours']} Hours. File Uploading... Please wait...</i>"
                 else:
-                    success_msg = "<b> Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>"
-
+                    success_msg = "<b>  Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>"
+                    
                 v_msg = await message.reply_text(success_msg, protect_content=True)
                 asyncio.create_task(auto_delete_helper(v_msg, 5))
                 
@@ -266,14 +266,16 @@ if len(message.command) == 2 and message.command[1].startswith('verify_'):
                     message.command[1] = link_parts[2]
                 else:
                     return 
+            
             else:
-                await message.reply_text("❌ Invalid Verification Link!")
+                await message.reply_text("  Invalid Verification Link!")
                 return
         except Exception as e:
             print(f"Verify Error: {e}")
             return
-
+            
     data = message.command[1]
+
     
     if IS_VERIFY:
         if not await check_verification(client, message.from_user.id):
