@@ -330,12 +330,22 @@ async def start(client, message):
                 [InlineKeyboardButton("❓ How to Download ❓", url="https://t.me/howtoo1/7")]
             ]
             
+            # Mode check panni dynamic-a text mathurom
+            v_settings = await db.get_verify_settings()
+            
+            if v_settings['mode'] == 'time':
+                # Time Based mode-kku hours display aagum
+                time_info = f"<blockquote><b>⏳ Verification Valid For : {v_settings['hours']} Hours!</b></blockquote>"
+            else:
+                # Everytime mode-kku 1st photo mathiriye minutes display aagum
+                time_info = f"<blockquote><b>⏳ Time Limit : {del_time} Minutes!</b></blockquote>"
+
             verify_text = (
                 "<b>⛔ Access Denied : Verification Required!</b>\n\n"
                 "<blockquote><b>📁 File Details:</b>\n\n"
                 f"{raw_caption}</blockquote>\n\n"
                 "<b>⚠️ Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed. </i>\n\n"
-                f"<blockquote><b>  Time Limit : {del_time} Minutes!</b></blockquote>"
+                f"{time_info}"
             )
             
             # --- 3. Pazhaya message-aiye Edit panrom (Smooth Effect) ---
