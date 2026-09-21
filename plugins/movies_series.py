@@ -41,7 +41,7 @@ async def list_movies(bot: Client, message: Message):
         asyncio.create_task(auto_delete_helper(k, 60))
         return
 
-    msg = "<b>🍿 Latest Uploaded Movies:</b>\n\n╭━━━━━━━━━━━━━━━╮\n"
+    msg = "<b>🍿 Latest Uploaded Movies:</b>\n\n"
     count = 1
     added_movies = set() # Duplicates avoid panna set() use panrom
 
@@ -55,7 +55,7 @@ async def list_movies(bot: Client, message: Message):
         if count > 15: # 15 Movies max for neat look
             break
             
-    msg += "╰━━━━━━━━━━━━━━━╯\n\n<i>⏳ This message will be auto-deleted in 1 minute.</i>"
+    msg += "\n<blockquote><i>⏳ This message will be auto-deleted in 1 minute.</i></blockquote>"
     k = await message.reply(msg[:4096], parse_mode=ParseMode.HTML)
     
     # User Command & Bot Message Auto Delete aagum
