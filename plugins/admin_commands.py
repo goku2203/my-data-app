@@ -18,11 +18,12 @@ async def master_admin_panel(bot: Client, message: Message):
 3. <code>/broadcast</code> — Send message to all users\n
 4. <code>/restart</code> — Restart the bot safely\n
 5. <code>/ping</code> — Check bot response speed\n
+6. <code>/vsettings</code> — Verify Page Custom Settings Panel\n
 
 <b>📁 FILE MANAGEMENT</b>\n
-1. <code>/deletefiles</code> or <code>/df</code>   Delete selected files from database\n
-2. <code>/cleandb</code> or <code>/cd</code>   Remove all Cam / PreDVD prints\n
-3. <code>/scanmovie</code> or <code>/sm</code>   Check HD and Cam files for a movie\n
+1. <code>/deletefiles</code> or <code>/df & /d</code> -Delete selected files from database\n
+2. <code>/cleandb</code> or <code>/cd & /c</code> - Remove all Cam / PreDVD prints\n
+3. <code>/scanmovie</code> or <code>/sm & /s</code> - Check HD and Cam files for a movie\n
 
 <b>📡 AUTO-INDEX CHANNELS</b>\n
 1. <code>/addchannel</code> — Add a new index channel\n
