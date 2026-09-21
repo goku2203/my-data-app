@@ -33,18 +33,14 @@
             padding: 15px;
             border-radius: 6px;
             margin: 20px 0;
-            cursor: pointer;
             border: 1px solid #484f58;
             transition: 0.2s;
-        }
-        .checkbox-container:hover {
-            background: #30363d;
         }
         .checkbox {
             width: 22px;
             height: 22px;
             margin-right: 12px;
-            cursor: pointer;
+            cursor: default;
         }
         .text {
             font-size: 16px;
@@ -54,7 +50,6 @@
             color: #58a6ff;
             font-size: 14px;
             margin-top: 15px;
-            display: none;
         }
         #warningBox {
             display: none;
@@ -72,24 +67,39 @@
 </head>
 <body>
     <div class="box">
-        <h2>  Security Check</h2>
-        <p style="color: #8b949e; font-size: 14px;">Please verify that you are not a robot to proceed.</p>
+        <h2>🔒 Security Check</h2>
+        <p style="color: #8b949e; font-size: 14px;">Please wait while we verify your connection.</p>
         
         <div id="warningBox">
-            <b>  Browser Not Allowed!</b><br>
-            Brave, Firefox, and Bypass extensions are strictly prohibited.<br><br>
-            Please copy this link and open it strictly in <b>Google Chrome</b> to continue.
+            <b>❌ Browser or Adblocker Not Allowed!</b><br><br>
+            Brave, Firefox, Adblockers, and DNS Blockers (like AdGuard) are strictly prohibited.<br><br>
+            Please disable them and use standard <b>Google Chrome</b> to continue.
         </div>
 
         <div class="checkbox-container" id="verifyBox">
-            <input type="checkbox" id="robotCheck" class="checkbox">
+            <input type="checkbox" id="robotCheck" class="checkbox" disabled>
             <span class="text">I'm not a robot</span>
         </div>
         
-        <div id="status">  Verifying browser... Please wait...</div>
+        <div id="status">Checking browser security...</div>
     </div>
 
     <script>
+        // Adblocker & DNS Blocker strict check
+        async function checkAdblocker() {
+            try {
+                // Google ads script-a fetch panni paarkum. Block aana error varum.
+                await fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    cache: 'no-store'
+                });
+                return false; // Adblocker illa
+            } catch (error) {
+                return true; // Adblocker or DNS blocker irukku
+            }
+        }
+
         async function checkBrowser() {
             let userAgent = navigator.userAgent;
             let isFirefox = userAgent.indexOf("Firefox") > -1;
@@ -98,33 +108,39 @@
             let isOpera = userAgent.indexOf("OPR") > -1 || userAgent.indexOf("Opera") > -1;
             let isChrome = userAgent.indexOf("Chrome") > -1 && !isBrave && !isEdge && !isOpera;
 
-            if (isBrave || isFirefox || !isChrome) {
+            let hasAdblock = await checkAdblocker();
+
+            // Check if restricted browser or adblocker is active
+            if (isBrave || isFirefox || !isChrome || hasAdblock) {
                 document.getElementById('verifyBox').style.display = 'none';
+                document.getElementById('status').style.display = 'none';
                 document.getElementById('warningBox').style.display = 'block';
                 return false;
             }
             return true;
         }
 
-        checkBrowser();
-
-        document.getElementById('verifyBox').addEventListener('click', async function() {
+        // Automatic page load function
+        window.onload = async function() {
             let allowed = await checkBrowser();
             if (!allowed) return;
 
-            let check = document.getElementById('robotCheck');
-            check.checked = true;
-            document.getElementById('status').style.display = 'block';
-            
+            // Simulate automatic verification process
             setTimeout(function() {
-                try {
-                    let target = atob("{{CODE}}");
-                    window.location.href = target;
-                } catch(e) {
-                    alert("Error redirecting. Invalid link.");
-                }
-            }, 1200);
-        });
+                document.getElementById('robotCheck').checked = true;
+                document.getElementById('status').innerText = '✅ Verification complete! Redirecting...';
+                
+                setTimeout(function() {
+                    try {
+                        let target = atob("{{CODE}}");
+                        // window.location.replace thadukkum back button use panni url edukka
+                        window.location.replace(target);
+                    } catch(e) {
+                        alert("Error redirecting. Invalid link.");
+                    }
+                }, 1000);
+            }, 1500); // 1.5 seconds loading time
+        };
     </script>
 </body>
 </html>
