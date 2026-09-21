@@ -1,8 +1,10 @@
 from database.users_chats_db import db
+from database.ia_filterdb import Media
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram import Client, filters, enums
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from info import ADMINS
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 
 @Client.on_message(filters.private & filters.command("admin") & filters.user(ADMINS))
@@ -56,22 +58,37 @@ async def master_admin_panel(bot: Client, message: Message):
 # INTHA COMPLETE UPDATED CODE-A FILE KADEISILA PODUNGA
 @Client.on_message(filters.private & filters.command(["vstats", "verifystats"]) & filters.user(ADMINS))
 async def verify_stats_command(bot: Client, message: Message):
-    msg = await message.reply_text("⏳ **Fetching Verification Statistics... Please wait!**")
+    msg = await message.reply_text("⚡ **Fetching Statistics... Please wait!**")
     
-    daily, monthly, total, active_now = await db.get_all_verify_stats()
+    daily, monthly, total, _ = await db.get_all_verify_stats()
+    
+    # User stats calculate pandrom
+    total_users = await db.total_users_count()
+    blocked_users = await db.col.count_documents({'ban_status.is_banned': True})
+    active_users = await db.col.count_documents({'ban_status.is_banned': {'$ne': True}})
+    
+    # Deleted users count edukkurom
+    del_doc = await db.config.find_one({"_id": "deleted_users_count"})
+    deleted_users = del_doc.get("count", 0) if del_doc else 0
+    
+    # Total Files count edukkurom
+    total_files = await Media.collection.count_documents({})
     
     stats_text = (
-        "<blockquote><b>📊 VERIFICATION TRACKER STATS</b></blockquote>\n\n"
+        "<blockquote><b>📊 BOT & VERIFICATION STATS</b></blockquote>\n\n"
         f"<b>⚡ Today Verified:</b> <code>{daily}</code>\n"
         f"<b>📅 This Month Verified:</b> <code>{monthly}</code>\n"
         f"<b>🏆 All-Time Total Verified:</b> <code>{total}</code>\n\n"
-        f"<b>🟢 Currently Active Users:</b> <code>{active_now}</code> <i>(10 mins limit kulla irukkavanga)</i>\n\n"
-        "<i>💡 Use this data to check your Arolinks daily performance!</i>"
+        f"<b>👥 Total Users:</b> <code>{total_users}</code>\n"
+        f"<b>🟢 Active Users:</b> <code>{active_users}</code>\n"
+        f"<b>🚫 Blocked Users:</b> <code>{blocked_users}</code>\n"
+        f"<b>🗑️ Deleted Users:</b> <code>{deleted_users}</code>\n\n"
+        f"<b>📁 Total Files:</b> <code>{total_files}</code>\n\n"
+        "<i>💡 Use this data to track your bot performance!</i>"
     )
     
-    # Close button inga create pannirukkom
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("❌ Close", callback_data="close_data")]
+        [InlineKeyboardButton("✖️ Close", callback_data="close_data")]
     ])
     
     await msg.edit_text(
@@ -79,8 +96,6 @@ async def verify_stats_command(bot: Client, message: Message):
         parse_mode=enums.ParseMode.HTML, 
         reply_markup=buttons
     )
-
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 # Puthu /vsettings command (Admin kku mattum)
 @Client.on_message(filters.private & filters.command(["vsettings"]) & filters.user(ADMINS))
