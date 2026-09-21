@@ -297,7 +297,7 @@ async def start(client, message):
             del_seconds = del_time * 60
             
             # --- 1. SMART LOADING MESSAGE (Udane send aagum) ---
-            anim_msg = await message.reply_text("<b>  Fetching File Details... Please wait!</b>", parse_mode=enums.ParseMode.HTML)
+            anim_msg = await message.reply_text("<b>⏳ Fetching File Details... Please wait!</b>", parse_mode=enums.ParseMode.HTML, protect_content=True)
             
             # --- 2. Background-la details edukkum (No Delay) ---
             verify_url = await get_verify_link(message.from_user.id, data)
@@ -333,15 +333,15 @@ async def start(client, message):
             v_settings = await db.get_verify_settings()
             
             if v_settings['mode'] == 'time':
-                # Time Based Mode - Attractive Unlimited Access Page
+                # Time Based Mode - Simple English text
                 verify_text = (
                     "<b>🎊 Premium Access : Activation Required! 🎊</b>\n\n"
                     f"<blockquote><b>🚀 Activate {v_settings['hours']} Hours Unlimited Access!</b>\n\n"
-                    "<i>Verify once now and download unlimited Movies & Series without any verification interruptions!</i></blockquote>\n\n"
+                    f"<i>Verify just one time! Enjoy unlimited direct downloads for the next {v_settings['hours']} hours without any links.</i></blockquote>\n\n"
                     "<b>⚠️ Note :</b> <i>Click the verify button below to activate your session.</i>"
                 )
             else:
-                # Everytime Mode - Standard File Details Page (Like 2nd Photo)
+                # Everytime Mode - Standard File Details Page
                 verify_text = (
                     "<b>⛔ Access Denied : Verification Required!</b>\n\n"
                     "<blockquote><b>📁 File Details:</b>\n\n"
