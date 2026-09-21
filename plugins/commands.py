@@ -297,7 +297,7 @@ async def start(client, message):
             del_seconds = del_time * 60
             
             # --- 1. SMART LOADING MESSAGE (Udane send aagum) ---
-            anim_msg = await message.reply_text("<b>⏳ Fetching File Details... Please wait!</b>", parse_mode=enums.ParseMode.HTML, protect_content=True)
+            anim_msg = await message.reply_text("<b><i>⏳ Fetching File Details... Please wait!</i></b>", parse_mode=enums.ParseMode.HTML, protect_content=True)
             
             # --- 2. Background-la details edukkum (No Delay) ---
             verify_url = await get_verify_link(message.from_user.id, data)
