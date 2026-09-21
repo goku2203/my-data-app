@@ -211,7 +211,12 @@ async def advantage_spoll_choker(bot, query):
 @Client.on_callback_query(filters.regex(r"^(close_data|alertmessage|file|checksub|pages|esp|msp|hsp|tsp)"))
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "close_data":
-        await query.message.delete()
+        try:
+            await query.message.delete() # Bot-oda panel message-a delete pannum
+            if query.message.reply_to_message:
+                await query.message.reply_to_message.delete() # User anupina command message-ayum delete pannum
+        except:
+            pass
 
     elif "alertmessage" in query.data:
         grp_id = query.message.chat.id
