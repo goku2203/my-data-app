@@ -58,6 +58,10 @@ async def master_admin_panel(bot: Client, message: Message):
 # INTHA COMPLETE UPDATED CODE-A FILE KADEISILA PODUNGA
 @Client.on_message(filters.private & filters.command(["vstats", "verifystats"]) & filters.user(ADMINS))
 async def verify_stats_command(bot: Client, message: Message):
+    try:
+        await message.delete() # User command-a delete pannum
+    except:
+        pass
     msg = await message.reply_text("⚡ **Fetching Statistics... Please wait!**")
     
     daily, monthly, total, _ = await db.get_all_verify_stats()
@@ -100,6 +104,10 @@ async def verify_stats_command(bot: Client, message: Message):
 # Puthu /vsettings command (Admin kku mattum)
 @Client.on_message(filters.private & filters.command(["vsettings"]) & filters.user(ADMINS))
 async def vsettings_panel(bot: Client, message: Message):
+    try:
+        await message.delete() # User command-a delete pannum
+    except:
+        pass
     await send_vsettings_menu(message)
 
 async def send_vsettings_menu(message_or_query):
