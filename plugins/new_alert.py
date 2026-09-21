@@ -19,18 +19,22 @@ def get_movie_name(name):
     match = re.search(r'\b(19[5-9][0-9]|20[0-3][0-9])\b', clean)
     
     if match:
-        end_index = match.end()
-        clean = clean[:end_index]
+        year = match.group(1)
+        clean = clean[:match.start()] # Year-kku munnadi ulla name mattum edukkum
+        clean = re.sub(r'[\[\(\)\}\]]', '', clean)
+        clean = re.sub(r'[-_./@|:+]', ' ', clean)
+        clean = re.sub(r'\s+', ' ', clean).strip()
+        return f"{clean.title()} ({year})" # Year-a bracket-la podum
     else:
         clean = re.sub(r'\.(mkv|mp4|avi|flv|webm)$', '', clean)
         junk_words = ["hq", "predvd", "clean", "proper", "1080p", "720p", "480p", "hdrip"]
         for word in junk_words:
             clean = re.sub(r'\b' + re.escape(word) + r'\b', '', clean)
             
-    clean = re.sub(r'[\[\(\)\}\]]', '', clean)
-    clean = re.sub(r'[-_./@|:+]', ' ', clean)
-    clean = re.sub(r'\s+', ' ', clean).strip()
-    return clean.title()
+        clean = re.sub(r'[\[\(\)\}\]]', '', clean)
+        clean = re.sub(r'[-_./@|:+]', ' ', clean)
+        clean = re.sub(r'\s+', ' ', clean).strip()
+        return clean.title()
 
 # 2. ANIME NAME CLEAN FUNCTION (New Anime Selection)
 def get_anime_name(name):
@@ -47,12 +51,25 @@ def get_anime_name(name):
         clean = clean[:match.start()] # Athukku appuram irukkura ellathayum remove pannidum
         
     clean = re.sub(r'\.(mkv|mp4|avi|flv|webm)$', '', clean)
+    
+    # Season filter panni bracket-la podum code
+    season_match = re.search(r'\b(s\d{1,2}|season\s*\d{1,2})\b', clean)
+    season_str = ""
+    if season_match:
+        s_raw = season_match.group(1).upper().replace("EASON", "").replace(" ", "")
+        m = re.match(r'S(\d+)', s_raw)
+        if m:
+            season_str = f" (S{int(m.group(1)):02d})"
+        else:
+            season_str = f" ({s_raw})"
+        clean = clean[:season_match.start()] + clean[season_match.end():]
+
     clean = re.sub(r'[\[\(\)\}\]]', '', clean)
     clean = re.sub(r'[-_./@|:+]', ' ', clean)
     clean = re.sub(r'\s+', ' ', clean).strip()
     
     # Capitalize panni correct-aana format la return pannum
-    return clean.title()
+    return f"{clean.title()}{season_str}"
 
 @Client.on_message(filters.chat([MOVIE_DB_CHANNEL, USER_REQ_DB_CHANNEL, ANIME_CHANNEL_ID, CAM_DB_CHANNEL]) & (filters.document | filters.video | filters.audio), group=10)
 async def alert_handler(client, message):
