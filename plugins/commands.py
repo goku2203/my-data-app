@@ -335,7 +335,7 @@ async def start(client, message):
             if v_settings['mode'] == 'time':
                 # Time Based Mode - Simple English text
                 verify_text = (
-                    "<b>🎊 Premium Access : Activation Required! 🎊</b>\n\n"
+                    "<b>🎊 Premium Access : Activation Required!</b>\n\n"
                     f"<blockquote><b>🚀 Activate {v_settings['hours']} Hours Unlimited Access!</b>\n\n"
                     f"<i>Verify just one time! Enjoy unlimited direct downloads for the next {v_settings['hours']} hours without any links.</i></blockquote>\n\n"
                     "<b>⚠️ Note :</b> <i>Click the verify button below to activate your session.</i>"
