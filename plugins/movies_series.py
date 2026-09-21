@@ -70,7 +70,7 @@ async def list_series(bot: Client, message: Message):
         asyncio.create_task(auto_delete_helper(k, 60))
         return
 
-    msg = "<b>📺 Latest Uploaded Series:</b>\n\n╭━━━━━━━━━━━━━━━╮\n"
+    msg = "<b>📺 Latest Uploaded Series:</b>\n\n"
     count = 1
 
     for title, episodes in series_data.items():
@@ -81,7 +81,7 @@ async def list_series(bot: Client, message: Message):
         if count > 15:
             break
             
-    msg += "╰━━━━━━━━━━━━━━━╯\n\n<i>⏳ This message will be auto-deleted in 1 minute.</i>"
+    msg += "\n<blockquote><i>⏳ This message will be auto-deleted in 1 minute.</i></blockquote>"
     k = await message.reply(msg[:4096], parse_mode=ParseMode.HTML)
     
     # User Command & Bot Message Auto Delete aagum
