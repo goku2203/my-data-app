@@ -330,23 +330,25 @@ async def start(client, message):
                 [InlineKeyboardButton("❓ How to Download ❓", url="https://t.me/howtoo1/7")]
             ]
             
-            # Mode check panni dynamic-a text mathurom
             v_settings = await db.get_verify_settings()
             
             if v_settings['mode'] == 'time':
-                # Time Based mode-kku hours display aagum
-                time_info = f"<blockquote><b>⏳ Verification Valid For : {v_settings['hours']} Hours!</b></blockquote>"
+                # Time Based Mode - Attractive Unlimited Access Page
+                verify_text = (
+                    "<b>🎊 Premium Access : Activation Required! 🎊</b>\n\n"
+                    f"<blockquote><b>🚀 Activate {v_settings['hours']} Hours Unlimited Access!</b>\n\n"
+                    "<i>Verify once now and download unlimited Movies & Series without any verification interruptions!</i></blockquote>\n\n"
+                    "<b>⚠️ Note :</b> <i>Click the verify button below to activate your session.</i>"
+                )
             else:
-                # Everytime mode-kku 1st photo mathiriye minutes display aagum
-                time_info = f"<blockquote><b>⏳ Time Limit : {del_time} Minutes!</b></blockquote>"
-
-            verify_text = (
-                "<b>⛔ Access Denied : Verification Required!</b>\n\n"
-                "<blockquote><b>📁 File Details:</b>\n\n"
-                f"{raw_caption}</blockquote>\n\n"
-                "<b>⚠️ Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed. </i>\n\n"
-                f"{time_info}"
-            )
+                # Everytime Mode - Standard File Details Page (Like 2nd Photo)
+                verify_text = (
+                    "<b>⛔ Access Denied : Verification Required!</b>\n\n"
+                    "<blockquote><b>📁 File Details:</b>\n\n"
+                    f"{raw_caption}</blockquote>\n\n"
+                    "<b>⚠️ Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed. </i>\n\n"
+                    f"<blockquote><b>⏳ Time Limit : {del_time} Minutes!</b></blockquote>"
+                )
             
             # --- 3. Pazhaya message-aiye Edit panrom (Smooth Effect) ---
             await anim_msg.edit_text(
