@@ -58,6 +58,7 @@ FILE_AUTO_DELETE_SECONDS = int(environ.get('FILE_AUTO_DELETE_SECONDS', 3600))
 # --- Logs & Support ---
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002793224320'))
 SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'https://t.me/Tamilmovieslink_bot')
+VERIFY_LOG_CHANNEL = int(environ.get('VERIFY_LOG_CHANNEL', '-1002729140893'))
 
 # --- UI & Custom Features ---
 P_TTI_SHOW_OFF = is_enabled(environ.get('P_TTI_SHOW_OFF', 'False'), False)
