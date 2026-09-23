@@ -139,6 +139,14 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{1}</code>
 🌐 <b>sᴏᴜʀᴄᴇ :</b> {3}</blockquote>"""
 
+    # ==========================================
+    #   VERIFICATION LOG TEXT
+    # ==========================================
+    VERIFY_LOG_TXT = """<b>✅ New User Verified!</b>\n
+👤 <b>User:</b> {mention}
+🆔 <b>ID:</b> <code>{id}</code>
+⏳ <b>Mode:</b> {mode}"""
+
 # ==========================================
     # MISSING LOG - Number List
 # ==========================================
