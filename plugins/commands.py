@@ -260,41 +260,41 @@ async def start(client, message):
             check_id = link_parts[1]
             
             if str(message.from_user.id) == check_id:
-                    v_settings = await verify_user(message.from_user.id)
-                    
-                    if v_settings['mode'] == 'time':
-                        success_msg = f"<b>✅ Verification Successful!</b>\n\n<i>Your access is activated for {v_settings['hours']} Hours. File Uploading... Please wait...</i>"
-                    else:
-                        success_msg = "<b>✅ Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>"
-                        
-                    v_msg = await message.reply_text(success_msg, protect_content=True)
-                    asyncio.create_task(auto_delete_helper(v_msg, 5))
-                    
-                    # --- ADDED: Verified Users Log ---
-                    try:
-                        user_mention = message.from_user.mention if message.from_user else "Unknown"
-                        user_id = message.from_user.id
-                        
-                        log_msg = script.VERIFY_LOG_TXT.format(
-                            mention=user_mention,
-                            id=user_id,
-                            mode=v_settings['mode'].title()
-                        )
-                        await client.send_message(chat_id=VERIFY_LOG_CHANNEL, text=log_msg)
-                    except Exception as e:
-                        logger.error(f"Verify Log Error: {e}")
-                    # ---------------------------------
-                    
-                    is_just_verified = True
-                    
-                    if len(link_parts) > 2:
-                        message.command[1] = link_parts[2]
-                    else:
-                        return
-                        
+                v_settings = await verify_user(message.from_user.id)
+                
+                if v_settings['mode'] == 'time':
+                    success_msg = f"<b>✅ Verification Successful!</b>\n\n<i>Your access is activated for {v_settings['hours']} Hours. File Uploading... Please wait...</i>"
                 else:
-                    await message.reply_text("❌ Invalid Verification Link!")
+                    success_msg = "<b>✅ Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>"
+                    
+                v_msg = await message.reply_text(success_msg, protect_content=True)
+                asyncio.create_task(auto_delete_helper(v_msg, 5))
+                
+                # --- ADDED: Verified Users Log ---
+                try:
+                    user_mention = message.from_user.mention if message.from_user else "Unknown"
+                    user_id = message.from_user.id
+                    
+                    log_msg = script.VERIFY_LOG_TXT.format(
+                        mention=user_mention,
+                        id=user_id,
+                        mode=v_settings['mode'].title()
+                    )
+                    await client.send_message(chat_id=VERIFY_LOG_CHANNEL, text=log_msg)
+                except Exception as e:
+                    logger.error(f"Verify Log Error: {e}")
+                # ---------------------------------
+                
+                is_just_verified = True
+                
+                if len(link_parts) > 2:
+                    message.command[1] = link_parts[2]
+                else:
                     return
+                    
+            else:
+                await message.reply_text("❌ Invalid Verification Link!")
+                return
         except Exception as e:
             print(f"Verify Error: {e}")
             return
