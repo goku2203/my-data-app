@@ -16,7 +16,7 @@ from Script import script
 from database.ia_filterdb import Media, get_file_details, unpack_new_file_id
 from database.users_chats_db import db
 from database.connections_mdb import active_connection
-from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY
+from info import CHANNELS, ADMINS, LOG_CHANNEL, VERIFY_LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY
 from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user, clean_filename
 from plugins.menu import START_BUTTONS
 from plugins.fsub_manager import send_fsub_prompt
@@ -260,18 +260,33 @@ async def start(client, message):
             check_id = link_parts[1]
             
             if str(message.from_user.id) == check_id:
-                v_settings = await verify_user(message.from_user.id)
-                
-                if v_settings['mode'] == 'time':
-                    success_msg = f"<b>  Verification Successful!</b>\n\n<i>Your access is activated for {v_settings['hours']} Hours. File Uploading... Please wait...</i>"
-                else:
-                    success_msg = "<b>  Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>"
+                    v_settings = await verify_user(message.from_user.id)
                     
-                v_msg = await message.reply_text(success_msg, protect_content=True)
-                asyncio.create_task(auto_delete_helper(v_msg, 5))
-                
-                # Inga flag-a True aakkidrom, so kelaye check pannaathu
-                is_just_verified = True
+                    if v_settings['mode'] == 'time':
+                        success_msg = f"<b>✅ Verification Successful!</b>\n\n<i>Your access is activated for {v_settings['hours']} Hours. File Uploading... Please wait...</i>"
+                    else:
+                        success_msg = "<b>✅ Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>"
+                        
+                    v_msg = await message.reply_text(success_msg, protect_content=True)
+                    asyncio.create_task(auto_delete_helper(v_msg, 5))
+                    
+                    # --- ADDED: Verified Users Log ---
+                    try:
+                        user_mention = message.from_user.mention if message.from_user else "Unknown"
+                        user_id = message.from_user.id
+                        
+                        log_msg = script.VERIFY_LOG_TXT.format(
+                            mention=user_mention,
+                            id=user_id,
+                            mode=v_settings['mode'].title()
+                        )
+                        await client.send_message(chat_id=VERIFY_LOG_CHANNEL, text=log_msg)
+                    except Exception as e:
+                        logger.error(f"Verify Log Error: {e}")
+                    # ---------------------------------
+                    
+                    # Inga flag-a True aakkidrom, so kelaye check pannaathu
+                    is_just_verified = True
                 
                 if len(link_parts) > 2:
                     message.command[1] = link_parts[2]
