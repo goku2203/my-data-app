@@ -285,17 +285,16 @@ async def start(client, message):
                         logger.error(f"Verify Log Error: {e}")
                     # ---------------------------------
                     
-                    # Inga flag-a True aakkidrom, so kelaye check pannaathu
                     is_just_verified = True
-                
-                if len(link_parts) > 2:
-                    message.command[1] = link_parts[2]
+                    
+                    if len(link_parts) > 2:
+                        message.command[1] = link_parts[2]
+                    else:
+                        return
+                        
                 else:
-                    return 
-            
-            else:
-                await message.reply_text("  Invalid Verification Link!")
-                return
+                    await message.reply_text("❌ Invalid Verification Link!")
+                    return
         except Exception as e:
             print(f"Verify Error: {e}")
             return
