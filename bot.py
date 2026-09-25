@@ -15,7 +15,7 @@ logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("imdbpy").setLevel(logging.ERROR)
 logging.getLogger("asyncio").setLevel(logging.CRITICAL - 1)
 
-# 👇 FIX: Create event loop BEFORE importing Pyrogram
+# FIX: Create event loop BEFORE importing Pyrogram
 try:
     loop = asyncio.get_event_loop()
 except RuntimeError:
@@ -101,7 +101,7 @@ class Bot(Client):
             logging.info("✅ Bot is Online and Running!")
             try:
                 # Restart-ku bathila verum Online status update anuppum
-                await self.send_message(chat_id=LOG_CHANNEL, text="✅ **Daily Status:** Bot is Online and Running normally! 🚀")
+                await self.send_message(chat_id=LOG_CHANNEL, text="✅  **Daily Status:** Bot is Online and Running normally! 🚀")
             except:
                 pass
             # Inga iruntha os.execl line-a thookiyachu, so bot switch off aagathu!
