@@ -142,7 +142,7 @@ async def list_fsub_channels(client, message):
             name = chat.title
         except Exception:
             name = "Unknown Channel (Check if bot is admin)"
-        text += f"▪️ {name} (`{ch}`)\n"
+        text += f"➜ {name}\n (`{ch}`)\n"
 
     k = await message.reply(text)
     asyncio.create_task(auto_delete_helper(k, message, 60))
