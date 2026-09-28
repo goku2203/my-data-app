@@ -6,6 +6,15 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from info import ADMINS
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
+# Auto-delete helper function add panrom
+async def auto_delete_helper(bot_msg, user_msg, delay):
+    await asyncio.sleep(delay)
+    try:
+        if bot_msg: await bot_msg.delete()
+    except: pass
+    try:
+        if user_msg: await user_msg.delete()
+    except: pass
 
 @Client.on_message(filters.private & filters.command("admin") & filters.user(ADMINS))
 async def master_admin_panel(bot: Client, message: Message):
@@ -100,6 +109,8 @@ async def verify_stats_command(bot: Client, message: Message):
         parse_mode=enums.ParseMode.HTML, 
         reply_markup=buttons
     )
+    # 60 Seconds (1 Min) kalichu bot and user msg delete aagum
+    asyncio.create_task(auto_delete_helper(msg, message, 60))
 
 # Puthu /vsettings command (Admin kku mattum)
 @Client.on_message(filters.private & filters.command(["vsettings"]) & filters.user(ADMINS))
