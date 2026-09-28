@@ -312,7 +312,8 @@ async def auto_filter(client, msg, spoll=False):
                 settings = {"button": True, "botpm": False, "file_secure": False, "imdb": False, "spell_check": False, "template": IMDB_TEMPLATE, "welcome": False}
 
             if message.text.startswith("/"): return
-            if re.findall(r"((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
+            # Message length invalid-a iruntha direct-a stop aagidum (Error thadukka)
+            if len(message.text) <= 2 or len(message.text) >= 100:
                 return
             
             if 2 < len(message.text) < 100:
