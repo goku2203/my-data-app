@@ -88,14 +88,14 @@ async def stats_command(client, message):
             photo=random.choice(PICS),
             caption=stats_text,
             reply_markup=buttons,
-            parse_mode=enums.ParseMode.HTML
+            parse_mode=enums.ParseMode.HTML,
             quote=True
         )
     except Exception as e:
         await message.reply_text(
             text=stats_text,
             reply_markup=buttons,
-            parse_mode=enums.ParseMode.HTML
+            parse_mode=enums.ParseMode.HTML,
             quote=True
         )
 
