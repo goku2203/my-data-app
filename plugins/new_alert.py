@@ -12,24 +12,31 @@ LAST_SENT = {}
 # 1. MOVIE NAME CLEAN FUNCTION (Normal Movies)
 def get_movie_name(name):
     if not name: return "Unknown Movie"
-    clean = name.lower()
-    
-    clean = re.sub(r'(?i)(?:\[|\(|@)?\s*goku[\s._-]*stark\s*(?:\]|\))?', '', clean)
-    clean = re.sub(r'^[\s\-_\[\]\(\)\.]+', '', clean)
-    match = re.search(r'\b(19[5-9][0-9]|20[0-3][0-9])\b', clean)
-    
+
+    # 1. First username-a remove panrom (@Goku_Stark)
+    clean = re.sub(r'(?i)(?:\[|\(|@)?\s*goku[\s._-]*stark\s*(?:\]|\))?', '', name)
+    clean = clean.strip()
+
+    # 2. Unga idea: Starting-la irunthu (Year) varaikum ulla text-a mattum edukkum
+    # Ex: "End of the Trail (1932) HQ HDRip..." -> match aagum
+    match = re.search(r'^(.*?)\((\d{4})\)', clean)
+
     if match:
-        year = match.group(1)
-        clean = clean[:match.start()] # Year-kku munnadi ulla name mattum edukkum
-        clean = re.sub(r'[\[\(\)\}\]]', '', clean)
-        clean = re.sub(r'[-_./@|:+]', ' ', clean)
-        clean = re.sub(r'\s+', ' ', clean).strip()
-        return f"{clean.title()} ({year})" # Year-a bracket-la podum
+        title_part = match.group(1) # Movie name part (Ex: "End of the Trail ")
+        year_part = match.group(2)  # Year part (Ex: "1932")
+
+        # Title-la irukka thevayillatha symbols-a space-a mathurom
+        title_part = re.sub(r'[-_./|:+]', ' ', title_part)
+        title_part = re.sub(r'\s+', ' ', title_part).strip()
+
+        # Movie Name (Year) format-la pakka va return pannum
+        return f"{title_part.title()} ({year_part})"
     else:
-        clean = re.sub(r'\.(mkv|mp4|avi|flv|webm)$', '', clean)
-        junk_words = ["hq", "predvd", "clean", "proper", "1080p", "720p", "480p", "hdrip"]
+        # Oruvela Year illana normal clean (Backup-ku)
+        clean = re.sub(r'\.(mkv|mp4|avi|flv|webm)$', '', clean, flags=re.IGNORECASE)
+        junk_words = ["hq", "predvd", "clean", "proper", "1080p", "720p", "480p", "hdrip", "x264", "x265", "hevc", "aac", "tamil", "telugu", "hindi", "eng", "malayalam", "kannada"]
         for word in junk_words:
-            clean = re.sub(r'\b' + re.escape(word) + r'\b', '', clean)
+            clean = re.sub(r'(?i)\b' + word + r'\b', '', clean)
             
         clean = re.sub(r'[\[\(\)\}\]]', '', clean)
         clean = re.sub(r'[-_./@|:+]', ' ', clean)
