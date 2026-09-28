@@ -89,12 +89,14 @@ async def stats_command(client, message):
             caption=stats_text,
             reply_markup=buttons,
             parse_mode=enums.ParseMode.HTML
+            quote=True
         )
     except Exception as e:
         await message.reply_text(
             text=stats_text,
             reply_markup=buttons,
             parse_mode=enums.ParseMode.HTML
+            quote=True
         )
 
 @Client.on_callback_query(filters.regex("^refresh_panel$") & filters.user(ADMINS))
