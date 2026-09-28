@@ -39,7 +39,7 @@ async def toggle_autopost(client, message):
     
     await message.reply(
         f"**Autopost Status:** `{state}`\n\nClick the button below to change the status:",
-        reply_markup=reply_markup
+        reply_markup=reply_markup,
         quote=True
     )
 
