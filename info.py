@@ -105,6 +105,9 @@ CAM_DB_CHANNEL = int(environ.get("CAM_DB_CHANNEL", "-1003952875911"))
 # --- API Integrations ---
 TMDB_API_KEY = environ.get("TMDB_API_KEY", "f0ed821364e340369110e83b814899ed")
 
+# --- Render URL Setup ---
+RENDER_URL = environ.get("RENDER_URL", "https://my-data-app-lovv.onrender.com")
+
 # --- Log Summary Setup ---
 LOG_STR = "Current Customized Configurations are:-\n"
 LOG_STR += ("IMDB Results are enabled, Bot will be showing imdb details for you queries.\n" if IMDB else "IMBD Results are disabled.\n")
