@@ -15,7 +15,7 @@ from pyrogram.enums import ChatMemberStatus
 
 from imdb import IMDb
 
-from info import LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, VERIFY_EXPIRE, IS_VERIFY, SHORTLINK_URL, SHORTLINK_API, REQUEST_FSUB_MODE
+from info import LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, VERIFY_EXPIRE, IS_VERIFY, SHORTLINK_URL, SHORTLINK_API, REQUEST_FSUB_MODE, RENDER_URL
 from database.users_chats_db import db
 
 logger = logging.getLogger(__name__)
