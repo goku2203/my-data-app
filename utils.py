@@ -422,7 +422,7 @@ async def get_verify_link(user_id, file_id=None):
         encoded_url = base64.b64encode(clean_short_link.encode('utf-8')).decode('utf-8')
         
         # Unga exact Render URL inga hardcode panniyachu (Entha error-um varathu)
-        render_base_url = "https://my-data-app.onrender.com"
+        render_base_url = RENDER_URL
             
         return f"{render_base_url}/verify?code={encoded_url}"
     except Exception as e:
