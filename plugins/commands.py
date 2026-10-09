@@ -258,9 +258,11 @@ async def start(client, message):
         try:
             link_parts = message.command[1].split("_", 2)
             check_id = link_parts[1]
+            logger.info(f"🔑 [VERIFY] Verify link received from User: {message.from_user.id} | Payload: {message.command[1]}")
             
             if str(message.from_user.id) == check_id:
                 v_settings = await verify_user(message.from_user.id)
+                logger.info(f"✅ [VERIFY] User {message.from_user.id} verified! Mode: {v_settings.get('mode')} ({v_settings.get('hours', 0)}h)")
                 
                 if v_settings['mode'] == 'time':
                     success_msg = f"<b>✅ Verification Successful!</b>\n\n<i>Your access is activated for {v_settings['hours']} Hours. File Uploading... Please wait...</i>"
@@ -270,11 +272,9 @@ async def start(client, message):
                 v_msg = await message.reply_text(success_msg, protect_content=True)
                 asyncio.create_task(auto_delete_helper(v_msg, 5))
                 
-                # --- ADDED: Verified Users Log ---
                 try:
                     user_mention = message.from_user.mention if message.from_user else "Unknown"
                     user_id = message.from_user.id
-                    
                     log_msg = script.VERIFY_LOG_TXT.format(
                         mention=user_mention,
                         id=user_id,
@@ -283,20 +283,21 @@ async def start(client, message):
                     await client.send_message(chat_id=VERIFY_LOG_CHANNEL, text=log_msg)
                 except Exception as e:
                     logger.error(f"Verify Log Error: {e}")
-                # ---------------------------------
-                
+                    
                 is_just_verified = True
                 
                 if len(link_parts) > 2:
                     message.command[1] = link_parts[2]
+                    logger.info(f"➡️ [VERIFY] File payload to process: '{link_parts[2]}'")
                 else:
+                    logger.warning("⚠️ [VERIFY] No file ID found in link_parts (len <= 2)")
                     return
-                    
             else:
+                logger.warning(f"❌ [VERIFY] User ID mismatch! Sender: {message.from_user.id} vs check_id: {check_id}")
                 await message.reply_text("❌ Invalid Verification Link!")
                 return
         except Exception as e:
-            print(f"Verify Error: {e}")
+            logger.error(f"❌ [VERIFY ERROR] {e}", exc_info=True)
             return
             
     data = message.command[1]
@@ -305,15 +306,11 @@ async def start(client, message):
     if IS_VERIFY and not is_just_verified:
         if not await check_verification(client, message.from_user.id):
             
-            # --- FETCH ADMIN AUTO DELETE TIME ---
             ad_settings = await db.get_autodelete_settings()
             del_time = ad_settings['time']
             del_seconds = del_time * 60
             
-            # --- 1. SMART LOADING MESSAGE (Udane send aagum) ---
             anim_msg = await message.reply_text("<b><i>⏳ Fetching File Details... Please wait!</i></b>", parse_mode=enums.ParseMode.HTML, protect_content=True)
-            
-            # --- 2. Background-la details edukkum (No Delay) ---
             verify_url = await get_verify_link(message.from_user.id, data)
             raw_caption = "Unknown Filename"
             
@@ -342,7 +339,7 @@ async def start(client, message):
                         return
 
                     if files_:
-                        raw_caption = files_[0].caption if files_[0].caption else files_[0].file_name
+                        raw_caption = files_[0].caption if hasattr(files_[0], 'caption') else files_[0].get('caption', '')
                 else:
                     raw_caption = "Batch Files Request"
             except Exception as e:
@@ -356,24 +353,20 @@ async def start(client, message):
             v_settings = await db.get_verify_settings()
             
             if v_settings['mode'] == 'time':
-                # Time Based Mode - Simple English text
                 verify_text = (
-                    "<b>🎊 Premium Access : Activation Required!</b>\n\n"
-                    f"<blockquote><b>🚀 Activate {v_settings['hours']} Hours Unlimited Access!</b>\n\n"
+                    "<b>🎉 Premium Access : Activation Required!</b>\n\n"
+                    f"<blockquote>🚀 <b>Activate {v_settings['hours']} Hours Unlimited Access!</b>\n\n"
                     f"<i>Verify just one time! Enjoy unlimited direct downloads for the next {v_settings['hours']} hours without any links.</i></blockquote>\n\n"
-                    "<b>⚠️ Note :</b> <i>Click the verify button below to activate your session.</i>"
+                    "⚠️ <b>Note : </b><i>Click the verify button below to activate your session.</i>"
                 )
             else:
-                # Everytime Mode - Standard File Details Page
                 verify_text = (
-                    "<b>⛔ Access Denied : Verification Required!</b>\n\n"
-                    "<blockquote><b>📁 File Details:</b>\n\n"
-                    f"{raw_caption}</blockquote>\n\n"
-                    "<b>⚠️ Important :</b> <i>You must verify yourself to get this file. Please click the verify button below to proceed. </i>\n\n"
-                    f"<blockquote><b>⏳ Time Limit : {del_time} Minutes!</b></blockquote>"
+                    "<b>🔒 File Locked : Verification Required!</b>\n\n"
+                    f"<blockquote>📂 <b>File:</b> <i>{raw_caption}</i>\n\n"
+                    "<i>Please verify to unlock this file. You will get direct file access after verification.</i></blockquote>\n\n"
+                    "⚠️ <b>Note : </b><i>Click the verify button below to continue.</i>"
                 )
-            
-            # --- 3. Pazhaya message-aiye Edit panrom (Smooth Effect) ---
+                
             await anim_msg.edit_text(
                 text=verify_text,
                 reply_markup=InlineKeyboardMarkup(buttons),
@@ -483,10 +476,13 @@ async def start(client, message):
             await asyncio.sleep(1) 
         return await sts.delete()
         
-    files_ = await get_file_details(file_id)           
+    logger.info(f"🔍 [LOOKUP] Looking up details for file_id: '{file_id}' (pre: '{pre}')")
+    files_ = await get_file_details(file_id)
     if not files_:
-        pre, file_id = ((base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii")).split("_", 1)
+        logger.warning(f"❌ [NOT_FOUND] get_file_details returned empty for file_id: '{file_id}'. Trying base64 fallback with data: '{data}'...")
         try:
+            pre, file_id = ((base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii")).split("_", 1)
+            logger.info(f"🔄 [BASE64_SUCCESS] Decoded -> pre: '{pre}', file_id: '{file_id}'")
             protect_content_flag = True if pre == 'filep' else False
             await send_file_to_user(
                 client=client,
@@ -495,19 +491,23 @@ async def start(client, message):
                 protect_content_flag=protect_content_flag
             )
             return
-        except:
-            pass
-        
+        except Exception as b64_err:
+            logger.error(f"❌ [BASE64_FAIL] Base64 fallback failed: {b64_err}")
+        logger.warning(f"🚨 [ALERT] File truly not found in database. Sending DELETED_FILE_TXT to user: {message.from_user.id}")
         msg = await message.reply(script.DELETED_FILE_TXT, parse_mode=enums.ParseMode.HTML)
         asyncio.create_task(auto_delete_helper(msg, 30, message))
         return
-        
     files = files_[0]
-    title = files.file_name
-    size = get_size(files.file_size)
-    f_caption = files.caption
+    if isinstance(files, dict):
+        title = files.get('file_name', 'Unknown')
+        size = get_size(files.get('file_size', 0))
+        f_caption = files.get('caption', '')
+    else:
+        title = files.file_name
+        size = get_size(files.file_size)
+        f_caption = files.caption
     protect_content_flag = True if pre == 'filep' else False
-    
+    logger.info(f"📤 [SENDING] Calling send_file_to_user for '{title}' to {message.from_user.id}...")
     await send_file_to_user(
         client=client,
         user_id=message.from_user.id,
