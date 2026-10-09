@@ -29,7 +29,7 @@ START_BUTTONS = [
     ]
 ]
 
-@Client.on_callback_query(filters.regex("^(start|start_data|help|about|source|manual_filter|button|auto_filter|connection)$"))
+@Client.on_callback_query(filters.regex("^(start|start_data|help|about|source|connection)$"))
 async def menu_callbacks_handler(client: Client, query: CallbackQuery):
     data = query.data
     
@@ -55,16 +55,15 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
     elif data == "help":
         buttons = [
             [
-                InlineKeyboardButton("🏷 ᴍᴀɴᴜᴀʟ ꜰɪʟᴛᴇʀ", callback_data="manual_filter"),
-                InlineKeyboardButton("⚙️ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ", callback_data="auto_filter")
+                InlineKeyboardButton("🔍 Rᴇᴏ̨ᴜᴇsᴛ Mᴏᴠɪᴇ", url="https://t.me/Tamilmovieslink_bot")
             ],
             [
-                InlineKeyboardButton("🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ", url="https://t.me/Tamilmovieslink_bot"),
-                InlineKeyboardButton("🔗 ᴄᴏɴɴᴇᴄᴛɪᴏɴꜱ", callback_data="connection")
+                InlineKeyboardButton("🔗 Mʏ Cᴏɴɴᴇᴄᴛɪᴏɴs", callback_data="connection"),
+                InlineKeyboardButton("💎 Pʀᴇᴍɪᴜᴍ Pʟᴀɴs", callback_data="premium_data")
             ],
             [
-                InlineKeyboardButton("⬅️ ʙᴀᴄᴋ", callback_data="start_data"),
-                InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴꜱ", callback_data="premium_data")
+                InlineKeyboardButton("🏠 Hᴏᴍᴇ", callback_data="start_data"),
+                InlineKeyboardButton("❌ Cʟᴏsᴇ", callback_data="close_data")
             ]
         ]
         
@@ -108,57 +107,6 @@ async def menu_callbacks_handler(client: Client, query: CallbackQuery):
             media=InputMediaPhoto(
                 media=random.choice(PICS),
                 caption=script.SOURCE_TXT,
-                parse_mode=enums.ParseMode.HTML
-            ),
-            reply_markup=reply_markup
-        )
-        return await query.answer()
-
-    elif data == "manual_filter":
-        buttons = [[
-            InlineKeyboardButton('⬅️ ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('🔘 ʙᴜᴛᴛᴏɴ', callback_data='button')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        
-        await query.message.edit_media(
-            media=InputMediaPhoto(
-                media=random.choice(PICS),
-                caption=script.MANUALFILTER_TXT,
-                parse_mode=enums.ParseMode.HTML
-            ),
-            reply_markup=reply_markup
-        )
-        return await query.answer()
-
-    elif data == "button":
-        buttons = [[
-            InlineKeyboardButton('⬅️ ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ', url='https://t.me/Tamilmovieslink_bot')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        
-        await query.message.edit_media(
-            media=InputMediaPhoto(
-                media=random.choice(PICS),
-                caption=script.BUTTON_TXT,
-                parse_mode=enums.ParseMode.HTML
-            ),
-            reply_markup=reply_markup
-        )
-        return await query.answer()
-
-    elif data == "auto_filter":
-        buttons = [[
-            InlineKeyboardButton('⬅️ ʙᴀᴄᴋ', callback_data='help'),
-            InlineKeyboardButton('🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ', url='https://t.me/Tamilmovieslink_bot')
-        ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        
-        await query.message.edit_media(
-            media=InputMediaPhoto(
-                media=random.choice(PICS),
-                caption=script.AUTOFILTER_TXT,
                 parse_mode=enums.ParseMode.HTML
             ),
             reply_markup=reply_markup
