@@ -7,6 +7,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Union, List
 import base64
+import urllib.parse
 
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
 from pyrogram.types import Message, InlineKeyboardButton
@@ -394,7 +395,6 @@ async def get_short(link):
 
 # ----- START OF NEW UTILS CODE -----
 
-# INTHA PUDHU CODE-A REPLACE PANNUNGA
 async def get_verify_link(user_id, file_id=None):
     bot_username = temp.U_NAME if temp.U_NAME else "Mikasa_Lovely_bot"
          
@@ -403,7 +403,8 @@ async def get_verify_link(user_id, file_id=None):
     else:
         link = f"https://telegram.me/{bot_username}?start=verify_{user_id}"
              
-    api_url = f"https://{SHORTLINK_URL}/api?api={SHORTLINK_API}&url={link}&format=text"
+    encoded_link = urllib.parse.quote(link)
+    api_url = f"https://{SHORTLINK_URL}/api?api={SHORTLINK_API}&url={encoded_link}&format=text"
          
     try:
         async with aiohttp.ClientSession() as session:
