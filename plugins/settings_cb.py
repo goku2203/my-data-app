@@ -3,24 +3,32 @@ from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from utils import get_settings, save_group_settings
 from database.connections_mdb import active_connection
+from info import ADMINS  # 👈 Inga ADMINS import add pannunga
 
 logger = logging.getLogger(__name__)
 
 @Client.on_callback_query(filters.regex(r"^setgs#"))
 async def settings_callback_handler(client: Client, query: CallbackQuery):
     ident, set_type, status, grp_id = query.data.split("#")
-    grpid = await active_connection(str(query.from_user.id))
+    user_id = query.from_user.id
     
-    if str(grp_id) != str(grpid):
-        await query.message.edit("Your Active Connection Has Been Changed. Go To /settings.")
-        return await query.answer()
-        
+    # 🔒 ADMIN CHECK: Group Admin or Bot Admin mattum thaan change panna mudiyum
+    try:
+        member = await client.get_chat_member(int(grp_id), user_id)
+        is_admin = member.status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER] or user_id in ADMINS
+    except Exception:
+        is_admin = user_id in ADMINS
+
+    if not is_admin:
+        return await query.answer("⚠️ You are not an admin! Only admins can change these settings.", show_alert=True)
+    
+    # Settings change panra logic
     if status == "True":
-        await save_group_settings(grpid, set_type, False)
+        await save_group_settings(int(grp_id), set_type, False)
     else:
-        await save_group_settings(grpid, set_type, True)
+        await save_group_settings(int(grp_id), set_type, True)
         
-    settings = await get_settings(grpid)
+    settings = await get_settings(int(grp_id))
     
     if settings is not None:
         buttons = [
@@ -52,4 +60,4 @@ async def settings_callback_handler(client: Client, query: CallbackQuery):
         reply_markup = InlineKeyboardMarkup(buttons)
         await query.message.edit_reply_markup(reply_markup)
         
-    await query.answer()
+    await query.answer("Settings Updated! ✅")
