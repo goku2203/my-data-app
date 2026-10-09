@@ -10,12 +10,6 @@ class script(object):
 
 <i>I can help you find Movies, Series, and Anime files quickly in your group. ⚡</i>
 
-<b>How to use me:</b>
-
-1. Add me to your group.
-2. Make me an <b>Admin</b>.
-3. Search and enjoy unlimited files! 🎬
-
 <blockquote>❤️ I am always here to help you.</blockquote>
 
 <i>Click the buttons below to learn more.</i>"""
