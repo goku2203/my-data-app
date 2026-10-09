@@ -127,7 +127,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
             ad_settings = await db.get_autodelete_settings()
             if ad_settings['enabled']:
                 asyncio.create_task(auto_delete_file(client, msg, ad_settings['time'] * 60))
-            
+        
     except Exception as e:
         logger.error(f"File send HTML error: {e}")
         safe_fallback_caption = f"File: {file_name}\nSize: {file_size}"
@@ -318,24 +318,33 @@ async def start(client, message):
             raw_caption = "Unknown Filename"
             
             try:
-                if "_" in data:
-                    try:
-                        _, temp_file_id = data.split('_', 1)
-                    except:
-                        temp_file_id = data
-                else:
-                    temp_file_id = data
+                if not data.startswith("BATCH") and not data.startswith("DSTORE"):
+                    if "_" in data:
+                        try:
+                            _, temp_file_id = data.split('_', 1)
+                        except:
+                            temp_file_id = data
+                    else:
+                        try:
+                            decoded = base64.urlsafe_b64decode(data + "=" * (-len(data) % 4)).decode("ascii")
+                            if "_" in decoded:
+                                _, temp_file_id = decoded.split('_', 1)
+                            else:
+                                temp_file_id = data
+                        except:
+                            temp_file_id = data
 
-                files_ = await get_file_details(temp_file_id)
-                
-                # --- NEW FIX: Check if file is deleted ---
-                if not files_:
-                    await anim_msg.edit_text(script.DELETED_FILE_TXT, parse_mode=enums.ParseMode.HTML)
-                    asyncio.create_task(auto_delete_helper(anim_msg, 30))
-                    return
-                # -----------------------------------------
-                if files_:
-                    raw_caption = files_[0].caption if files_[0].caption else files_[0].file_name
+                    files_ = await get_file_details(temp_file_id)
+
+                    if not files_:
+                        await anim_msg.edit_text(script.DELETED_FILE_TXT, parse_mode=enums.ParseMode.HTML)
+                        asyncio.create_task(auto_delete_helper(anim_msg, 30))
+                        return
+
+                    if files_:
+                        raw_caption = files_[0].caption if files_[0].caption else files_[0].file_name
+                else:
+                    raw_caption = "Batch Files Request"
             except Exception as e:
                 print(f"Error getting file details: {e}")
                 
