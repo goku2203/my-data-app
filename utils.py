@@ -419,7 +419,17 @@ async def get_verify_link(user_id, file_id=None):
 
     # Arolinks URL-a Base64 la hide panni unga Render Verify Page-kku anuppurom
     try:
-        clean_short_link = short_link.strip()
+        clean_short_link = short_link.strip().strip('"').strip("'")
+        if clean_short_link.startswith("{"):
+            try:
+                import json
+                js = json.loads(clean_short_link)
+                clean_short_link = js.get("shortenedUrl", clean_short_link)
+            except Exception:
+                pass
+        if not clean_short_link.startswith("http"):
+            clean_short_link = link
+
         encoded_url = base64.b64encode(clean_short_link.encode('utf-8')).decode('utf-8')
         
         # Unga exact Render URL inga hardcode panniyachu (Entha error-um varathu)
