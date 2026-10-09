@@ -4,8 +4,6 @@ from pyrogram.types import InputMediaPhoto
 from pyrogram.enums import ParseMode
 from info import ADMINS, PRIVATE_CHANNEL
 
-PRIVATE_CHANNEL = -1003333546040
-
 logger = logging.getLogger(__name__)
 
 @Client.on_message(
