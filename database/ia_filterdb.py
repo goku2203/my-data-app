@@ -160,33 +160,107 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
 
     return files, next_offset, total_results
 
+def extract_lookup_candidates(query: str):
+    candidates = []
+    
+    def add(val):
+        if not val or not isinstance(val, str):
+            return
+        val = val.strip()
+        if val and val not in candidates:
+            candidates.append(val)
+
+    add(query)
+
+    for sep in ['#', '-']:
+        if sep in query:
+            for p in reversed(query.split(sep)):
+                add(p)
+
+    if '_' in query:
+        parts = query.split('_')
+        for p in reversed(parts):
+            add(p)
+        if len(parts) > 1:
+            add('_'.join(parts[1:]))
+
+    try:
+        b64_pad = query + '=' * (-len(query) % 4)
+        dec = base64.urlsafe_b64decode(b64_pad).decode('utf-8', errors='ignore').strip()
+        if dec and dec.isprintable() and dec != query:
+            add(dec)
+            if '_' in dec:
+                for p in reversed(dec.split('_')):
+                    add(p)
+    except Exception:
+        pass
+
+    valid = []
+    for c in candidates:
+        if re.match(r'^[A-Za-z0-9_-]+$', c) and len(c) >= 8:
+            valid.append(c)
+    if query not in valid:
+        valid.insert(0, query)
+    return valid
+
 async def get_file_details(query):
     logger.info(f"🔍 [DB_LOOKUP] get_file_details called for ID: '{query}'")
     
-    # 1. First 'file_id' vachu thedurom
-    filter = {'file_id': query}
-    cursor = Media.find(filter)
-    filedetails = await cursor.to_list(length=1)
+    candidates = extract_lookup_candidates(str(query))
     
-    # 2. Kedaikkalana umongo '_id' vachu thedurom
-    if not filedetails:
-        logger.warning(f"⚠️ [DB_LOOKUP] 'file_id' la kedaikkala: '{query}' -> Trying '_id' search...")
-        cursor_id = Media.find({'_id': query})
-        filedetails = await cursor_id.to_list(length=1)
-        
-        # 3. Direct Mongo collection search fallback
-        if not filedetails:
-            logger.warning(f"⚠️ [DB_LOOKUP] umongo la kedaikkala -> Trying raw collection search...")
-            filedetails = await Media.collection.find({'_id': query}).to_list(length=1)
-            
-        if filedetails:
-            logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using '_id'!")
-        else:
-            logger.error(f"❌ [DB_LOOKUP] FAILED! File ID '{query}' database collection '{COLLECTION_NAME}'-la illa!")
-    else:
-        logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using 'file_id'!")
-        
-    return filedetails
+    for cand in candidates:
+        # 1. 'file_id' / '_id' search via umongo Media
+        try:
+            filedetails = await Media.find({'file_id': cand}).to_list(length=1)
+            if filedetails:
+                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using 'file_id': '{cand}'")
+                return filedetails
+        except Exception:
+            pass
+
+        try:
+            filedetails = await Media.find({'_id': cand}).to_list(length=1)
+            if filedetails:
+                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using '_id': '{cand}'")
+                return filedetails
+        except Exception:
+            pass
+
+        # 2. 'file_ref' search via umongo Media
+        try:
+            filedetails = await Media.find({'file_ref': cand}).to_list(length=1)
+            if filedetails:
+                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using 'file_ref': '{cand}'")
+                return filedetails
+        except Exception:
+            pass
+
+        # 3. Direct Mongo collection search fallback for '_id'
+        try:
+            raw_docs = await Media.collection.find({'_id': cand}).to_list(length=1)
+            if raw_docs:
+                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in raw collection using '_id': '{cand}'")
+                try:
+                    return [Media.build_from_mongo(d) for d in raw_docs]
+                except Exception:
+                    return raw_docs
+        except Exception:
+            pass
+
+        # 4. Direct Mongo collection search fallback for 'file_ref'
+        try:
+            raw_docs = await Media.collection.find({'file_ref': cand}).to_list(length=1)
+            if raw_docs:
+                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in raw collection using 'file_ref': '{cand}'")
+                try:
+                    return [Media.build_from_mongo(d) for d in raw_docs]
+                except Exception:
+                    return raw_docs
+        except Exception:
+            pass
+
+    logger.error(f"❌ [DB_LOOKUP] FAILED! File ID '{query}' database collection '{COLLECTION_NAME}'-la illa!")
+    return []
 
 def encode_file_id(s: bytes) -> str:
     r = b""
