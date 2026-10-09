@@ -102,8 +102,6 @@ ALERT_LOG_CHANNEL_ID = int(environ.get("ALERT_LOG_CHANNEL_ID", "-1003602676231")
 MISSING_LOG_CHANNEL = int(environ.get("MISSING_LOG_CHANNEL", "-1003555146843"))
 CAM_DB_CHANNEL = int(environ.get("CAM_DB_CHANNEL", "-1003952875911"))
 
-PRIVATE_CHANNEL = int(environ.get("PRIVATE_CHANNEL", "-1003333546040"))
-
 # --- API Integrations ---
 TMDB_API_KEY = environ.get("TMDB_API_KEY", "")
 
