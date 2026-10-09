@@ -22,6 +22,7 @@ from plugins.menu import START_BUTTONS
 from plugins.fsub_manager import send_fsub_prompt
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 BATCH_FILES = {}
 FORCE_MSG = {}
@@ -158,14 +159,25 @@ async def checksub_callback(client, callback_query):
     
     if await is_subscribed(user_id, client):
         try:
+            actual_file_id = (
+                getattr(file_details, 'file_id', None)
+                or getattr(file_details, 'id', None)
+                or (file_details.get('file_id') or file_details.get('_id') if isinstance(file_details, dict) else None)
+                or file_id
+            ) if file_details else file_id
+
+            file_name = getattr(file_details, 'file_name', None) or (file_details.get('file_name') if isinstance(file_details, dict) else None) if file_details else None
+            file_size_raw = getattr(file_details, 'file_size', 0) if not isinstance(file_details, dict) else (file_details.get('file_size', 0) if file_details else 0)
+            file_caption = getattr(file_details, 'caption', None) or (file_details.get('caption') if isinstance(file_details, dict) else None) if file_details else None
+
             await send_file_to_user(
                 client=client,
                 user_id=user_id,
-                file_id=file_id,
+                file_id=actual_file_id,
                 protect_content_flag=protect_content_flag,
-                file_name=file_details.file_name if file_details else None,
-                file_size=get_size(file_details.file_size) if file_details else None,
-                file_caption=file_details.caption if file_details else None
+                file_name=file_name,
+                file_size=get_size(file_size_raw) if file_size_raw else None,
+                file_caption=file_caption
             )
             await callback_query.message.delete()
         except Exception as e:
@@ -255,18 +267,35 @@ async def start(client, message):
     data = message.command[1]
     is_just_verified = False
     
-    if len(message.command) == 2 and message.command[1].startswith('verify_'):
-        try:
-            link_parts = message.command[1].split("_", 2)
+    # Check verification callback payload
+    # Handles: verify_{user_id}_{payload}, verify_{user_id}, or {user_id}_{token}_{payload}
+    cmd_param = message.command[1]
+    is_verify_candidate = False
+    check_id = None
+    extracted_data = cmd_param
+
+    if cmd_param.startswith('verify_'):
+        link_parts = cmd_param.split("_", 2)
+        if len(link_parts) > 1:
             check_id = link_parts[1]
-            logger.info(f"🔑 [VERIFY] Verify link received from User: {message.from_user.id} | Payload: {message.command[1]}")
-            
+            extracted_data = link_parts[2] if len(link_parts) > 2 else ""
+            is_verify_candidate = True
+    elif "_" in cmd_param:
+        parts = cmd_param.split("_")
+        if parts[0].isdigit() and parts[0] == str(message.from_user.id) and len(parts) >= 2:
+            check_id = parts[0]
+            extracted_data = "_".join(parts[1:])
+            is_verify_candidate = True
+
+    if is_verify_candidate:
+        try:
+            logger.info(f"🔑 [VERIFY] Verify link received from User: {message.from_user.id} | Payload: {cmd_param}")
             if str(message.from_user.id) == check_id:
                 v_settings = await verify_user(message.from_user.id)
                 logger.info(f"✅ [VERIFY] User {message.from_user.id} verified! Mode: {v_settings.get('mode')} ({v_settings.get('hours', 0)}h)")
                 
-                if v_settings['mode'] == 'time':
-                    success_msg = f"<b>✅ Verification Successful!</b>\n\n<i>Your access is activated for {v_settings['hours']} Hours. File Uploading... Please wait...</i>"
+                if v_settings.get('mode') == 'time':
+                    success_msg = f"<b>✅ Verification Successful!</b>\n\n<i>Your access is activated for {v_settings.get('hours', 0)} Hours. File Uploading... Please wait...</i>"
                 else:
                     success_msg = "<b>✅ Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>"
                     
@@ -279,21 +308,15 @@ async def start(client, message):
                     log_msg = script.VERIFY_LOG_TXT.format(
                         mention=user_mention,
                         id=user_id,
-                        mode=v_settings['mode'].title()
+                        mode=str(v_settings.get('mode', '')).title()
                     )
                     await client.send_message(chat_id=VERIFY_LOG_CHANNEL, text=log_msg)
                 except Exception as e:
                     logger.error(f"Verify Log Error: {e}")
                     
                 is_just_verified = True
-                
-                # 🎯 MAIN FIX: data-va direct-a link_parts[2] kku assign pandrom (User ID strip aagidum)
-                if len(link_parts) > 2:
-                    data = link_parts[2]
-                    logger.info(f"➡️ [VERIFY] File payload correctly extracted to data: '{data}'")
-                else:
-                    logger.warning("⚠️ [VERIFY] No file ID found in link_parts (len <= 2)")
-                    return
+                data = extracted_data
+                logger.info(f"➡️ [VERIFY] File payload correctly extracted to data: '{data}'")
             else:
                 logger.warning(f"❌ [VERIFY] User ID mismatch! Sender: {message.from_user.id} vs check_id: {check_id}")
                 await message.reply_text("❌ Invalid Verification Link!")
@@ -316,34 +339,24 @@ async def start(client, message):
             
             try:
                 if not data.startswith("BATCH") and not data.startswith("DSTORE"):
-                    if "_" in data:
+                    files_ = await get_file_details(data)
+                    if not files_ and "_" in data:
                         try:
                             _, temp_file_id = data.split('_', 1)
-                        except:
-                            temp_file_id = data
-                    else:
-                        try:
-                            decoded = base64.urlsafe_b64decode(data + "=" * (-len(data) % 4)).decode("ascii")
-                            if "_" in decoded:
-                                _, temp_file_id = decoded.split('_', 1)
-                            else:
-                                temp_file_id = data
-                        except:
-                            temp_file_id = data
-
-                    files_ = await get_file_details(temp_file_id)
+                            files_ = await get_file_details(temp_file_id)
+                        except Exception:
+                            pass
 
                     if not files_:
                         await anim_msg.edit_text(script.DELETED_FILE_TXT, parse_mode=enums.ParseMode.HTML)
                         asyncio.create_task(auto_delete_helper(anim_msg, 30))
                         return
 
-                    if files_:
-                        raw_caption = files_[0].caption if hasattr(files_[0], 'caption') else files_[0].get('caption', '')
+                    raw_caption = getattr(files_[0], 'caption', '') or (files_[0].get('caption', '') if isinstance(files_[0], dict) else '')
                 else:
                     raw_caption = "Batch Files Request"
             except Exception as e:
-                print(f"Error getting file details: {e}")
+                logger.error(f"Error getting file details: {e}")
                 
             buttons = [
                 [InlineKeyboardButton("✨ Click Here To Verify ✨", url=verify_url)],
@@ -476,21 +489,36 @@ async def start(client, message):
             await asyncio.sleep(1) 
         return await sts.delete()
         
-    logger.info(f"🔍 [LOOKUP] Looking up details for file_id: '{file_id}' (pre: '{pre}')")
+    logger.info(f"🔍 [LOOKUP] Looking up details for data: '{data}', file_id: '{file_id}' (pre: '{pre}')")
     files_ = await get_file_details(file_id)
+    if not files_:
+        files_ = await get_file_details(data)
     if not files_:
         logger.warning(f"❌ [NOT_FOUND] get_file_details returned empty for file_id: '{file_id}'. Trying base64 fallback with data: '{data}'...")
         try:
-            pre, file_id = ((base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii")).split("_", 1)
+            b64_str = (base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii")
+            if "_" in b64_str:
+                pre, file_id = b64_str.split("_", 1)
+            else:
+                file_id = b64_str
             logger.info(f"🔄 [BASE64_SUCCESS] Decoded -> pre: '{pre}', file_id: '{file_id}'")
             protect_content_flag = True if pre == 'filep' else False
-            await send_file_to_user(
-                client=client,
-                user_id=message.from_user.id,
-                file_id=file_id,
-                protect_content_flag=protect_content_flag
-            )
-            return
+            files_ = await get_file_details(file_id)
+            if not files_:
+                files_ = await get_file_details(b64_str)
+            if files_:
+                files = files_[0]
+                actual_file_id = getattr(files, 'file_id', None) or getattr(files, 'id', None) or (files.get('file_id') or files.get('_id') if isinstance(files, dict) else file_id)
+                await send_file_to_user(
+                    client=client,
+                    user_id=message.from_user.id,
+                    file_id=actual_file_id,
+                    protect_content_flag=protect_content_flag,
+                    file_name=getattr(files, 'file_name', None) or (files.get('file_name', '') if isinstance(files, dict) else ''),
+                    file_size=get_size(getattr(files, 'file_size', 0) if not isinstance(files, dict) else files.get('file_size', 0)),
+                    file_caption=getattr(files, 'caption', None) or (files.get('caption', '') if isinstance(files, dict) else '')
+                )
+                return
         except Exception as b64_err:
             logger.error(f"❌ [BASE64_FAIL] Base64 fallback failed: {b64_err}")
             
@@ -504,17 +532,19 @@ async def start(client, message):
         title = files.get('file_name', 'Unknown')
         size = get_size(files.get('file_size', 0))
         f_caption = files.get('caption', '')
+        actual_file_id = files.get('file_id') or files.get('_id') or file_id
     else:
-        title = files.file_name
-        size = get_size(files.file_size)
-        f_caption = files.caption
+        title = getattr(files, 'file_name', 'Unknown')
+        size = get_size(getattr(files, 'file_size', 0))
+        f_caption = getattr(files, 'caption', '')
+        actual_file_id = getattr(files, 'file_id', None) or getattr(files, 'id', None) or file_id
         
     protect_content_flag = True if pre == 'filep' else False
-    logger.info(f"📤 [SENDING] Calling send_file_to_user for '{title}' to {message.from_user.id}...")
+    logger.info(f"📤 [SENDING] Calling send_file_to_user for '{title}' (ID: {actual_file_id}) to {message.from_user.id}...")
     await send_file_to_user(
         client=client,
         user_id=message.from_user.id,
-        file_id=file_id,
+        file_id=actual_file_id,
         protect_content_flag=protect_content_flag,
         file_name=title,
         file_size=size,

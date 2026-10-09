@@ -234,9 +234,9 @@ async def cb_handler(client: Client, query: CallbackQuery):
             return await query.answer('No such file exist.')
         files = files_[0]
         
-        title = clean_filename(files.file_name)
-        size = get_size(files.file_size)
-        f_caption = clean_filename(files.caption)
+        title = clean_filename(getattr(files, 'file_name', None) or (files.get('file_name', '') if isinstance(files, dict) else ''))
+        size = get_size(getattr(files, 'file_size', None) or (files.get('file_size', 0) if isinstance(files, dict) else 0))
+        f_caption = clean_filename(getattr(files, 'caption', None) or (files.get('caption', '') if isinstance(files, dict) else ''))
         
         settings = await get_settings(query.message.chat.id)
         if not settings:
