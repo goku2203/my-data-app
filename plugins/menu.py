@@ -13,19 +13,17 @@ logger = logging.getLogger(__name__)
 # ==========================================
 START_BUTTONS = [
     [
-        InlineKeyboardButton("➕  ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ  ➕", url=f"https://t.me/{temp.U_NAME}?startgroup=true")
-    ],
-    [
         InlineKeyboardButton("📚 ʜᴇʟᴘ", callback_data="help"),
         InlineKeyboardButton("ℹ️ ᴀʙᴏᴜᴛ", callback_data="about")
     ],
     [
-        InlineKeyboardButton("🎭 ᴀɴɪᴍᴇ ᴄʜᴀɴɴᴇʟ", url="https://t.me/Anime_single"), 
-        InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ", url="https://t.me/super_goku_god")
-    ],
-    [
         InlineKeyboardButton("🧑‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ", url="https://t.me/Tamilmovieslink_bot"),
         InlineKeyboardButton("💎 ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴꜱ", callback_data="premium_data")
+    ],
+    [
+        InlineKeyboardButton("🎭 ᴀɴɪᴍᴇ ᴄʜᴀɴɴᴇʟ", url="https://t.me/Anime_single"), 
+        InlineKeyboardButton("📢 ᴜᴘᴅᴀᴛᴇꜱ", url="https://t.me/super_goku_god")
+        
     ]
 ]
 
