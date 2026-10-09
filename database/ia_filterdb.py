@@ -161,24 +161,31 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
     return files, next_offset, total_results
 
 async def get_file_details(query):
+    logger.info(f"🔍 [DB_LOOKUP] get_file_details called for ID: '{query}'")
+    
     # 1. First 'file_id' vachu thedurom
     filter = {'file_id': query}
     cursor = Media.find(filter)
     filedetails = await cursor.to_list(length=1)
-
-    # 2. Oruvela kedaikkalana '_id' vachu thedurom
+    
+    # 2. Kedaikkalana umongo '_id' vachu thedurom
     if not filedetails:
+        logger.warning(f"⚠️ [DB_LOOKUP] 'file_id' la kedaikkala: '{query}' -> Trying '_id' search...")
         cursor_id = Media.find({'_id': query})
         filedetails = await cursor_id.to_list(length=1)
-
+        
         # 3. Direct Mongo collection search fallback
         if not filedetails:
+            logger.warning(f"⚠️ [DB_LOOKUP] umongo la kedaikkala -> Trying raw collection search...")
             filedetails = await Media.collection.find({'_id': query}).to_list(length=1)
-
-            if not filedetails:
-                # ERROR-kku bathila WARNING use pandrom, log spam aagathu
-                logger.warning(f"  [DB_LOOKUP] File Not Found (Deleted/Invalid): '{query}'")
-
+            
+        if filedetails:
+            logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using '_id'!")
+        else:
+            logger.error(f"❌ [DB_LOOKUP] FAILED! File ID '{query}' database collection '{COLLECTION_NAME}'-la illa!")
+    else:
+        logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using 'file_id'!")
+        
     return filedetails
 
 def encode_file_id(s: bytes) -> str:
