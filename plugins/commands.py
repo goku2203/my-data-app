@@ -499,7 +499,7 @@ async def start(client, message):
             pass
         
         msg = await message.reply(script.DELETED_FILE_TXT, parse_mode=enums.ParseMode.HTML)
-        asyncio.create_task(auto_delete_helper(msg, message, 30))
+        asyncio.create_task(auto_delete_helper(msg, 30, message))
         return
         
     files = files_[0]
