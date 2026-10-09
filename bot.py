@@ -95,14 +95,6 @@ class Bot(Client):
             sleep_threshold=5,
         )
 
-    async def kulasthree(self):
-        while True:
-            await asyncio.sleep(24 * 60 * 60)
-            logging.info("  Bot is Online and Running!")
-            # Daily status message log channel-ku varama irukka antha code remove panniyachu
-    
-            # Inga iruntha os.execl line-a thookiyachu, so bot switch off aagathu!
-
     async def start(self, **kwargs):
         # Bot start aagum pothu maintenance status edukka
         temp.MAINT_MODE = await db.get_maintenance()
@@ -145,10 +137,6 @@ class Bot(Client):
                 await self.send_message(chat_id=LOG_CHANNEL, text="<b>✅ Bot is Online!</b>")
         except Exception as e:
             logging.error(f"  LOG_CHANNEL Error: Bot is not Admin in Log Channel! Error: {e}")
-
-        asyncio.create_task(self.kulasthree())
-        if KEEP_ALIVE_URL:
-            asyncio.create_task(keep_alive())
 
     async def stop(self, *args):
         await super().stop()
