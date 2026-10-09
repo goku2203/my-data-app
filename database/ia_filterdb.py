@@ -66,9 +66,14 @@ async def save_file(media):
             logger.warning(
                 f'{getattr(media, "file_name", "NO_FILE")} is already saved in database'
             )
-            # If file already exists, update its caption so search works perfectly
+            # If file already exists, update both caption and file_ref so lookup works perfectly
+            update_data = {}
             if cap_text:
-                await Media.collection.update_one({'_id': file_id}, {'$set': {'caption': cap_text}})
+                update_data['caption'] = cap_text
+            if file_ref:
+                update_data['file_ref'] = file_ref
+            if update_data:
+                await Media.collection.update_one({'_id': file_id}, {'$set': update_data})
             return False, 0
         else:
             logger.info(f'{getattr(media, "file_name", "NO_FILE")} is saved to database')
@@ -181,8 +186,8 @@ def extract_lookup_candidates(query: str):
         parts = query.split('_')
         for p in reversed(parts):
             add(p)
-        if len(parts) > 1:
-            add('_'.join(parts[1:]))
+        for i in range(1, len(parts)):
+            add('_'.join(parts[i:]))
 
     try:
         b64_pad = query + '=' * (-len(query) % 4)
@@ -197,7 +202,7 @@ def extract_lookup_candidates(query: str):
 
     valid = []
     for c in candidates:
-        if re.match(r'^[A-Za-z0-9_-]+$', c) and len(c) >= 8:
+        if re.match(r'^[A-Za-z0-9_-]+$', c) and len(c) >= 5:
             valid.append(c)
     if query not in valid:
         valid.insert(0, query)
@@ -209,37 +214,22 @@ async def get_file_details(query):
     candidates = extract_lookup_candidates(str(query))
     
     for cand in candidates:
-        # 1. 'file_id' / '_id' search via umongo Media
+        or_filter = {'$or': [{'_id': cand}, {'file_id': cand}, {'file_ref': cand}]}
+        
+        # 1. Search via umongo Media
         try:
-            filedetails = await Media.find({'file_id': cand}).to_list(length=1)
+            filedetails = await Media.find(or_filter).to_list(length=1)
             if filedetails:
-                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using 'file_id': '{cand}'")
+                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in Media: '{cand}'")
                 return filedetails
         except Exception:
             pass
 
+        # 2. Search via raw Media.collection
         try:
-            filedetails = await Media.find({'_id': cand}).to_list(length=1)
-            if filedetails:
-                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using '_id': '{cand}'")
-                return filedetails
-        except Exception:
-            pass
-
-        # 2. 'file_ref' search via umongo Media
-        try:
-            filedetails = await Media.find({'file_ref': cand}).to_list(length=1)
-            if filedetails:
-                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found using 'file_ref': '{cand}'")
-                return filedetails
-        except Exception:
-            pass
-
-        # 3. Direct Mongo collection search fallback for '_id'
-        try:
-            raw_docs = await Media.collection.find({'_id': cand}).to_list(length=1)
+            raw_docs = await Media.collection.find(or_filter).to_list(length=1)
             if raw_docs:
-                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in raw collection using '_id': '{cand}'")
+                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in Media.collection: '{cand}'")
                 try:
                     return [Media.build_from_mongo(d) for d in raw_docs]
                 except Exception:
@@ -247,17 +237,24 @@ async def get_file_details(query):
         except Exception:
             pass
 
-        # 4. Direct Mongo collection search fallback for 'file_ref'
-        try:
-            raw_docs = await Media.collection.find({'file_ref': cand}).to_list(length=1)
-            if raw_docs:
-                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in raw collection using 'file_ref': '{cand}'")
-                try:
-                    return [Media.build_from_mongo(d) for d in raw_docs]
-                except Exception:
-                    return raw_docs
-        except Exception:
-            pass
+    # 3. Search other collections in the same database if not found in COLLECTION_NAME
+    try:
+        col_names = await db.list_collection_names()
+        for cname in col_names:
+            if cname in [COLLECTION_NAME, 'users', 'groups', 'config', 'smart_counter', 'system.indexes']:
+                continue
+            col = db[cname]
+            for cand in candidates:
+                or_filter = {'$or': [{'_id': cand}, {'file_id': cand}, {'file_ref': cand}]}
+                raw_docs = await col.find(or_filter).to_list(length=1)
+                if raw_docs:
+                    logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in collection '{cname}': '{cand}'")
+                    try:
+                        return [Media.build_from_mongo(d) for d in raw_docs]
+                    except Exception:
+                        return raw_docs
+    except Exception as e:
+        logger.debug(f"Cross-collection search error: {e}")
 
     logger.error(f"❌ [DB_LOOKUP] FAILED! File ID '{query}' database collection '{COLLECTION_NAME}'-la illa!")
     return []
