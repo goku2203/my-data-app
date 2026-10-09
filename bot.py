@@ -98,12 +98,9 @@ class Bot(Client):
     async def kulasthree(self):
         while True:
             await asyncio.sleep(24 * 60 * 60)
-            logging.info("✅ Bot is Online and Running!")
-            try:
-                # Restart-ku bathila verum Online status update anuppum
-                await self.send_message(chat_id=LOG_CHANNEL, text="✅  **Daily Status:** Bot is Online and Running normally! 🚀")
-            except:
-                pass
+            logging.info("  Bot is Online and Running!")
+            # Daily status message log channel-ku varama irukka antha code remove panniyachu
+    
             # Inga iruntha os.execl line-a thookiyachu, so bot switch off aagathu!
 
     async def start(self, **kwargs):
@@ -134,22 +131,20 @@ class Bot(Client):
         logging.info(f"{me.first_name} running on Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
         
-        try:
-            await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT)
-        except Exception as e:
-            logging.error(f"⚠️ LOG_CHANNEL Error: Bot is not Admin in Log Channel! Error: {e}")
-
         print("mntg4u</>")
-
         tz = pytz.timezone('Asia/Kolkata')
         today = date.today()
         now = datetime.now(tz)
-        time_str = now.strftime("%H:%M:%S %p")
+        time_str = now.strftime("%I:%M:%S %p")
         
         try:
-            await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_GC_TXT.format(today, time_str))
-        except Exception:
-            pass
+            # Midnight (12 AM to 1 AM) restart aana detailed message varum, illana simple message varum
+            if now.hour == 0:
+                await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_GC_TXT.format(today, time_str))
+            else:
+                await self.send_message(chat_id=LOG_CHANNEL, text="<b>✅ Bot is Online!</b>")
+        except Exception as e:
+            logging.error(f"  LOG_CHANNEL Error: Bot is not Admin in Log Channel! Error: {e}")
 
         asyncio.create_task(self.kulasthree())
         if KEEP_ALIVE_URL:
