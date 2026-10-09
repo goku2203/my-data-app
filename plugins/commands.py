@@ -1,3 +1,4 @@
+import time
 import os
 import logging
 import random
@@ -7,6 +8,7 @@ import json
 import base64
 import html
 from datetime import datetime, timedelta
+
 
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait
@@ -28,6 +30,7 @@ BATCH_FILES = {}
 PENDING_VERIFY_FILES = {}
 FORCE_MSG = {}
 AUTO_DELETE_SECONDS = 15
+VERIFY_SHAPE = re.compile(r'^[A-Za-z]{3,10}_\d{6,12}_[A-Za-z]{2,10}_.+$')
 
 async def create_file_buttons(client, sent_message):
     buttons = []
@@ -290,6 +293,18 @@ async def start(client, message):
             extracted_data = link_parts[2] if len(link_parts) > 2 else ""
             is_verify_candidate = True
 
+    elif VERIFY_SHAPE.match(cmd_param):
+        user_doc = await db.col.find_one({'id': message.from_user.id}) or {}
+        pending_file = user_doc.get('pending_file')
+        elapsed = time.time() - user_doc.get('pending_time', 0)
+        if pending_file and 15 <= elapsed <= 1800:
+            check_id = user_id_str
+            extracted_data = pending_file
+            is_verify_candidate = True
+        else:
+            await message.reply_text("❌ Verification expired or incomplete. Please request the file again.")
+            return
+
     if is_verify_candidate:
         try:
             logger.info(f"🔑 [VERIFY] Verify link received from User: {message.from_user.id} | Payload: {cmd_param}")
@@ -341,7 +356,7 @@ async def start(client, message):
             # Store pending file so user always gets the exact requested file after verifying!
             try:
                 PENDING_VERIFY_FILES[message.from_user.id] = data
-                await db.col.update_one({'id': message.from_user.id}, {'$set': {'pending_file': data}}, upsert=True)
+                await db.col.update_one({'id': message.from_user.id}, {'$set': {'pending_file': data, 'pending_time': time.time()}}, upsert=True)
             except Exception as pe:
                 logger.error(f"Error saving pending_file: {pe}")
             raw_caption = "Unknown Filename"
@@ -580,7 +595,7 @@ async def start(client, message):
     )
     PENDING_VERIFY_FILES.pop(message.from_user.id, None)
     try:
-        await db.col.update_one({'id': message.from_user.id}, {'$unset': {'pending_file': 1}})
+        await db.col.update_one({'id': message.from_user.id}, {'$unset': {'pending_file': 1, 'pending_time': 1}})
     except Exception:
         pass
 
