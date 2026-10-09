@@ -161,9 +161,11 @@ async def get_search_results(query, file_type=None, max_results=10, offset=0, fi
     return files, next_offset, total_results
 
 async def get_file_details(query):
-    filter = {'file_id': query}
+    filter = {'$or': [{'file_id': query}, {'_id': query}]}
     cursor = Media.find(filter)
     filedetails = await cursor.to_list(length=1)
+    if not filedetails:
+        filedetails = await Media.collection.find({'_id': query}).to_list(length=1)
     return filedetails
 
 def encode_file_id(s: bytes) -> str:
