@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 BATCH_FILES = {}
+PENDING_VERIFY_FILES = {}
 FORCE_MSG = {}
 AUTO_DELETE_SECONDS = 15
 
@@ -268,23 +269,25 @@ async def start(client, message):
     is_just_verified = False
     
     # Check verification callback payload
-    # Handles: verify_{user_id}_{payload}, verify_{user_id}, or {user_id}_{token}_{payload}
+    # Handles any variation from shorteners:
+    # verify_{user_id}_{payload}, {user_id}_{payload}, or {slug}_{user_id}_{slug}_{payload}
     cmd_param = message.command[1]
     is_verify_candidate = False
     check_id = None
     extracted_data = cmd_param
+    user_id_str = str(message.from_user.id)
 
-    if cmd_param.startswith('verify_'):
+    parts = cmd_param.split("_")
+    if user_id_str in parts:
+        user_idx = parts.index(user_id_str)
+        check_id = user_id_str
+        extracted_data = "_".join(parts[user_idx + 1:]) if user_idx + 1 < len(parts) else ""
+        is_verify_candidate = True
+    elif cmd_param.startswith('verify_'):
         link_parts = cmd_param.split("_", 2)
         if len(link_parts) > 1:
             check_id = link_parts[1]
             extracted_data = link_parts[2] if len(link_parts) > 2 else ""
-            is_verify_candidate = True
-    elif "_" in cmd_param:
-        parts = cmd_param.split("_")
-        if parts[0].isdigit() and parts[0] == str(message.from_user.id) and len(parts) >= 2:
-            check_id = parts[0]
-            extracted_data = "_".join(parts[1:])
             is_verify_candidate = True
 
     if is_verify_candidate:
@@ -335,6 +338,12 @@ async def start(client, message):
             
             anim_msg = await message.reply_text("<b><i>⏳ Fetching File Details... Please wait!</i></b>", parse_mode=enums.ParseMode.HTML, protect_content=True)
             verify_url = await get_verify_link(message.from_user.id, data)
+            # Store pending file so user always gets the exact requested file after verifying!
+            try:
+                PENDING_VERIFY_FILES[message.from_user.id] = data
+                await db.col.update_one({'id': message.from_user.id}, {'$set': {'pending_file': data}}, upsert=True)
+            except Exception as pe:
+                logger.error(f"Error saving pending_file: {pe}")
             raw_caption = "Unknown Filename"
             
             try:
@@ -493,6 +502,25 @@ async def start(client, message):
     files_ = await get_file_details(file_id)
     if not files_:
         files_ = await get_file_details(data)
+
+    # 🎯 PENDING FILE FALLBACK: If shortener returned a mangled token or file not found after verification,
+    # retrieve the exact file the user asked for before verifying!
+    if not files_ and is_just_verified:
+        logger.info(f"🔄 [PENDING_FALLBACK] Checking pending_file for user: {message.from_user.id}")
+        pending_file = PENDING_VERIFY_FILES.get(message.from_user.id)
+        if not pending_file:
+            user_doc = await db.col.find_one({'id': message.from_user.id})
+            if user_doc:
+                pending_file = user_doc.get('pending_file')
+        if pending_file:
+            logger.info(f"🔄 [PENDING_FALLBACK] Found pending_file: '{pending_file}'. Looking up...")
+            files_ = await get_file_details(pending_file)
+            if files_:
+                data = pending_file
+                if "_" in data:
+                    pre, file_id = data.split("_", 1)
+                else:
+                    file_id = data
     if not files_:
         logger.warning(f"❌ [NOT_FOUND] get_file_details returned empty for file_id: '{file_id}'. Trying base64 fallback with data: '{data}'...")
         try:
@@ -550,6 +578,11 @@ async def start(client, message):
         file_size=size,
         file_caption=f_caption
     )
+    PENDING_VERIFY_FILES.pop(message.from_user.id, None)
+    try:
+        await db.col.update_one({'id': message.from_user.id}, {'$unset': {'pending_file': 1}})
+    except Exception:
+        pass
 
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
 async def channel_info(bot, message):
