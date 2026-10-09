@@ -61,47 +61,6 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     # 🔵 GUIDES & TUTORIAL TEXTS
     # ==========================================
 
-    MANUALFILTER_TXT = """<blockquote><b>🛠️ Manual Filters Help</b></blockquote>
-
-<i>Filters allow the bot to reply automatically when a specific keyword is detected.</i>
-
-<b>📝 Rules:</b>
-1. Bot must be an <b>Admin</b>.
-2. Only Admins can set filters.
-3. Buttons have a 64-character limit.
-
-<b>🎮 Commands:</b>
-• /filter - <code>Add a new filter</code>
-• /filters - <code>List all active filters</code>
-• /del - <code>Delete a specific filter</code>
-• /delall - <code>Delete all filters (Owner only)</code>"""
-
-    BUTTON_TXT = """<blockquote><b>🔘 Button Formatting Help</b></blockquote>
-
-<i>I support both URL and Alert (Pop-up) buttons.</i>
-
-<b>⚠️ Note:</b> Buttons must have content (text/media).
-
-<b>1️⃣ URL Button Format:</b>
-<code>[Button Text](buttonurl:https://t.me/Goku_Stark)</code>
-
-<b>2️⃣ Alert Button Format:</b>
-<code>[Button Text](buttonalert:This is a pop-up message!)</code>"""
-
-    AUTOFILTER_TXT = """<blockquote><b>🤖 Auto-Filter Guide</b></blockquote>
-
-<b>1️⃣ For Private Channels:</b>
-• Make me an <b>Admin</b> in your channel.
-• Ensure the channel has <b>NO</b> porn/fake files.
-• Forward the last message from your channel to me (with quotes).
-• I will index all files automatically! 📂
-
-<b>2️⃣ For Groups:</b>
-• Add me as an <b>Admin</b>.
-• Use <code>/connect</code> to link your group to my PM.
-• Use <code>/settings</code> in PM to enable Auto-Filter.
-"""
-
     CONNECTION_TXT = """<blockquote><b>🔗 Connection Manager</b></blockquote>
 
 <i>Connect your groups to my PM to manage filters easily and avoid spam.</i>
