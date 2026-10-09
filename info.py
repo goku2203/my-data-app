@@ -19,8 +19,8 @@ def is_enabled(value, default):
 # --- Bot Credentials ---
 BOT_USERNAME = environ.get("BOT_USERNAME", "Mikasa_Lovely_bot")
 SESSION = environ.get('SESSION', 'Media_search')
-API_ID = int(environ.get('API_ID', '28910807'))
-API_HASH = environ.get('API_HASH', 'ed988261e49d480ef468664ce8c2eff0')
+API_ID = int(environ.get('API_ID', ''))
+API_HASH = environ.get('API_HASH', '')
 BOT_TOKEN = environ.get('BOT_TOKEN', '')
 
 # --- Keep Alive ---
@@ -36,7 +36,7 @@ USE_CAPTION_FILTER = is_enabled(environ.get('USE_CAPTION_FILTER', 'True'), True)
 PICS = environ.get('PICS', 'https://i.ibb.co/p6SmhYv3/photo.jpg https://i.ibb.co/k6M0CyGs/photo.jpg https://i.ibb.co/JRDZjtwT/photo.jpg https://i.ibb.co/prB7zBV0/photo.jpg https://i.ibb.co/SDjyjk4M/photo.jpg https://i.ibb.co/mFbGL4yW/photo.jpg https://i.ibb.co/23TMfwyF/photo.jpg').split()
 
 # --- Admins, Channels & Users ---
-ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '600302393').split()]
+ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '').split()]
 CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '').split()]
 auth_users = [int(user) if id_pattern.search(user) else user for user in environ.get('AUTH_USERS', '').split()]
 AUTH_USERS = (auth_users + ADMINS) if auth_users else []
@@ -46,7 +46,7 @@ AUTH_GROUPS = [int(ch) for ch in auth_grp.split()] if auth_grp else None
 DEFAULT_AUTH_CHANNELS = [int(x) for x in environ.get("AUTH_CHANNEL", '').split() if x.lstrip('-').isdigit()]
 
 # --- MongoDB Information ---
-DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://goku:kZNRorqyAwj5M0fy@cluster0.plhtdqg.mongodb.net/?appName=Cluster0")
+DATABASE_URI = environ.get('DATABASE_URI', "")
 DATABASE_NAME = environ.get('DATABASE_NAME', "Cluster0")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'mn_files')
 
@@ -78,7 +78,7 @@ PUBLIC_FILE_STORE = is_enabled(environ.get('PUBLIC_FILE_STORE', "False"), True)
 
 # --- Shortlink Configurations ---
 SHORTLINK_URL = environ.get("SHORTLINK_URL", "arolinks.com")
-SHORTLINK_API = environ.get("SHORTLINK_API", "9142b3e52913166ef75d3b8ad05bc2e8460e9e3b")
+SHORTLINK_API = environ.get("SHORTLINK_API", "")
 IS_VERIFY = is_enabled(environ.get("IS_VERIFY", "True"), True)
 VERIFY_EXPIRE = int(environ.get("VERIFY_EXPIRE", "600"))
 
@@ -103,7 +103,7 @@ MISSING_LOG_CHANNEL = int(environ.get("MISSING_LOG_CHANNEL", "-1003555146843"))
 CAM_DB_CHANNEL = int(environ.get("CAM_DB_CHANNEL", "-1003952875911"))
 
 # --- API Integrations ---
-TMDB_API_KEY = environ.get("TMDB_API_KEY", "f0ed821364e340369110e83b814899ed")
+TMDB_API_KEY = environ.get("TMDB_API_KEY", "")
 
 # --- Render URL Setup ---
 RENDER_URL = environ.get("RENDER_URL", "https://my-data-app-lovv.onrender.com")
