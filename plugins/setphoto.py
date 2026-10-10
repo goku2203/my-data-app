@@ -21,12 +21,24 @@ async def auto_delete_helper(bot_msg, user_msg, delay=15):
         pass
 
 @Client.on_message(
-    filters.private & filters.photo & filters.user(ADMINS)
-    & filters.regex(r"^(/setphoto|/set|/sp)")
+    filters.private & filters.user(ADMINS)
+    & filters.regex(r"^(/setphoto|/sp|/set)")
 )
 async def set_post_photo(client, message):
     try:
-        parts = message.caption.split()
+        # Check if it's a photo with caption OR a text message replying to a photo
+        text = message.caption if message.photo else message.text
+        parts = text.split()
+        
+        # Photo enga irukku nu kandupudikkanum
+        if message.photo:
+            file_id = message.photo.file_id
+        elif message.reply_to_message and message.reply_to_message.photo:
+            file_id = message.reply_to_message.photo.file_id
+        else:
+            msg = await message.reply("⚠️ Photo kidaikkala. Photo-ah attach panni caption-la command podunga, illana oru photo-kku reply panni command podunga.")
+            asyncio.create_task(auto_delete_helper(msg, message, 15))
+            return
         
         # Link kudutha antha post, illana kadaisi autopost
         if len(parts) > 1:
@@ -53,7 +65,7 @@ async def set_post_photo(client, message):
             chat_id=UPDATES_CHANNEL,
             message_id=post_id,
             media=InputMediaPhoto(
-                message.photo.file_id,
+                file_id,
                 caption=caption,
                 parse_mode=ParseMode.HTML,
             ),
