@@ -8,17 +8,15 @@ from plugins.autopost import POST_CAPTIONS, LAST_POST
 
 logger = logging.getLogger(__name__)
 
-# Auto Delete Helper Function
-async def auto_delete_helper(bot_msg, user_msg, delay=15):
+# Auto Delete Helper Function (Ippo moonu message-um delete aagum)
+async def auto_delete_helper(bot_msg, user_msg, delay=15, replied_photo=None):
     await asyncio.sleep(delay)
-    try:
-        if bot_msg: await bot_msg.delete()
-    except:
-        pass
-    try:
-        if user_msg: await user_msg.delete()
-    except:
-        pass
+    for msg in [bot_msg, user_msg, replied_photo]:
+        if msg:
+            try:
+                await msg.delete()
+            except:
+                pass
 
 @Client.on_message(
     filters.private & filters.user(ADMINS)
@@ -30,11 +28,14 @@ async def set_post_photo(client, message):
         text = message.caption if message.photo else message.text
         parts = text.split()
         
+        replied_photo = None # Original photo-va store panna
+        
         # Photo enga irukku nu kandupudikkanum
         if message.photo:
             file_id = message.photo.file_id
         elif message.reply_to_message and message.reply_to_message.photo:
             file_id = message.reply_to_message.photo.file_id
+            replied_photo = message.reply_to_message # Photo-va eduthu vachikurom
         else:
             msg = await message.reply("⚠️ Photo kidaikkala. Photo-ah attach panni caption-la command podunga, illana oru photo-kku reply panni command podunga.")
             asyncio.create_task(auto_delete_helper(msg, message, 15))
@@ -48,7 +49,7 @@ async def set_post_photo(client, message):
         
         if not post_id:
             msg = await message.reply("⚠️ Post ID not found. Please provide the post link.")
-            asyncio.create_task(auto_delete_helper(msg, message, 15))
+            asyncio.create_task(auto_delete_helper(msg, message, 15, replied_photo))
             return
         
         # Original caption iruntha athai use pannum
@@ -57,7 +58,7 @@ async def set_post_photo(client, message):
             old = await client.get_messages(UPDATES_CHANNEL, post_id)
             if not old or not old.caption:
                 msg = await message.reply("⚠️ Post not found.")
-                asyncio.create_task(auto_delete_helper(msg, message, 15))
+                asyncio.create_task(auto_delete_helper(msg, message, 15, replied_photo))
                 return
             caption = old.caption.html
         
@@ -71,9 +72,9 @@ async def set_post_photo(client, message):
             ),
         )
         msg = await message.reply("✅ Photo updated successfully!")
-        asyncio.create_task(auto_delete_helper(msg, message, 15))
+        asyncio.create_task(auto_delete_helper(msg, message, 15, replied_photo)) # Moonaiyum delete panna anupurom
         
     except Exception as e:
         logger.error(f"setphoto error: {e}", exc_info=True)
         msg = await message.reply(f"⚠️ Error: {e}")
-        asyncio.create_task(auto_delete_helper(msg, message, 15))
+        asyncio.create_task(auto_delete_helper(msg, message, 15, replied_photo))
