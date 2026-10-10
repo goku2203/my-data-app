@@ -31,7 +31,7 @@ async def broadcast(bot, message):
     
     users = await db.get_all_users()
     
-    # 2. Sequential Processing (Fixes the stuck at 360 problem)
+    # 2. Sequential Processing
     async for user in users:
         user_id = int(user['id'])
         pti, sh = await broadcast_messages(user_id, b_msg)
@@ -66,5 +66,16 @@ async def broadcast(bot, message):
     time_taken = datetime.timedelta(seconds=int(time.time() - start_time))
     await sts.edit(
         f"Broadcast Completed in {time_taken}.\n\nTotal Users: {total_users}\n"
-        f"Success: {success} | Blocked: {blocked} | Deleted: {deleted} | Failed: {failed}"
+        f"Success: {success} | Blocked: {blocked} | Deleted: {deleted} | Failed: {failed}\n\n"
+        f"<i>  Note: Intha message matrum command 1 minute-la auto-delete aagidum...</i>"
     )
+    
+    # 3. Auto-Delete Section (Safe Cleanup)
+    await asyncio.sleep(60) # Wait for 1 minute before deleting
+    try:
+        await message.delete()  # Deletes /broadcast command
+        await ask_msg.delete()  # Deletes Bot's question
+        await b_msg.delete()    # Deletes your broadcast message
+        await sts.delete()      # Deletes the final status report
+    except:
+        pass
