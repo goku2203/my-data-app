@@ -209,8 +209,6 @@ def extract_lookup_candidates(query: str):
     return valid
 
 async def get_file_details(query):
-    logger.info(f"🔍 [DB_LOOKUP] get_file_details called for ID: '{query}'")
-    
     candidates = extract_lookup_candidates(str(query))
     
     for cand in candidates:
@@ -220,23 +218,21 @@ async def get_file_details(query):
         try:
             filedetails = await Media.find(or_filter).to_list(length=1)
             if filedetails:
-                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in Media: '{cand}'")
                 return filedetails
         except Exception:
             pass
-
+            
         # 2. Search via raw Media.collection
         try:
             raw_docs = await Media.collection.find(or_filter).to_list(length=1)
             if raw_docs:
-                logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in Media.collection: '{cand}'")
                 try:
                     return [Media.build_from_mongo(d) for d in raw_docs]
                 except Exception:
                     return raw_docs
         except Exception:
             pass
-
+            
     # 3. Search other collections in the same database if not found in COLLECTION_NAME
     try:
         col_names = await db.list_collection_names()
@@ -248,15 +244,13 @@ async def get_file_details(query):
                 or_filter = {'$or': [{'_id': cand}, {'file_id': cand}, {'file_ref': cand}]}
                 raw_docs = await col.find(or_filter).to_list(length=1)
                 if raw_docs:
-                    logger.info(f"✅ [DB_LOOKUP] SUCCESS! File found in collection '{cname}': '{cand}'")
                     try:
                         return [Media.build_from_mongo(d) for d in raw_docs]
                     except Exception:
                         return raw_docs
     except Exception as e:
         logger.debug(f"Cross-collection search error: {e}")
-
-    logger.error(f"❌ [DB_LOOKUP] FAILED! File ID '{query}' database collection '{COLLECTION_NAME}'-la illa!")
+        
     return []
 
 def encode_file_id(s: bytes) -> str:
