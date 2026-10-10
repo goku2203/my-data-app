@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 # --- BATCH STORAGE ---
 BATCH_DATA = {}
 BATCH_TASKS = {}
+POST_CAPTIONS = {} 
+LAST_POST = {}
 
 @Client.on_message(filters.command("autopost") & filters.user(ADMINS))
 async def toggle_autopost(client, message):
@@ -337,6 +339,8 @@ async def send_batched_post(client, clean_name):
                 text=caption,
                 parse_mode=ParseMode.HTML 
             )
+        POST_CAPTIONS[sent.id] = caption
+        LAST_POST["id"] = sent.id
         logger.info(f"✅ Post Sent: {clean_name}")
         
     except Exception as e:
