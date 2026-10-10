@@ -1,28 +1,41 @@
-from pyrogram import Client, filters
+import pyromod
+import asyncio
 import datetime
 import time
+from pyrogram import Client, filters
 from database.users_chats_db import db
 from info import ADMINS
 from utils import broadcast_messages
-import asyncio
 
-BROADCAST_BATCH_SIZE = 20  # Safe limit for Telegram
-BROADCAST_SLEEP = 3  # Increased delay to prevent flood waits
-
-@Client.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
+@Client.on_message(filters.command("broadcast") & filters.user(ADMINS))
 async def broadcast(bot, message):
-    users = await db.get_all_users()
-    b_msg = message.reply_to_message
-    sts = await message.reply_text("Broadcasting your messages...")
+    # 1. Ask for the message first
+    ask_msg = await message.reply_text(
+        "<b>Broadcast Message:</b>\n\nEnna message send pannanumo atha ippo type panni send pannunga.\n\nCancel panna <code>/cancel</code> nu type pannunga."
+    )
+    
+    try:
+        # Wait for user to send the message (Timeout after 5 minutes)
+        b_msg = await bot.listen(message.chat.id, timeout=300)
+    except asyncio.TimeoutError:
+        return await ask_msg.edit("Time out aagiduchu! Thirumbavum /broadcast command use pannunga.")
+        
+    if b_msg.text and b_msg.text.startswith("/cancel"):
+        return await ask_msg.edit("Broadcast cancel aagiduchu.")
+        
+    sts = await message.reply_text("Broadcasting your messages... Please wait.")
     
     start_time = time.time()
     total_users = await db.total_users_count()
     done, blocked, deleted, failed, success = 0, 0, 0, 0, 0
     
-    async def send_message(user):
-        nonlocal success, blocked, deleted, failed
+    users = await db.get_all_users()
+    
+    # 2. Sequential Processing (Fixes the stuck at 360 problem)
+    async for user in users:
         user_id = int(user['id'])
         pti, sh = await broadcast_messages(user_id, b_msg)
+        
         if pti:
             success += 1
         else:
@@ -34,16 +47,11 @@ async def broadcast(bot, message):
                 await db.delete_user(user_id)
             elif sh == "Error":
                 failed += 1
-
-    tasks = []
-    async for user in users:
-        tasks.append(send_message(user))
+                
         done += 1
         
-        if len(tasks) >= BROADCAST_BATCH_SIZE:
-            await asyncio.gather(*tasks)
-            tasks = []
-            # Update status message safely
+        # Update status message every 20 users safely
+        if done % 20 == 0:
             try:
                 await sts.edit(
                     f"Broadcast in progress:\n\nTotal Users: {total_users}\nCompleted: {done} / {total_users}\n"
@@ -51,10 +59,9 @@ async def broadcast(bot, message):
                 )
             except:
                 pass
-            await asyncio.sleep(BROADCAST_SLEEP)
+            await asyncio.sleep(1) # Prevent FloodWait for status edit
             
-    if tasks:
-        await asyncio.gather(*tasks)
+        await asyncio.sleep(0.1) # Safe delay between each user to prevent Telegram blocks
         
     time_taken = datetime.timedelta(seconds=int(time.time() - start_time))
     await sts.edit(
