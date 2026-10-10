@@ -37,7 +37,7 @@ async def set_post_photo(client, message):
             file_id = message.reply_to_message.photo.file_id
             replied_photo = message.reply_to_message # Photo-va eduthu vachikurom
         else:
-            msg = await message.reply("⚠️ Photo kidaikkala. Photo-ah attach panni caption-la command podunga, illana oru photo-kku reply panni command podunga.")
+            msg = await message.reply("⚠️ Photo not found. Please attach a photo and add the command in the caption, or reply to a photo with the command.")
             asyncio.create_task(auto_delete_helper(msg, message, 15))
             return
         
