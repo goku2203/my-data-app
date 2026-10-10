@@ -513,7 +513,6 @@ async def start(client, message):
             await asyncio.sleep(1) 
         return await sts.delete()
         
-    logger.info(f"🔍 [LOOKUP] Looking up details for data: '{data}', file_id: '{file_id}' (pre: '{pre}')")
     files_ = await get_file_details(file_id)
     if not files_:
         files_ = await get_file_details(data)
@@ -521,14 +520,12 @@ async def start(client, message):
     # 🎯 PENDING FILE FALLBACK: If shortener returned a mangled token or file not found after verification,
     # retrieve the exact file the user asked for before verifying!
     if not files_ and is_just_verified:
-        logger.info(f"🔄 [PENDING_FALLBACK] Checking pending_file for user: {message.from_user.id}")
         pending_file = PENDING_VERIFY_FILES.get(message.from_user.id)
         if not pending_file:
             user_doc = await db.col.find_one({'id': message.from_user.id})
             if user_doc:
                 pending_file = user_doc.get('pending_file')
         if pending_file:
-            logger.info(f"🔄 [PENDING_FALLBACK] Found pending_file: '{pending_file}'. Looking up...")
             files_ = await get_file_details(pending_file)
             if files_:
                 data = pending_file
@@ -537,14 +534,12 @@ async def start(client, message):
                 else:
                     file_id = data
     if not files_:
-        logger.warning(f"❌ [NOT_FOUND] get_file_details returned empty for file_id: '{file_id}'. Trying base64 fallback with data: '{data}'...")
         try:
             b64_str = (base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii")
             if "_" in b64_str:
                 pre, file_id = b64_str.split("_", 1)
             else:
                 file_id = b64_str
-            logger.info(f"🔄 [BASE64_SUCCESS] Decoded -> pre: '{pre}', file_id: '{file_id}'")
             protect_content_flag = True if pre == 'filep' else False
             files_ = await get_file_details(file_id)
             if not files_:
@@ -562,10 +557,9 @@ async def start(client, message):
                     file_caption=getattr(files, 'caption', None) or (files.get('caption', '') if isinstance(files, dict) else '')
                 )
                 return
-        except Exception as b64_err:
-            logger.error(f"❌ [BASE64_FAIL] Base64 fallback failed: {b64_err}")
+        except Exception:
+            pass
             
-        logger.warning(f"🚨 [ALERT] File truly not found in database. Sending DELETED_FILE_TXT to user: {message.from_user.id}")
         msg = await message.reply(script.DELETED_FILE_TXT, parse_mode=enums.ParseMode.HTML)
         asyncio.create_task(auto_delete_helper(msg, 30, message))
         return
@@ -583,7 +577,6 @@ async def start(client, message):
         actual_file_id = getattr(files, 'file_id', None) or getattr(files, 'id', None) or file_id
         
     protect_content_flag = True if pre == 'filep' else False
-    logger.info(f"📤 [SENDING] Calling send_file_to_user for '{title}' (ID: {actual_file_id}) to {message.from_user.id}...")
     await send_file_to_user(
         client=client,
         user_id=message.from_user.id,
