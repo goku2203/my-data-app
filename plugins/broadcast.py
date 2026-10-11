@@ -10,7 +10,7 @@ from utils import broadcast_messages
 async def broadcast(bot, message):
     # 1. Ask for the message first
     ask_msg = await message.reply_text(
-        "<b>Broadcast Message:</b>\n\nEnna message send pannanumo atha ippo type panni send pannunga.\n\nCancel panna <code>/cancel</code> nu type pannunga."
+        "<b>Broadcast Message:</b>\n\nType and send the message you want to broadcast.\n\nTo cancel, type <code>/cancel</code>."
     )
     
     try:
