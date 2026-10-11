@@ -28,7 +28,6 @@ LAST_POST = {}
 async def toggle_autopost(client, message):
     current_status = await db.get_autopost()
     state = "ON ✅" if current_status else "OFF ❌"
-    
     button_text = "Turn OFF 🔴" if current_status else "Turn ON 🟢"
     callback_data = "autopost_off" if current_status else "autopost_on"
     
