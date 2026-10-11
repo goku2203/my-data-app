@@ -190,11 +190,10 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
     CHK_MOV_ALRT = """<b>♻️ Checking Database... Please Wait! ♻️</b>"""
 
-    OLD_MES = """<b>⚠️ Request Expired!</b>
+    OLD_MES = """<b>  Request Expired!</b>
+     <i>You are clicking an old message. Please request the file again.</i>"""
     
-<i>You are clicking an old message. Please request the file again.</i> 🔄"""
-
-    MOV_NT_FND = """<b>❌ Movie Not Found!</b>
+    MOV_NT_FND = """<b>  Movie Not Found!</b>
 
 <i>This movie is not yet released or not added to my database.</i>
 
