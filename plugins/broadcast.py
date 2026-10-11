@@ -32,7 +32,10 @@ async def broadcast(bot, message):
     
     # 2. Sequential Processing
     async for user in users:
-        user_id = int(user['id'])
+        try:
+            user_id = int(user['id'])
+        except ValueError:
+            continue
         pti, sh = await broadcast_messages(user_id, b_msg)
         
         if pti:
