@@ -46,8 +46,7 @@ async def master_admin_panel(bot: Client, message: Message):
 2. <code>/delfsub</code> — Remove Force Subscribe channel\n
 3. <code>/listfsub</code> — View all Force Subscribe channels\n
 
-<blockquote><b>💡 Tip: Command mela tap pannina easy-ah copy pannalaam.</b></blockquote>
-"""
+<blockquote><b>💡 Tip: Command mela tap pannina easy-ah copy pannalaam.</b></blockquote>"""
 
     buttons = [
         [
