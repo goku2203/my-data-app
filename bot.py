@@ -1,3 +1,4 @@
+import uvloop
 import logging
 import logging.config
 import os
@@ -15,7 +16,8 @@ logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("imdbpy").setLevel(logging.ERROR)
 logging.getLogger("asyncio").setLevel(logging.CRITICAL - 1)
 
-# FIX: Create event loop BEFORE importing Pyrogram
+# FIX: Create event loop BEFORE importing Pyrogram & use uvloop for speed
+uvloop.install()
 try:
     loop = asyncio.get_event_loop()
 except RuntimeError:
