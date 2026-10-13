@@ -592,8 +592,12 @@ async def advantage_spell_chok(client, msg):
         try:
             first_char = query[0] if query else ""
             if first_char:
-                cursor = Media.collection.find({"file_name": {"$regex": f"^{first_char}", "$options": "i"}}).sort("$natural", -1).limit(3000)
-                db_files = await cursor.to_list(length=3000)
+                # RAM save panna file_name mattum edukkurom, limit 500 aakkiduvom
+                cursor = Media.collection.find(
+                    {"file_name": {"$regex": f"^{first_char}", "$options": "i"}},
+                    {"file_name": 1, "_id": 0}
+                ).sort("$natural", -1).limit(500)
+                db_files = await cursor.to_list(length=500)
                 db_names = [clean_filename(x['file_name']) for x in db_files] 
                 db_names = list(set(db_names)) 
                 if db_names:
