@@ -129,7 +129,6 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
     CUSTOM_FILE_CAPTION = """<b>📂 Filename:</b> <b><i>{file_caption}</i></b>\n
 <b>💾 Size:</b> <b>{file_size}</b>\n
-
 <blockquote><b>📢 Join Our Channels : 👇</b>\n
     <b>➠ <a href='https://t.me/+cuus3LKv3OwxYjJl'>Anime Single File</a></b>
     <b>➠ <a href='https://t.me/+LxPgPQsF7tExZmFl'>Naruto Channel</a></b>
@@ -140,21 +139,16 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 <b><i>Please forward or save this file immediately!</i></b></blockquote>"""
 
     SPOLL_NOT_FND = """<b>🎬 Movie Not Found! 😕</b>
-    
-🔍 <b>Eng:</b> I couldn’t find your movie  
-🔍 <b>Tanglish:</b> Nee thedina movie kidaikala bro
 
-⚠️ <b>Reason irukkalam:</b>  
-<blockquote>• 🔤 Spelling konjam wrong ah irukkalam  
-• 📂 My Database la file illa</blockquote>
+🔍 <b>Eng:</b> I couldn't find your movie.
+🔍 <b>Tan:</b> Nee thedina movie kidaikala bro.
 
-✨ <b>Quick Fix:</b>  
-<blockquote>• ✅ Correct ah type pannunga  
-• 🎯 Movie name mattum podunga  
-• 🚫 Release aagala movie avoid pannunga</blockquote>
+💡 <b>Quick Fix / Try this:</b>
+<blockquote>• 🔤 Check spelling / Spelling check pannunga.
+• 🎯 Type movie name only / Name mattum type pannunga.
+• 📂 Not in DB / Namma DB-la illama irukkalam.</blockquote>
 
-🌐 <b>Still miss aagudha?</b>  
-👉 <b>Google la search pannunga bro 👇</b>"""
+🌐 <b>Still missing? Search on Google 👇</b>"""
 
     # ==========================================
     # 🔠 SPELLING CHECK & ALERT TEXTS
