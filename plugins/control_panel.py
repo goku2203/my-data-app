@@ -217,3 +217,35 @@ async def del_channel_cmd(client, message):
         await msg.delete()
     except:
         pass
+
+# ✅ INTHA CODE-AH plugins/control_panel.py KADAISILA ADD PANNIKKO:
+@Client.on_message(filters.command("listchannels") & filters.user(ADMINS))
+async def list_channels_cmd(client, message):
+    channels = await get_all_index_channels()
+    if not channels:
+        msg = await message.reply("No channels have been added to the database yet.")
+        await asyncio.sleep(30)
+        try:
+            await msg.delete()
+            await message.delete()
+        except:
+            pass
+        return
+
+    text = "📋 **Auto-Indexing Channels List:**\n\n"
+    msg = await message.reply("🔄 Fetching channel names... Please wait.")
+    for ch in channels:
+        try:
+            chat = await client.get_chat(ch)
+            title = chat.title
+        except Exception:
+            title = "Unknown Channel (Bot removed?)"
+        text += f"🔹 **{title}**\nID: `{ch}`\n\n"
+
+    await msg.edit_text(text)
+    await asyncio.sleep(60)
+    try:
+        await msg.delete()
+        await message.delete()
+    except:
+        pass
