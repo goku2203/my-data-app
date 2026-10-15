@@ -340,8 +340,8 @@ async def auto_filter(client, msg, spoll=False):
                     sticker=random.choice(WAIT_STICKERS)
                 )
                 
-                # Sticker play aaga mudhalla 1.5 seconds wait pandrom
-                await asyncio.sleep(1.5)
+                # Sticker play aaga mudhalla 1.3 seconds wait pandrom
+                await asyncio.sleep(1.3)
                 
                 # Athukappuram thaan background-la theda (search panna) start pandrom
                 files, offset, total_results = await get_search_results(search.lower(), offset=0, filter=True)
@@ -393,8 +393,6 @@ async def auto_filter(client, msg, spoll=False):
                         )
                         asyncio.create_task(auto_delete_msgs(not_found_msg, msg, 15))
                         return
-                else:
-                    await search_msg.delete() 
         else:
             settings = await get_settings(msg.message.chat.id)
             if not settings:
