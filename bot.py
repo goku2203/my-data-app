@@ -47,21 +47,21 @@ routes = webserver.RouteTableDef()
 
 @routes.get("/", allow_head=True)
 async def root_route_handler(request):
-    return webserver.json_response("Bot is Running on Render!")
+    return webserver.Response(text="Bot is Running on Render!")
 
 @routes.get("/verify", allow_head=True)
 async def verify_route_handler(request):
     code = request.query.get("code", "")
     if not code:
         return webserver.Response(text="Invalid Security Token!", status=400)
-    
+        
     try:
         with open("verify.html", "r", encoding="utf-8") as f:
             html_content = f.read()
         html_content = html_content.replace("{{CODE}}", code)
     except Exception as e:
         return webserver.Response(text=f"Error loading verification file: {e}", status=500)
-        
+            
     return webserver.Response(text=html_content, content_type="text/html")
 
 async def web_server():
@@ -86,7 +86,7 @@ async def keep_alive():
             await asyncio.sleep(111)
 
 class Bot(Client):
-    # ✅ INTHA CODE-AH REPLACE PANNU:
+    #   INTHA CODE-AH REPLACE PANNU:
     def __init__(self):
         super().__init__(
             name=SESSION,
@@ -102,27 +102,31 @@ class Bot(Client):
     async def start(self, **kwargs):
         # Bot start aagum pothu maintenance status edukka
         temp.MAINT_MODE = await db.get_maintenance()
+        
         try:
-            app = webserver.AppRunner(await web_server())
-            await app.setup()
+            self.web_app = webserver.AppRunner(await web_server())
+            await self.web_app.setup()
             bind_address = "0.0.0.0"
-            await webserver.TCPSite(app, bind_address, int(PORT)).start()
-            logging.info(f"✅ Web Server Started on Port {PORT}")
+            self.tcp_site = webserver.TCPSite(self.web_app, bind_address, int(PORT))
+            await self.tcp_site.start()
+            logging.info(f"  Web Server Started on Port {PORT}")
         except Exception as e:
-            logging.error(f"❌ Web Server Error: {e}")
+            logging.error(f"  Web Server Error: {e}")
 
         b_users, b_chats = await db.get_banned()
         temp.BANNED_USERS = b_users
         temp.BANNED_CHATS = b_chats
+
         await super().start()
         await Media.ensure_indexes()
+
         me = await self.get_me()
         temp.ME = me.id
         temp.U_NAME = me.username
         temp.B_NAME = me.first_name
         self.username = '@' + me.username
 
-        # ✅ INTHA LINE-AH preload_auth_channels() KU KEELA ADD PANNU:
+        #   INTHA LINE-AH preload_auth_channels() KU KEELA ADD PANNU:
         await preload_auth_channels()
         asyncio.create_task(keep_alive())
 
@@ -130,12 +134,13 @@ class Bot(Client):
         logging.info(LOG_STR)
         
         print("mntg4u</>")
-        # ✅ INTHA PUDHU CODE-AH REPLACE PANNU:
+
+        #   INTHA PUDHU CODE-AH REPLACE PANNU:
         tz = pytz.timezone('Asia/Kolkata')
         now = datetime.now(tz)
         today = now.strftime("%Y-%m-%d")
         time_str = now.strftime("%I:%M:%S %p")
-                 
+                  
         try:
             # Midnight (12 AM to 2 AM) auto-restart aana detailed message varum, illana simple message varum
             if now.hour in [0, 1]:
@@ -147,23 +152,23 @@ class Bot(Client):
             else:
                 await self.send_message(
                     chat_id=LOG_CHANNEL,
-                    text="<b>✅ Bot is Online!</b>",
+                    text="<b>  Bot is Online!</b>",
                     parse_mode=enums.ParseMode.HTML
                 )
         except Exception as e:
-            logging.error(f"❌ LOG_CHANNEL Error: {e}")
+            logging.error(f"  LOG_CHANNEL Error: {e}")
 
-    async def stop(self, *args):
-        await super().stop()
+    async def stop(self, *args, **kwargs):
+        await super().stop(*args, **kwargs)
         logging.info("Bot stopped. Bye.")
 
-    async def iter_messages(self, chat_id: Union[int, str], limit: int, offset: int = 0) -> Optional[AsyncGenerator["types.Message", None]]:
+    async def iter_messages(self, chat_id: Union[int, str], limit: int, offset: int = 0) -> AsyncGenerator["types.Message", None]:
         current = offset
         while True:
             new_diff = min(200, limit - current)
             if new_diff <= 0:
                 return
-            messages = await self.get_messages(chat_id, list(range(current, current + new_diff + 1)))
+            messages = await self.get_messages(chat_id, list(range(current, current + new_diff)))
             for message in messages:
                 yield message
                 current += 1
