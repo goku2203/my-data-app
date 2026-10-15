@@ -130,19 +130,28 @@ class Bot(Client):
         logging.info(LOG_STR)
         
         print("mntg4u</>")
+        # ✅ INTHA PUDHU CODE-AH REPLACE PANNU:
         tz = pytz.timezone('Asia/Kolkata')
-        today = date.today()
         now = datetime.now(tz)
+        today = now.strftime("%Y-%m-%d")
         time_str = now.strftime("%I:%M:%S %p")
-        
+                 
         try:
-            # Midnight (12 AM to 1 AM) restart aana detailed message varum, illana simple message varum
-            if now.hour == 0:
-                await self.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_GC_TXT.format(today, time_str))
+            # Midnight (12 AM to 2 AM) auto-restart aana detailed message varum, illana simple message varum
+            if now.hour in [0, 1]:
+                await self.send_message(
+                    chat_id=LOG_CHANNEL,
+                    text=script.RESTART_GC_TXT.format(today, time_str),
+                    parse_mode=enums.ParseMode.HTML
+                )
             else:
-                await self.send_message(chat_id=LOG_CHANNEL, text="<b>✅ Bot is Online!</b>")
+                await self.send_message(
+                    chat_id=LOG_CHANNEL,
+                    text="<b>✅ Bot is Online!</b>",
+                    parse_mode=enums.ParseMode.HTML
+                )
         except Exception as e:
-            logging.error(f"  LOG_CHANNEL Error: Bot is not Admin in Log Channel! Error: {e}")
+            logging.error(f"❌ LOG_CHANNEL Error: {e}")
 
     async def stop(self, *args):
         await super().stop()
