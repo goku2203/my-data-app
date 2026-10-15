@@ -30,13 +30,15 @@ SPELL_CHECK = {}
 LOG_COOLDOWN = 600
 RECENT_REQUESTS = {}
 
-SPAM_REGEX = re.compile(r'\b(' + '|'.join(map(re.escape, SPAM_WORDS_LIST)) + r')\b', re.IGNORECASE)
+LOG_COOLDOWN = 600
+RECENT_REQUESTS = {}
 
 # Regex compile panna CPU save aagum
 JUNK_WORDS_LIST = ["1080p", "720p", "480p", "tamil dubbed", "tamil", "telugu", "hindi", "malayalam", "dubbed", "hq", "hd", "print", "download", "movie", "full"]
 JUNK_REGEX = re.compile(r'(?i)\b(' + '|'.join(JUNK_WORDS_LIST) + r')\b')
 
 SPAM_WORDS_LIST = ["porn", "p_o_r_n", "slut", "booty", "anal", "pussy", "dick", "boobs", "whore", "cum", "cuming", "lesbian", "fettish", "creampie", "sex"]
+SPAM_REGEX = re.compile(r'\b(' + '|'.join(map(re.escape, SPAM_WORDS_LIST)) + r')\b', re.IGNORECASE)
 
 async def auto_delete_msgs(bot_msg, user_msg, delay):
     await asyncio.sleep(delay)
