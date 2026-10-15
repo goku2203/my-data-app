@@ -30,6 +30,8 @@ SPELL_CHECK = {}
 LOG_COOLDOWN = 600
 RECENT_REQUESTS = {}
 
+SPAM_REGEX = re.compile(r'\b(' + '|'.join(map(re.escape, SPAM_WORDS_LIST)) + r')\b', re.IGNORECASE)
+
 # Regex compile panna CPU save aagum
 JUNK_WORDS_LIST = ["1080p", "720p", "480p", "tamil dubbed", "tamil", "telugu", "hindi", "malayalam", "dubbed", "hq", "hd", "print", "download", "movie", "full"]
 JUNK_REGEX = re.compile(r'(?i)\b(' + '|'.join(JUNK_WORDS_LIST) + r')\b')
@@ -196,15 +198,12 @@ async def advantage_spoll_choker(bot, query):
         return await query.answer(script.OLD_MES, show_alert=True)
     movie = movies[(int(movie_))]
     await query.answer(script.CHK_MOV_ALRT)
-    k = await manual_filters(bot, query.message, text=movie)
-    if k == False:
         files, offset, total_results = await get_search_results(movie, offset=0, filter=True)
-        if files:
-            k = (movie, files, offset, total_results)
-            await auto_filter(bot, query, k)
-        else:
-            k = await query.message.edit(script.MOV_NT_FND)
-            asyncio.create_task(auto_delete_msgs(k, query.message.reply_to_message, 10))
+    if files:
+        await auto_filter(bot, query, (movie, files, offset, total_results))
+    else:
+        k = await query.message.edit(script.MOV_NT_FND)
+        asyncio.create_task(auto_delete_msgs(k, query.message.reply_to_message, 10))
 
 @Client.on_callback_query(filters.regex(r"^(close_data|alertmessage|file|checksub|pages|esp|msp|hsp|tsp)"))
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -326,11 +325,8 @@ async def auto_filter(client, msg, spoll=False):
                 
                 if "@" in search_lower or "http" in search_lower or "t.me" in search_lower:
                     is_spam = True
-                else:
-                    for word in SPAM_WORDS_LIST:
-                        if word in search_lower:
-                            is_spam = True
-                            break
+                elif SPAM_REGEX.search(search_lower):
+                    is_spam = True
                             
                 if is_spam:
                     return
