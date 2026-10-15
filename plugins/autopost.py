@@ -326,18 +326,18 @@ async def send_batched_post(client, clean_name):
         caption += "<b><a href='https://t.me/anime_love8'>ᐅ Super Channel ᐊ</a></b>\n\n"
         caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
         if image_url:
-            await client.send_photo(
+            sent = await client.send_photo(
                 chat_id=UPDATES_CHANNEL,
                 photo=image_url,
                 caption=caption,
-                parse_mode=ParseMode.HTML 
-            )
-        else:
-            await client.send_message(
+                parse_mode=ParseMode.HTML
+             )
+         else:
+             sent = await client.send_message(
                 chat_id=UPDATES_CHANNEL,
                 text=caption,
-                parse_mode=ParseMode.HTML 
-            )
+                parse_mode=ParseMode.HTML
+             )
         POST_CAPTIONS[sent.id] = caption
         LAST_POST["id"] = sent.id
         logger.info(f"✅ Post Sent: {clean_name}")
