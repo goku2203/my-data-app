@@ -86,15 +86,17 @@ async def keep_alive():
             await asyncio.sleep(111)
 
 class Bot(Client):
+    # ✅ INTHA CODE-AH REPLACE PANNU:
     def __init__(self):
         super().__init__(
             name=SESSION,
             api_id=API_ID,
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
-            workers=6,
+            workers=8,
             plugins={"root": "plugins"},
             sleep_threshold=5,
+            max_concurrent_transmissions=5,
         )
 
     async def start(self, **kwargs):
