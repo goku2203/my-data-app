@@ -8,8 +8,6 @@ from utils import get_size, temp, get_settings
 from Script import script
 from pyrogram.errors import ChatAdminRequired
 
-"""-----------------------------------------https://t.me/GetTGLink/4179 --------------------------------------"""
-
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
     r_j_check = [u.id for u in message.new_chat_members]
@@ -124,25 +122,6 @@ async def re_enable_chat(bot, message):
     await db.re_enable_chat(int(chat_))
     temp.BANNED_CHATS.remove(int(chat_))
     await message.reply("Chat Successfully re-enabled")
-
-
-@Client.on_message(filters.command('stats') & filters.incoming)
-async def get_stats(bot, message):
-    if message.from_user.id in ADMINS:
-        rju = await message.reply('<b>𝙰𝙲𝙲𝙴𝚂𝚂𝙸𝙽𝙶 𝚂𝚃𝙰𝚃𝚄𝚂 𝙳𝙴𝚃𝙰𝙸𝙻𝚂...</b>')
-        total_users = await db.total_users_count()
-        totl_chats = await db.total_chat_count()
-        files = await Media.count_documents()
-        size = await db.get_db_size()
-        free = 536870912 - size
-        size = get_size(size)
-        free = get_size(free)
-        await rju.edit(script.STATUS_TXT.format(files, total_users, totl_chats, size, free))
-    else:
-        k = await message.reply_text("<b>Sᴏʀʀʏ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ ᴏɴʟʏ ᴀᴅᴍɪɴꜱ</b>")        
-        await asyncio.sleep(10)
-        await k.delete()
-        await message.delete()
 
 @Client.on_message(filters.command('ban') & filters.user(ADMINS))
 async def ban_a_user(bot, message):
