@@ -196,9 +196,9 @@ Just type the <b>Movie or Series name</b> directly in the chat or group. <i>Make
 
     RESTART_TXT = """<b>✅ Bot Restarted Successfully!</b>"""
     
-    RESTART_GC_TXT = """<b>♻️ System Restarted!</b>
+    RESTART_GC_TXT = """<b>🔄 System Restarted!</b>
 
-<b>📅 Date:</b> <code>{}</code>
-<b>⏰ Time:</b> <code>{}</code>
-<b>🌐 Zone:</b> <code>Asia/Kolkata</code>
-<b>🛠️ Version:</b> <code>v2.0 [Stable]</code>"""
+📅 <b>Date:</b> <code>{}</code>
+⏰ <b>Time:</b> <code>{}</code>
+🌐 <b>Zone:</b> <code>Asia/Kolkata</code>
+⚙️ <b>Version:</b> <code>v2.0 [Stable]</code>"""
