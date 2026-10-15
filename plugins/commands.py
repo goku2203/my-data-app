@@ -120,18 +120,17 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 reply_markup=reply_markup
             )
             asyncio.create_task(auto_delete_message(client, user_msg, AUTO_DELETE_SECONDS))
+        # ✅ INTHA CODE-AH REPLACE PANNU:
         else:
             msg = await client.send_cached_media(
                 chat_id=user_id,
                 file_id=file_id,
                 caption=caption,
                 parse_mode=enums.ParseMode.HTML,
-                protect_content=False,
+                protect_content=protect_content_flag,
             )
-            # DB la admin auto-delete on panniruntha mattum delete aagum
-            ad_settings = await db.get_autodelete_settings()
             if ad_settings['enabled']:
-                asyncio.create_task(auto_delete_file(client, msg, ad_settings['time'] * 60))
+                asyncio.create_task(auto_delete_file(client, msg, del_time * 60))
         
     except Exception as e:
         logger.error(f"File send HTML error: {e}")
