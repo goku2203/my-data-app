@@ -7,7 +7,7 @@ import asyncio
 from datetime import date, datetime
 import pytz
 import aiohttp
-from aiohttp import web as webserver 
+from aiohttp import web as webserver
 
 # Get logging configurations
 logging.config.fileConfig('logging.conf')
@@ -25,7 +25,7 @@ except RuntimeError:
     asyncio.set_event_loop(loop)
 
 import tgcrypto
-from pyrogram import Client, __version__
+from pyrogram import Client, __version__, enums
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
