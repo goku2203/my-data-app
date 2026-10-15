@@ -342,11 +342,6 @@ async def auto_filter(client, msg, spoll=False):
                 
                 # Sticker play aaga mudhalla 1.3 seconds wait pandrom
                 await asyncio.sleep(1.3)
-                except Exception:
-                    class DummyMsg:
-                        async def delete(self):
-                            pass
-                    search_msg = DummyMsg()
                 
                 # Athukappuram thaan background-la theda (search panna) start pandrom
                 files, offset, total_results = await get_search_results(search.lower(), offset=0, filter=True)
