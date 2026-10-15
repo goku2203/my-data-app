@@ -149,24 +149,7 @@ def get_clean_name(name):
     ]
     for junk in junk_list:
         clean = clean.replace(junk, "")
-    clean = re.sub(r'[\[\(\{].*?[\]\)\}]', '', clean)
-    clean = re.sub(r'\b\d{3,4}mb\b', '', clean)
-    clean = re.sub(r'\b\d+(\.\d+)?gb\b', '', clean)
-    junk_words = [
-        "2160p", "4k", "1080p", "720p", "480p", "360p", 
-        "hdrip", "hq", "hd", "bd", "bluray", "blu-ray", "br-rip", "brrip", "web-dl", "web",
-        "dvdscr", "dvd", "cam", "hdcam", "proper", "true", "avc", "remastered", 
-        "uncut", "extended", "dual", "multi", "audio", "esubs", "esub", "x264", "x265", "hevc",
-        "dd5.1", "dd+", "aac", "ac3", "predvd", "pre-dvd", "hqpredvd", "hq-predvd", "camrip", 
-        "print", "ddp2", "ddp", "v2", "v1", "amzn", "hotstar", "zee5", "netflix", "org", "subs"
-    ]
-    
-    for word in junk_words:
-        clean = re.sub(r'\b' + re.escape(word) + r'\b', '', clean)
-    langs = ["tamil", "telugu", "hindi", "english", "tam", "tel", "hin", "eng", "malayalam", "kannada", "hqaud"]
-    for lang in langs:
-        clean = re.sub(r'\b' + re.escape(lang) + r'\b', '', clean)
-    clean = re.sub(r'[\[\]\(\)\{\}\-_./@|:+]', ' ', clean)
+    clean = re.sub(r'[\[\(\{].*?[\]\)\}]', '', clean) clean = re.sub(r'\b\d{3,4}mb\b', '', clean) clean = re.sub(r'\b\d+(\.\d+)?gb\b', '', clean) junk_words = [ "2160p", "4k", "1080p", "720p", "480p", "360p", "hdrip", "hq", "hd", "bd", "bluray", "blu-ray", "br-rip", "brrip", "web-dl", "web", "dvdscr", "dvd", "cam", "hdcam", "proper", "true", "avc", "remastered", "uncut", "extended", "dual", "multi", "audio", "esubs", "esub", "x264", "x265", "hevc", "dd5.1", "dd+", "aac", "ac3", "predvd", "pre-dvd", "hqpredvd", "hq-predvd", "camrip", "print", "ddp2", "ddp", "v2", "v1", "amzn", "hotstar", "zee5", "netflix", "org", "subs" ]  for word in junk_words: clean = re.sub(r'\b' + re.escape(word) + r'\b', '', clean) langs = ["tamil", "telugu", "hindi", "english", "tam", "tel", "hin", "eng", "malayalam", "kannada", "hqaud"] for lang in langs: clean = re.sub(r'\b' + re.escape(lang) + r'\b', '', clean) clean = re.sub(r'[\[\]\(\)\{\}\-_./@|:+]', ' ', clean)
     clean = re.sub(r'\s+', ' ', clean).strip()
     
     return clean.title()
@@ -331,13 +314,13 @@ async def send_batched_post(client, clean_name):
                 photo=image_url,
                 caption=caption,
                 parse_mode=ParseMode.HTML
-             )
-         else:
-             sent = await client.send_message(
+            )
+        else:
+            sent = await client.send_message(
                 chat_id=UPDATES_CHANNEL,
                 text=caption,
                 parse_mode=ParseMode.HTML
-             )
+            )
         POST_CAPTIONS[sent.id] = caption
         LAST_POST["id"] = sent.id
         logger.info(f"✅ Post Sent: {clean_name}")
