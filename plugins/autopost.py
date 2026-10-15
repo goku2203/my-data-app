@@ -308,6 +308,7 @@ async def send_batched_post(client, clean_name):
         caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
         caption += "<b><a href='https://t.me/anime_love8'>ᐅ Super Channel ᐊ</a></b>\n\n"
         caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
+        # ✅ INTHA CORRECTED CODE-AH REPLACE PANNU:
         if image_url:
             sent = await client.send_photo(
                 chat_id=UPDATES_CHANNEL,
@@ -323,7 +324,6 @@ async def send_batched_post(client, clean_name):
             )
         POST_CAPTIONS[sent.id] = caption
         LAST_POST["id"] = sent.id
-        logger.info(f"✅ Post Sent: {clean_name}")
         
     except Exception as e:
         # This will catch ANY silent error and print it to the Render Logs!
