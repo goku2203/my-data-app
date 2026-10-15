@@ -4,16 +4,14 @@ class script(object):
     # 🟢 MAIN BOT COMMANDS TEXTS
     # ==========================================
 
-    START_TXT = """<b>👋 Hello {}!</b>
+    START_TXT = """<blockquote><b>⚡ Hᴇʏ {}!</b></blockquote>
+    
+<blockquote><b>🎌 Wᴇʟᴄᴏᴍᴇ ᴛᴏ Mɪᴋᴀsᴀ Bᴏᴛ!</b></blockquote>
 
-<b>🤖 I am Mikasa, your file search assistant.</b>
+<blockquote><i>🎬 Sᴇᴀʀᴄʜ ғᴏʀ Mᴏᴠɪᴇs, Aɴɪᴍᴇ, Sᴇʀɪᴇs🎬</i>
+<i>⚡ Gᴇᴛ ғɪʟᴇs ɪɴ sᴇᴄᴏɴᴅs!</i></blockquote>
 
-<i>I can help you find Movies, Series, and Anime files quickly in your group. ⚡</i>
-
-<blockquote>❤️ I am always here to help you.</blockquote>
-
-<i>Click the buttons below to learn more.</i>"""
-
+<blockquote><b>❤️ I Aᴍ Aʟᴡᴀʏs Hᴇʀᴇ Tᴏ Hᴇʟᴘ Yᴏᴜ...</b></blockquote>"""
 
     HELP_TXT = """<blockquote><b>⚙️ Help & System Status</b></blockquote>
 
@@ -41,7 +39,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 ├ 💾 <b>ᴅᴀᴛᴀʙᴀsᴇ :</b> MongoDB
 ╰ ☁️ <b>sᴇʀᴠᴇʀ :</b> Koyeb
 
-<blockquote><b><i>❤️ I’ll always be here when you need me.</i></b></blockquote>"""
+<blockquote><b><i>❤️ I’ʟʟ Aʟᴡᴀʏs Bᴇ Hᴇʀᴇ Wʜᴇɴ Yᴏᴜ Nᴇᴇᴅ Mᴇ...</i></b></blockquote>"""
 
 
     SOURCE_TXT = """<blockquote><b>🛠️ Source Code</b></blockquote>
@@ -78,27 +76,29 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
 
 <blockquote>⚙️ Waiting for admin setup...</blockquote>"""
 
-    LOG_TEXT_P = """<b>✨ ɴᴇᴡ ᴜsᴇʀ ✨</b>
+    LOG_TEXT_P = """<b>✨ Nᴇᴡ Usᴇʀ</b>
 
-<blockquote>👤 <b>ᴜsᴇʀ :</b> {1}
-🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{0}</code></blockquote>"""
+<blockquote>👤 <b>Usᴇʀ :</b> {1}
+🆔 <b>Usᴇʀ ID :</b> <code>{0}</code></blockquote>"""
 
 
-    MISSING_LOG_TXT = """<b>❌ MISSING FILE ❌</b>
+    MISSING_LOG_TXT = """<b>Mɪssɪɴɢ Fɪʟᴇ</b>
 
-<blockquote>📁 <b>ꜰɪʟᴇ :</b> <code>{2}</code>
+<b>📁 Nᴀᴍᴇ ▼</b>
 
-👤 <b>ᴜsᴇʀ :</b> {0}
-🆔 <b>ᴜsᴇʀ ɪᴅ :</b> <code>{1}</code>
-🌐 <b>sᴏᴜʀᴄᴇ :</b> {3}</blockquote>"""
+<blockquote><code>{2}</code></blockquote>
+
+<blockquote>👤 <b>Usᴇʀ :</b> {0}
+🆔 <b>Usᴇʀ ID :</b> <code>{1}</code>
+🌐 <b>Sᴏᴜʀᴄᴇ :</b> {3}</blockquote>"""
 
     # ==========================================
     #   VERIFICATION LOG TEXT
     # ==========================================
-    VERIFY_LOG_TXT = """<b>✅ New User Verified!</b>\n
-👤 <b>User:</b> {mention}
-🆔 <b>ID:</b> <code>{id}</code>
-⏳ <b>Mode:</b> {mode}"""
+    VERIFY_LOG_TXT = """<b>✅ Nᴇᴡ Usᴇʀ Vᴇʀɪғɪᴇᴅ!</b>\n
+👤 <b>Usᴇʀ:</b> {mention}
+🆔 <b>ɪᴅ:</b> <code>{id}</code>
+⏳ <b>Mᴏᴅᴇ:</b> {mode}"""
 
 # ==========================================
     # MISSING LOG - Number List
@@ -126,7 +126,7 @@ Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
     "[ ⌛ Only 1 minute left! Hurry! ]\n\n"
     "<i>Check the results below:</i>"
     )
-
+    
     CUSTOM_FILE_CAPTION = """<b>📂 Filename:</b> <b><i>{file_caption}</i></b>\n
 <b>💾 Size:</b> <b>{file_size}</b>\n
 <blockquote><b>📢 Join Our Channels : 👇</b>\n
