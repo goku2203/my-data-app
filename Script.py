@@ -13,17 +13,18 @@ class script(object):
 
 <blockquote><b>❤️ I Aᴍ Aʟᴡᴀʏs Hᴇʀᴇ Tᴏ Hᴇʟᴘ Yᴏᴜ...</b></blockquote>"""
 
-    HELP_TXT = """<blockquote><b>⚙️ Help & System Status</b></blockquote>
+    HELP_TXT = """<b>👋 Welcome to the Help Menu!</b>
 
-<b>👤 User:</b> {}
-<b>📡 Server:</b> Free Tier (Experimental) ⚠️
+<i>Here is how you can easily find and download your favorite files:</i>
 
-<i>I am currently running on a free server, so I might be a little slow. Please be patient! 🐢</i>
+<blockquote><b>🔍 How to Search:</b>
+Just type the <b>Movie or Series name</b> directly in the chat or group. <i>Make sure to check the spelling on Google first!</i></blockquote>
 
-<b>🚫 Important:</b>
-Please <b>Don't Spam</b> commands, or I might crash (die) 😵.
+<blockquote><b>⚡ Extra Features:</b>
+• <b>Inline Search:</b> Type our bot username in any chat to search files quickly.
+• <b>Premium Access:</b> Use /plan to check <i>fast download</i> and <i>ad-free</i> options.</blockquote>
 
-<b>👇 Choose a category below:</b>"""
+<i>Still facing an issue? Contact the admin for support!</i>"""
 
     MAINT_TXT = (
         "<b>⚠️ Bot is Under Maintenance! 🛠️</b>\n\n<i>5 to 10 minutes wait pannunga. Work nadanthutu irukku!</i>"
