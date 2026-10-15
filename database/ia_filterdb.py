@@ -1,6 +1,3 @@
-#  @MrMNTG @MusammilN
-#please give credits https://github.com/MN-BOTS/ShobanaFilterBot
-
 import logging
 from struct import pack
 import re
@@ -208,49 +205,34 @@ def extract_lookup_candidates(query: str):
         valid.insert(0, query)
     return valid
 
+# ✅ INTHA COMPLETE CORRECTED CODE-AH REPLACE PANNU:
 async def get_file_details(query):
     candidates = extract_lookup_candidates(str(query))
     
+    # 1. SUPER FAST DIRECT INDEX LOOKUP (Uses MongoDB _id index directly)
     for cand in candidates:
-        or_filter = {'$or': [{'_id': cand}, {'file_id': cand}, {'file_ref': cand}]}
-        
-        # 1. Search via umongo Media
         try:
-            filedetails = await Media.find(or_filter).to_list(length=1)
-            if filedetails:
-                return filedetails
-        except Exception:
-            pass
-            
-        # 2. Search via raw Media.collection
-        try:
-            raw_docs = await Media.collection.find(or_filter).to_list(length=1)
-            if raw_docs:
+            doc = await Media.collection.find_one({'_id': cand})
+            if doc:
                 try:
-                    return [Media.build_from_mongo(d) for d in raw_docs]
+                    return [Media.build_from_mongo(doc)]
                 except Exception:
-                    return raw_docs
+                    return [doc]
         except Exception:
             pass
-            
-    # 3. Search other collections in the same database if not found in COLLECTION_NAME
-    try:
-        col_names = await db.list_collection_names()
-        for cname in col_names:
-            if cname in [COLLECTION_NAME, 'users', 'groups', 'config', 'smart_counter', 'system.indexes']:
-                continue
-            col = db[cname]
-            for cand in candidates:
-                or_filter = {'$or': [{'_id': cand}, {'file_id': cand}, {'file_ref': cand}]}
-                raw_docs = await col.find(or_filter).to_list(length=1)
-                if raw_docs:
-                    try:
-                        return [Media.build_from_mongo(d) for d in raw_docs]
-                    except Exception:
-                        return raw_docs
-    except Exception as e:
-        logger.debug(f"Cross-collection search error: {e}")
-        
+
+    # 2. Fallback lookup if searched by file_ref
+    for cand in candidates:
+        try:
+            doc = await Media.collection.find_one({'file_ref': cand})
+            if doc:
+                try:
+                    return [Media.build_from_mongo(doc)]
+                except Exception:
+                    return [doc]
+        except Exception:
+            pass
+
     return []
 
 def encode_file_id(s: bytes) -> str:
