@@ -21,7 +21,7 @@ class script(object):
 Just type the <b>Movie or Series name</b> directly in the chat or group. <i>Make sure to check the spelling on Google first!</i></blockquote>
 
 <blockquote><b>⚡ Extra Features:</b>
-• <b>Inline Search:</b> Type our bot username in any chat to search files quickly.
+• <b>Latest Uploads:</b> Send /movies or /series in bot PM to see recently added lists.
 • <b>Premium Access:</b> Use /plan to check <i>fast download</i> and <i>ad-free</i> options.</blockquote>
 
 <i>Still facing an issue? Contact the admin for support!</i>"""
