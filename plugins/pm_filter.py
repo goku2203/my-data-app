@@ -342,6 +342,11 @@ async def auto_filter(client, msg, spoll=False):
                 
                 # Sticker play aaga mudhalla 1.3 seconds wait pandrom
                 await asyncio.sleep(1.3)
+                except Exception:
+                    class DummyMsg:
+                        async def delete(self):
+                            pass
+                    search_msg = DummyMsg()
                 
                 # Athukappuram thaan background-la theda (search panna) start pandrom
                 files, offset, total_results = await get_search_results(search.lower(), offset=0, filter=True)
@@ -509,9 +514,15 @@ async def auto_filter(client, msg, spoll=False):
             mention = message.from_user.mention if message.from_user else "User"
             cap = script.RESULT_TXT.format(mention=mention, query=search)
 
+        # ✅ INTHA CORRECTED CODE-AH REPLACE PANNU:
+        if not spoll and search_msg:
+            try:
+                await search_msg.delete()
+            except Exception:
+                pass
+
         if imdb and imdb.get('poster'):
             try:
-                if not spoll: await search_msg.delete()
                 delauto = await message.reply_photo(
                     photo=imdb.get('poster'),
                     caption=cap[:1024],
@@ -519,7 +530,6 @@ async def auto_filter(client, msg, spoll=False):
                 )
                 asyncio.create_task(auto_delete_msgs(delauto, message, 60))
             except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
-                if not spoll: await search_msg.delete()
                 pic = imdb.get('poster')
                 poster = pic.replace('.jpg', "._V1_UX360.jpg")
                 delau = await message.reply_photo(
@@ -529,11 +539,9 @@ async def auto_filter(client, msg, spoll=False):
                 )
                 asyncio.create_task(auto_delete_msgs(delau, message, 60))
             except Exception as e:
-                if not spoll: await search_msg.delete()
                 audel = await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(btn))
                 asyncio.create_task(auto_delete_msgs(audel, message, 60))
         else:
-            if not spoll: await search_msg.delete()
             
             if HYPER_MODE:
                 autodel = await message.reply_text(
