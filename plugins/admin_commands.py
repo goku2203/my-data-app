@@ -23,25 +23,25 @@ async def master_admin_panel(bot: Client, message: Message):
 <b>👑 MASTER ADMIN PANEL</b>
 <blockquote>Welcome back, Admin! Choose the command you need below.</blockquote>
 
-<b>⚙️ SYSTEM & SETTINGS</b>\n
-1. <code>/panel</code> — Server status & database details\n
+<blockquote><b>⚙️ SYSTEM & SETTINGS</b>\n
+<blockquote>1. <code>/panel</code> — Server status & database details\n
 2. <code>/settings</code> — Auto-filter settings menu\n
 3. <code>/broadcast</code> — Send message to all users\n
 4. <code>/restart</code> — Restart the bot safely\n
 5. <code>/ping</code> — Check bot response speed\n
 6. <code>/vsettings</code> — Verify Page Custom Settings Panel\n
 
-<b>📁 FILE MANAGEMENT</b>\n
+<blockquote><b>📁 FILE MANAGEMENT</b>\n
 1. <code>/deletefiles</code> or <code>/df & /d</code> -Delete selected files from database\n
 2. <code>/cleandb</code> or <code>/cd & /c</code> - Remove all Cam / PreDVD prints\n
 3. <code>/scanmovie</code> or <code>/sm & /s</code> - Check HD and Cam files for a movie\n
 
-<b>📡 AUTO-INDEX CHANNELS</b>\n
+<blockquote><b>📡 AUTO-INDEX CHANNELS</b>\n
 1. <code>/addchannel</code> — Add a new index channel\n
 2. <code>/delchannel</code> — Remove an index channel\n
 3. <code>/listchannels</code> — View all index channels\n
 
-<b>🔐 FORCE SUBSCRIBE</b>\n
+<blockquote><b>🔐 FORCE SUBSCRIBE</b>\n
 1. <code>/addfsub</code> — Add Force Subscribe channel\n
 2. <code>/delfsub</code> — Remove Force Subscribe channel\n
 3. <code>/listfsub</code> — View all Force Subscribe channels\n
@@ -50,8 +50,7 @@ async def master_admin_panel(bot: Client, message: Message):
 
     buttons = [
         [
-            InlineKeyboardButton("🏠 Home", callback_data="start_data"),
-            InlineKeyboardButton("❌ Close", callback_data="close_data")
+            InlineKeyboardButton("✖️ Close", callback_data="close_data")
         ]
     ]
 
@@ -63,14 +62,13 @@ async def master_admin_panel(bot: Client, message: Message):
         disable_web_page_preview=True
     )
 
-# INTHA COMPLETE UPDATED CODE-A FILE KADEISILA PODUNGA
 @Client.on_message(filters.private & filters.command(["vstats", "verifystats"]) & filters.user(ADMINS))
 async def verify_stats_command(bot: Client, message: Message):
     try:
         await message.delete() # User command-a delete pannum
     except:
         pass
-    msg = await message.reply_text("⚡ **Fetching Statistics... Please wait!**")
+    msg = await message.reply_text("⚡ **Pʟᴇᴀsᴇ Wᴀɪᴛ...**")
     
     daily, monthly, total, _ = await db.get_all_verify_stats()
     
@@ -164,7 +162,7 @@ async def send_vsettings_menu(message_or_query):
             InlineKeyboardButton("  +5 Mins", callback_data="adset_min_plus")
         ])
         
-    buttons.append([InlineKeyboardButton("  Close", callback_data="close_data")])
+    buttons.append([InlineKeyboardButton("✖️ Close", callback_data="close_data")])
 
     reply_markup = InlineKeyboardMarkup(buttons)
     
