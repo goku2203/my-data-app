@@ -19,8 +19,8 @@ async def auto_delete_helper(bot_msg, user_msg, delay=15, replied_photo=None):
                 pass
 
 @Client.on_message(
-    filters.private & filters.user(ADMINS)
-    & filters.regex(r"^(/setphoto|/sp|/set)")
+    filters.private & filters.user(ADMINS) &
+    filters.command(["setphoto", "set"])
 )
 async def set_post_photo(client, message):
     try:
