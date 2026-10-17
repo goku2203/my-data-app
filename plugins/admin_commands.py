@@ -19,11 +19,10 @@ async def auto_delete_helper(bot_msg, user_msg, delay):
 async def master_admin_panel(bot: Client, message: Message):
 
     admin_text = """
-<b>Mᴀsᴛᴇʀ Aᴅᴍɪɴ Pᴀɴᴇʟ</b>
+<b>👑 Mᴀsᴛᴇʀ Aᴅᴍɪɴ Pᴀɴᴇʟ 👑</b>
 <blockquote>Welcome back, Admin! Choose the command you need below.</blockquote>
 
 <blockquote><b>⚙️ Sʏsᴛᴇᴍ & Sᴇᴛᴛɪɴɢs</b></blockquote>
-
 <blockquote>1. <code>/panel</code>
 <b>Server status & database details</b>
 2. <code>/settings</code>
@@ -38,7 +37,6 @@ async def master_admin_panel(bot: Client, message: Message):
 <b>Verify Page Custom Settings Panel</b></blockquote>
 
 <blockquote><b>📁 Fɪʟᴇ Mᴀɴᴀɢᴇᴍᴇɴᴛ</b></blockquote>
-
 <blockquote>1. <code>/deletefiles</code> or <code>/df & /d</code>
 <b>Delete selected files from database</b>
 2. <code>/cleandb</code> or <code>/cd & /c</code>
@@ -47,7 +45,6 @@ async def master_admin_panel(bot: Client, message: Message):
 <b>Check HD and Cam files for a movie</b></blockquote>
 
 <blockquote><b>📡 Aᴜᴛᴏ Iɴᴅᴇx Cʜᴀɴɴᴇʟ</b></blockquote>
-
 <blockquote>1. <code>/addchannel</code>
 <b>Add a new index channel</b>
 2. <code>/delchannel</code>
@@ -56,13 +53,12 @@ async def master_admin_panel(bot: Client, message: Message):
 <b>View all index channels</b></blockquote>
 
 <blockquote><b>🔐 Fᴏʀᴄᴇ Sᴜʙsᴄʀɪʙᴇ</b></blockquote>
-
 <blockquote>1. <code>/addfsub</code>
 <b>Add Force Subscribe channel</b>
 2. <code>/delfsub</code>
 <b>Remove Force Subscribe channel</b>
 3. <code>/listfsub</code>
-<b>View all Force Subscribe channels</b></blockquote>\n
+<b>View all Force Subscribe channels</b></blockquote>
 
 <blockquote><b>💡 Tip: Tap the command to copy it easily.</b></blockquote>"""
 
