@@ -1,10 +1,9 @@
-from database.users_chats_db import db
-from database.ia_filterdb import Media
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram import Client, filters, enums
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+import asyncio
+from database.users_chats_db import db 
+from database.ia_filterdb import Media 
+from pyrogram import Client, filters, enums 
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from info import ADMINS
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 # Auto-delete helper function add panrom
 async def auto_delete_helper(bot_msg, user_msg, delay):
@@ -20,33 +19,52 @@ async def auto_delete_helper(bot_msg, user_msg, delay):
 async def master_admin_panel(bot: Client, message: Message):
 
     admin_text = """
-<b>👑 MASTER ADMIN PANEL</b>
+<b>Mᴀsᴛᴇʀ Aᴅᴍɪɴ Pᴀɴᴇʟ</b>
 <blockquote>Welcome back, Admin! Choose the command you need below.</blockquote>
 
-<blockquote><b>⚙️ SYSTEM & SETTINGS</b>\n
-<blockquote>1. <code>/panel</code> — Server status & database details\n
-2. <code>/settings</code> — Auto-filter settings menu\n
-3. <code>/broadcast</code> — Send message to all users\n
-4. <code>/restart</code> — Restart the bot safely\n
-5. <code>/ping</code> — Check bot response speed\n
-6. <code>/vsettings</code> — Verify Page Custom Settings Panel\n
+<blockquote><b>⚙️ Sʏsᴛᴇᴍ & Sᴇᴛᴛɪɴɢs</b></blockquote>
 
-<blockquote><b>📁 FILE MANAGEMENT</b>\n
-1. <code>/deletefiles</code> or <code>/df & /d</code> -Delete selected files from database\n
-2. <code>/cleandb</code> or <code>/cd & /c</code> - Remove all Cam / PreDVD prints\n
-3. <code>/scanmovie</code> or <code>/sm & /s</code> - Check HD and Cam files for a movie\n
+<blockquote>1. <code>/panel</code>
+<b>Server status & database details</b>
+2. <code>/settings</code>
+<b>Auto-filter settings menu</b>
+3. <code>/broadcast</code>
+<b>Send message to all users</b>
+4. <code>/restart</code>
+<b>Restart the bot safely</b>
+5. <code>/ping</code>
+<b>Check bot response speed</b>
+6. <code>/vsettings</code>
+<b>Verify Page Custom Settings Panel</b></blockquote>
 
-<blockquote><b>📡 AUTO-INDEX CHANNELS</b>\n
-1. <code>/addchannel</code> — Add a new index channel\n
-2. <code>/delchannel</code> — Remove an index channel\n
-3. <code>/listchannels</code> — View all index channels\n
+<blockquote><b>📁 Fɪʟᴇ Mᴀɴᴀɢᴇᴍᴇɴᴛ</b></blockquote>
 
-<blockquote><b>🔐 FORCE SUBSCRIBE</b>\n
-1. <code>/addfsub</code> — Add Force Subscribe channel\n
-2. <code>/delfsub</code> — Remove Force Subscribe channel\n
-3. <code>/listfsub</code> — View all Force Subscribe channels\n
+<blockquote>1. <code>/deletefiles</code> or <code>/df & /d</code>
+<b>Delete selected files from database</b>
+2. <code>/cleandb</code> or <code>/cd & /c</code>
+<b>Remove all Cam / PreDVD prints</b>
+3. <code>/scanmovie</code> or <code>/sm & /s</code>
+<b>Check HD and Cam files for a movie</b></blockquote>
 
-<blockquote><b>💡 Tip: Command mela tap pannina easy-ah copy pannalaam.</b></blockquote>"""
+<blockquote><b>📡 Aᴜᴛᴏ Iɴᴅᴇx Cʜᴀɴɴᴇʟ</b></blockquote>
+
+<blockquote>1. <code>/addchannel</code>
+<b>Add a new index channel</b>
+2. <code>/delchannel</code>
+<b>Remove an index channel</b>
+3. <code>/listchannels</code>
+<b>View all index channels</b></blockquote>
+
+<blockquote><b>🔐 Fᴏʀᴄᴇ Sᴜʙsᴄʀɪʙᴇ</b></blockquote>
+
+<blockquote>1. <code>/addfsub</code>
+<b>Add Force Subscribe channel</b>
+2. <code>/delfsub</code>
+<b>Remove Force Subscribe channel</b>
+3. <code>/listfsub</code>
+<b>View all Force Subscribe channels</b></blockquote>\n
+
+<blockquote><b>💡 Tip: Tap the command to copy it easily.</b></blockquote>"""
 
     buttons = [
         [
