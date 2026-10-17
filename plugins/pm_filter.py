@@ -16,7 +16,6 @@ from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerId
 
 # --- Missing aana mukkiyamana imports inga add panni irukken ---
 from database.ia_filterdb import Media, get_file_details, get_search_results
-from database.filters_mdb import find_filter, get_filters
 from Script import script
 from info import HYPER_MODE, ADMINS, CUSTOM_FILE_CAPTION, IMDB_TEMPLATE, MISSING_LOG_CHANNEL, WAIT_STICKERS
 from utils import get_size, is_subscribed, get_poster, temp, get_settings, create_invite_links, clean_filename
@@ -216,17 +215,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 await query.message.reply_to_message.delete() # User anupina command message-ayum delete pannum
         except:
             pass
-
-    elif "alertmessage" in query.data:
-        grp_id = query.message.chat.id
-        i = query.data.split(":")[1]
-        keyword = query.data.split(":")[2]
-        reply_text, btn, alerts, fileid = await find_filter(grp_id, keyword)
-        if alerts is not None:
-            alerts = ast.literal_eval(alerts)
-            alert = alerts[int(i)]
-            alert = alert.replace("\\n", "\n").replace("\\t", "\t")
-            await query.answer(alert, show_alert=True)
 
     elif query.data.startswith("file"):
         ident, file_id = query.data.split("#")
