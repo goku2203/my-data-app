@@ -83,10 +83,9 @@ Just type the <b>Movie or Series name</b> directly in the chat or group. <i>Make
 🆔 <b>Usᴇʀ ID :</b> <code>{0}</code></blockquote>"""
 
 
-    MISSING_LOG_TXT = """<b>Mɪssɪɴɢ Fɪʟᴇ</b>
+    MISSING_LOG_TXT = """<b>✖️ Mɪssɪɴɢ Fɪʟᴇ</b>
 
 <b>📁 Nᴀᴍᴇ ▼</b>
-
 <blockquote><code>{2}</code></blockquote>
 
 <blockquote>👤 <b>Usᴇʀ :</b> {0}
