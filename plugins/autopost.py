@@ -64,7 +64,7 @@ async def autopost_callback(client, query: CallbackQuery):
     reply_markup = InlineKeyboardMarkup(
         [
             [InlineKeyboardButton(button_text, callback_data=callback_data)],
-            [InlineKeyboardButton("Close ✖️", callback_data="close_data")]
+            [InlineKeyboardButton("✖️ Close", callback_data="close_data")]
         ]
     )
     
@@ -303,7 +303,6 @@ async def send_batched_post(client, clean_name):
             f"<blockquote>🗓 <b><i>Year: {first_file['year']}</i></b>\n"
             f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
             f"💿 <b><i>Quality: {final_print_str}</i></b></blockquote>\n"
-            f"\u200B\n"
             f"📥 <b>Download Links:-</b>\n"
         )
 
@@ -322,14 +321,14 @@ async def send_batched_post(client, clean_name):
         total_files = len(all_files_to_post)
         for i, f in enumerate(all_files_to_post):
             if i == total_files - 1:
-                caption += f"└ 📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
+                caption += f"└ ⦿ <a href='{f['link']}'><b>{f['size']}</b></a>\n"
             else:
-                caption += f"├ 📁 <a href='{f['link']}'><b>{f['size']}</b></a>\n"
+                caption += f"├ ⦿ <a href='{f['link']}'><b>{f['size']}</b></a>\n"
 
         caption += "━━━━━━━━━━━━━━━━━━\n"
         caption += "<blockquote><i>(Click the file size to download)</i></blockquote>\n\n"
         caption += "<b><a href='https://t.me/anime_love8'>ᐅ Super Channel ᐊ</a></b>\n\n"
-        caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File 📂</a></b>"
+        caption += "<b><a href='https://t.me/+0TPEBg7YCZM3NDM1'>💘 Anime Single File</a></b>"
         # ✅ INTHA CORRECTED CODE-AH REPLACE PANNU:
         if image_url:
             sent = await client.send_photo(
