@@ -52,7 +52,7 @@ async def create_file_buttons(client, sent_message):
                 member_limit=1
             )).invite_link
         
-        buttons.append([InlineKeyboardButton("📢 Join Channel", url=invite_link)])
+        buttons.append([InlineKeyboardButton("📢 Jᴏɪɴ Cʜᴀɴɴᴇʟ", url=invite_link)])
         buttons.append([InlineKeyboardButton("🔗 View File", url=message_link)])
     except Exception as e:
         logger.error(f"Error creating invite: {e}")
@@ -188,7 +188,7 @@ async def checksub_callback(client, callback_query):
             await callback_query.answer("Failed to send file. Please try again later.", show_alert=True)
     else:
         links = await create_invite_links(client)
-        btn = [[InlineKeyboardButton("🤖 Join Updates Channel", url=url)] for url in links.values()]
+        btn = [[InlineKeyboardButton("🤖 Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ", url=url)] for url in links.values()]
         btn.append([InlineKeyboardButton("🔄 Try Again", callback_data=data)])
         await callback_query.edit_message_text(
             text="**❌ You still haven't joined all channels!**\n\nPlease join and press Try Again:",
@@ -208,11 +208,11 @@ async def start(client, message):
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
             [
-                InlineKeyboardButton("🎬 ᴀɴɪᴍᴇ ᴄʜᴀɴɴᴇʟ", url="https://t.me/Anime_single"),
-                InlineKeyboardButton('📢 ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ', url='https://t.me/super_goku_god')
+                InlineKeyboardButton("🎬 Aɴɪᴍᴇ Cʜᴀɴɴᴇʟ", url="https://t.me/Anime_single"),
+                InlineKeyboardButton('📢 Mᴀɪɴ Cʜᴀɴɴᴇʟ', url='https://t.me/super_goku_god')
             ],
             [
-                InlineKeyboardButton("👨‍💻 ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ", url="https://t.me/Tamilmovieslink_bot")
+                InlineKeyboardButton("👨‍💻 Cᴏɴᴛᴀᴄᴛ Aᴅᴍɪɴ", url="https://t.me/Tamilmovieslink_bot")
             ]
         ]
             
@@ -312,9 +312,9 @@ async def start(client, message):
                 logger.info(f"✅ [VERIFY] User {message.from_user.id} verified! Mode: {v_settings.get('mode')} ({v_settings.get('hours', 0)}h)")
                 
                 if v_settings.get('mode') == 'time':
-                    success_msg = f"<b>✅ Verification Successful!</b>\n\n<i>Your access is activated for {v_settings.get('hours', 0)} Hours. File Uploading... Please wait...</i>"
+                    success_msg = f"<b>✅ Vᴇʀɪғɪᴄᴀᴛɪᴏɴ Sᴜᴄᴄᴇssғᴜʟ!</b>\n\n<i>Your access is activated for {v_settings.get('hours', 0)} Hours. File Uploading... Please wait...</i>"
                 else:
-                    success_msg = "<b>✅ Verification Successful!</b>\n\n<i>File Uploading... Please wait...</i>"
+                    success_msg = "<b>✅ Vᴇʀɪғɪᴄᴀᴛɪᴏɴ Sᴜᴄᴄᴇssғᴜʟ!</b>\n\n<i>File Uploading... Please wait...</i>"
                     
                 v_msg = await message.reply_text(success_msg, protect_content=True)
                 asyncio.create_task(auto_delete_helper(v_msg, 5))
@@ -883,7 +883,7 @@ async def premium_plans(client, message):
                 InlineKeyboardButton("🧾 Send Screenshot", url=admin_link)
             ],
             [
-                InlineKeyboardButton("❌ Close", callback_data="close_data")
+                InlineKeyboardButton("✖️ Close", callback_data="close_data")
             ]
         ]
         
