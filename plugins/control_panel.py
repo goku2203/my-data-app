@@ -40,36 +40,31 @@ async def get_panel_data(user_mention):
     ram = psutil.virtual_memory().percent
     
     stats_text = (
-        "<blockquote><b>👑 𝗢𝗪𝗡𝗘𝗥 𝗖𝗢𝗡𝗧𝗥𝗢𝗟 𝗣𝗔𝗡𝗘𝗟 👑</b></blockquote>\n\n"
+        "<blockquote><b>Aᴅᴍɪɴ Cᴏɴᴛʀᴏʟ Pᴀɴᴇʟ</b></blockquote>\n\n"
         f"<i>Welcome Master {user_mention}! Here is your Bot Status.</i>\n\n"
-        "<b>🤖 <u>𝗦𝘆𝘀𝘁𝗲𝗺 𝗣𝗲𝗿𝗳𝗼𝗿𝗺𝗮𝗻𝗰𝗲</u></b>\n"
+        "<b>🤖 Sʏsᴛᴇᴍ Pᴇʀғᴏʀᴍᴀɴᴄᴇ</b>\n"
         f"┣ ⏱️ <b>Uptime:</b> <code>{uptime}</code>\n"
         f"┗ 🚀 <b>Ping:</b> <code>{ping_time} ms</code>\n\n"
-        "<b>📊 <u>𝗨𝘀𝗲𝗿 𝗦𝘁𝗮𝘁𝗶𝘀𝘁𝗶𝗰𝘀</u></b>\n"
+        "<b>📊 Usᴇʀ Sᴛᴀᴛɪsᴛɪᴄs</b>\n"
         f"┣ 👤 <b>Total Users:</b> <code>{total_users}</code>\n"
         f"┣ 👥 <b>Total Groups:</b> <code>{total_chats}</code>\n"
         f"┣ 🗂️ <b>Total Files:</b> <code>{total_files}</code>\n"
         f"┗ 📅 <b>Monthly Verified:</b> <code>{monthly_verified}</code>\n\n"
-        "<b>💾 <u>𝗦𝘁𝗼𝗿𝗮𝗴𝗲 & 𝗗𝗮𝘁𝗮𝗯𝗮𝘀𝗲 (𝗠𝗼𝗻𝗴𝗼𝗗𝗕)</u></b>\n"
+        "<b>💾 Sᴛᴏʀᴀɢᴇ & Dᴀᴛᴀʙᴀsᴇ (MᴏɴɢᴏDB)</b>\n"
         f"┣ 📈 <b>Used:</b> <code>{monsize_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
         f"┗ 🟢 <b>Free:</b> <code>{free}</code>\n\n"
-        "<b>🖥️ <u>𝗦𝗲𝗿𝘃𝗲𝗿 𝗛𝗮𝗿𝗱𝘄𝗮𝗿𝗲 (𝗥𝗲𝗻𝗱𝗲𝗿 𝗖𝗹𝗼𝘂𝗱)</u></b>\n"
+        "<b>🖥️ Sᴇʀᴠᴇʀ Hᴀʀᴅᴡᴀʀᴇ (Rᴇɴᴅᴇʀ Cʟᴏᴜᴅ)</b>\n"
         f"┣ ⚡ <b>CPU:</b> <code>{cpu}%</code>\n"
         f"┗ 💽 <b>RAM:</b> <code>{ram}%</code>"
     )
     
     buttons = InlineKeyboardMarkup([
         [
-            # 👇 Ithu thaan puthu Manage Channels button 👇
-            InlineKeyboardButton("⚙️ Manage Index Channels", callback_data="chan_menu")
+            InlineKeyboardButton("⚙️ Mᴀɴᴀɢᴇ Iɴᴅᴇx Cʜᴀɴɴᴇʟs", callback_data="chan_menu")
         ],
         [
-            InlineKeyboardButton("☁️ Render Dashboard", url="https://dashboard.render.com"),
-            InlineKeyboardButton("🍃 MongoDB Cloud", url="https://cloud.mongodb.com")
-        ],
-        [
-            InlineKeyboardButton("🔄 Refresh", callback_data="refresh_panel"),
-            InlineKeyboardButton("🗑 Close Panel", callback_data="close_data")
+            InlineKeyboardButton("🔄 Rᴇғʀᴇsʜ", callback_data="refresh_panel"),
+            InlineKeyboardButton("✖️ Cʟᴏsᴇ", callback_data="close_data")
         ]
     ])
     
@@ -131,10 +126,10 @@ async def channel_panel_callbacks(client, query: CallbackQuery):
     if data == "chan_menu":
         # Channel menu buttons
         buttons = [
-            [InlineKeyboardButton("📝 List All Channels", callback_data="chan_list")],
-            [InlineKeyboardButton("➕ Add Channel", callback_data="chan_add"), 
-             InlineKeyboardButton("🗑️ Delete Channel", callback_data="chan_del")],
-            [InlineKeyboardButton("🔙 Back to Stats", callback_data="refresh_panel")]
+            [InlineKeyboardButton("📝 Lɪsᴛ Aʟʟ Cʜᴀɴɴᴇʟs", callback_data="chan_list")],
+            [InlineKeyboardButton("➕ Aᴅᴅ Cʜᴀɴɴᴇʟ", callback_data="chan_add"), 
+             InlineKeyboardButton("🗑️ Dᴇʟᴇᴛᴇ Cʜᴀɴɴᴇʟ", callback_data="chan_del")],
+            [InlineKeyboardButton("🔙 Bᴀᴄᴋ ᴛᴏ Sᴛᴀᴛs", callback_data="refresh_panel")]
         ]
         text = "<b>⚙️ CHANNEL MANAGEMENT ⚙️</b>\n\nPlease select an option below to proceed:"
         
@@ -148,16 +143,15 @@ async def channel_panel_callbacks(client, query: CallbackQuery):
         if not channels:
             return await query.answer("No channels are currently found in the database!", show_alert=True)
             
-        text = "<b>📝 Auto-Indexing Channels List:</b>\n\n"
+        text = "<blockquote><b>📝 Auto-Indexing Channels List:</b></blockquote>\n\n"
         for ch in channels:
-            # Bot channel name ah fetch panna try pannum
             try:
                 chat = await client.get_chat(ch)
                 title = chat.title
             except Exception:
                 title = "Unknown Channel"
                 
-            text += f"✅ <b>{title}</b> | ID: <code>{ch}</code> 🔗\n"
+            text += f"⦿ <b>{title}</b>\nID: <code>{ch}</code> 🔗\n"
             
         btn = [[InlineKeyboardButton("🔙 Back to Menu", callback_data="chan_menu")]]
         
@@ -218,7 +212,6 @@ async def del_channel_cmd(client, message):
     except:
         pass
 
-# ✅ INTHA CODE-AH plugins/control_panel.py KADAISILA ADD PANNIKKO:
 @Client.on_message(filters.command("listchannels") & filters.user(ADMINS))
 async def list_channels_cmd(client, message):
     channels = await get_all_index_channels()
@@ -233,14 +226,14 @@ async def list_channels_cmd(client, message):
         return
 
     text = "📋 **Auto-Indexing Channels List:**\n\n"
-    msg = await message.reply("🔄 Fetching channel names... Please wait.")
+    msg = await message.reply("Pʟᴇᴀsᴇ ᴡᴀɪᴛ...")
     for ch in channels:
         try:
             chat = await client.get_chat(ch)
             title = chat.title
         except Exception:
             title = "Unknown Channel (Bot removed?)"
-        text += f"🔹 **{title}**\nID: `{ch}`\n\n"
+        text += f"⦿ **{title}**\nID: `{ch}`\n\n"
 
     await msg.edit_text(text)
     await asyncio.sleep(60)
