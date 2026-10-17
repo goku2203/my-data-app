@@ -150,10 +150,9 @@ class Bot(Client):
         temp.B_NAME = me.first_name
         self.username = '@' + me.username
 
-        #   INTHA LINE-AH preload_auth_channels() KU KEELA ADD PANNU:
         await preload_auth_channels()
         asyncio.create_task(keep_alive())
-
+        asyncio.create_task(auto_restart(self)) # Ithu thaan puthusa add panna timer task
         logging.info(f"{me.first_name} running on Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
         
