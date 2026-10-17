@@ -94,15 +94,18 @@ async def alert_handler(client, message):
                 return
         LAST_SENT[clean_name] = current_time
 
+        # Anti-Copyright Magic: Ovvoru letter-kum naduvula invisible space add pandrom
+        safe_name = "\u200B".join(list(clean_name))
+
         # MESSAGE SEND PANDRA IDAM
         if message.chat.id == USER_REQ_DB_CHANNEL:
-            text = f"<blockquote><b>✨ User Request Added</b></blockquote>\n\n<b>▸ {clean_name}</b>"
+            text = f"<blockquote><b>✨ User Request Added</b></blockquote>\n\n<b>▸ {safe_name}</b>"
         elif message.chat.id == ANIME_CHANNEL_ID:
-            text = f"<blockquote><b>🎬 New Anime Added</b></blockquote>\n\n<b>▸ {clean_name}</b>"
+            text = f"<blockquote><b>🎬 New Anime Added</b></blockquote>\n\n<b>▸ {safe_name}</b>"
         elif message.chat.id == CAM_DB_CHANNEL:
-            text = f"🎬 <b>{clean_name} Added ✅</b>"
+            text = f"🎬 <b>{safe_name} Added ✅</b>"
         else:
-            text = f"🎬 <b>{clean_name} Added ✅</b>"
+            text = f"🎬 <b>{safe_name} Added ✅</b>"
 
         await client.send_message(chat_id=ALERT_LOG_CHANNEL_ID, text=text, parse_mode=enums.ParseMode.HTML)
         
