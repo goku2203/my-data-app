@@ -29,7 +29,7 @@ from pyrogram import Client, __version__, enums
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL, KEEP_ALIVE_URL, DEFAULT_AUTH_CHANNELS
+from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL, KEEP_ALIVE_URL, DEFAULT_AUTH_CHANNELS, RENDER_URL
 from utils import temp
 from typing import Union, Optional, AsyncGenerator
 from pyrogram import types
@@ -74,16 +74,40 @@ async def preload_auth_channels():
         await db.set_auth_channels(DEFAULT_AUTH_CHANNELS)
         logging.info("Set default AUTH_CHANNELs in DB.")
 
+# REPLACE PANNU:
 async def keep_alive():
     async with aiohttp.ClientSession() as session:
         while True:
             try:
-                if KEEP_ALIVE_URL:
-                    await session.get(KEEP_ALIVE_URL)
-                    logging.info("Sent keep-alive request.")
+                # Koyeb URL-a thavirthu, unga original Render URL-a ping pannum.
+                # Ithu unga bot-a sleep aagama 24/7 online-la vechikkum.
+                target_url = KEEP_ALIVE_URL if KEEP_ALIVE_URL and "koyeb" not in KEEP_ALIVE_URL else RENDER_URL
+                if target_url:
+                    await session.get(target_url)
+                    logging.info(f"Sent keep-alive request to: {target_url}")
             except Exception as e:
                 logging.error(f"Keep-alive request failed: {e}")
             await asyncio.sleep(111)
+
+# Exact-ah 12:00 AM ku bot-a force restart pandra puthu function
+async def auto_restart(client):
+    while True:
+        tz = pytz.timezone('Asia/Kolkata')
+        now = datetime.now(tz)
+        # Midnight 12:00 AM check
+        if now.hour == 0 and now.minute == 0:
+            logging.info("Midnight Auto-Restarting...")
+            try:
+                await client.send_message(
+                    chat_id=LOG_CHANNEL, 
+                    text="<b>  Midnight System Restarting... Please Wait!</b>", 
+                    parse_mode=enums.ParseMode.HTML
+                )
+            except:
+                pass
+            # Bot code-a internal ah re-run pandra command
+            os.execl(sys.executable, sys.executable, *sys.argv)
+        await asyncio.sleep(60) # Ovoru 1 minute-kum time check pannum
 
 class Bot(Client):
     #   INTHA CODE-AH REPLACE PANNU:
