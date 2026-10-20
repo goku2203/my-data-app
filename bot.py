@@ -4,7 +4,8 @@ import logging.config
 import os
 import sys
 import asyncio
-from datetime import date, datetime
+import json
+from datetime import date, datetime, timedelta
 import pytz
 import aiohttp
 from aiohttp import web as webserver
@@ -89,25 +90,62 @@ async def keep_alive():
                 logging.error(f"Keep-alive request failed: {e}")
             await asyncio.sleep(111)
 
-# Exact-ah 12:00 AM ku bot-a force restart pandra puthu function
+# ---------------- MIDNIGHT AUTO RESTART (FIXED) ----------------
+# Restart pannum pothu "Midnight System Restarting" message id-a intha file la save pannuvom.
+# Process restart aanalum file irukkum (same container), so puthu process ithai paathu
+# antha old message-a delete pannidum.
+RESTART_FLAG = "restart_flag.json"
+IST = pytz.timezone('Asia/Kolkata')
+
+def _read_flag():
+    try:
+        with open(RESTART_FLAG, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def _write_flag(data):
+    try:
+        with open(RESTART_FLAG, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+    except Exception as e:
+        logging.error(f"Flag write failed: {e}")
+
+def _clear_flag():
+    try:
+        os.remove(RESTART_FLAG)
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        logging.error(f"Flag remove failed: {e}")
+
 async def auto_restart(client):
     while True:
-        tz = pytz.timezone('Asia/Kolkata')
-        now = datetime.now(tz)
-        # Midnight 12:00 AM check
-        if now.hour == 0 and now.minute == 0:
-            logging.info("Midnight Auto-Restarting...")
-            try:
-                await client.send_message(
-                    chat_id=LOG_CHANNEL, 
-                    text="<b>  Midnight System Restarting... Please Wait!</b>", 
-                    parse_mode=enums.ParseMode.HTML
-                )
-            except:
-                pass
-            # Bot code-a internal ah re-run pandra command
-            os.execl(sys.executable, sys.executable, *sys.argv)
-        await asyncio.sleep(60) # Ovoru 1 minute-kum time check pannum
+        now = datetime.now(IST)
+        # Next midnight (naalaikku 12:00 AM) varaikkum thookkam
+        next_midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        await asyncio.sleep((next_midnight - now).total_seconds() + 1)
+
+        today = datetime.now(IST).strftime("%Y-%m-%d")
+        flag = _read_flag()
+        # Innaikku already restart aaiduchu na thirumba restart pannaathey (loop guard)
+        if flag and flag.get("date") == today:
+            continue
+
+        logging.info("Midnight Auto-Restarting...")
+        msg_id = None
+        try:
+            m = await client.send_message(
+                chat_id=LOG_CHANNEL,
+                text="<b>Midnight System Restarting... Please Wait!</b>",
+                parse_mode=enums.ParseMode.HTML
+            )
+            msg_id = m.id
+        except Exception as e:
+            logging.error(f"Restart notice failed: {e}")
+
+        _write_flag({"date": today, "pending": True, "chat_id": LOG_CHANNEL, "msg_id": msg_id})
+        os.execl(sys.executable, sys.executable, *sys.argv)
 
 class Bot(Client):
     #   INTHA CODE-AH REPLACE PANNU:
@@ -158,28 +196,34 @@ class Bot(Client):
         
         print("mntg4u</>")
 
-        #   INTHA PUDHU CODE-AH REPLACE PANNU:
-        tz = pytz.timezone('Asia/Kolkata')
-        now = datetime.now(tz)
+        now = datetime.now(IST)
         today = now.strftime("%Y-%m-%d")
         time_str = now.strftime("%I:%M:%S %p")
-                  
+
+        flag = _read_flag()
         try:
-            # Midnight (12 AM to 2 AM) auto-restart aana detailed message varum, illana simple message varum
-            if now.hour in [0, 1]:
+            if flag and flag.get("pending"):
+                # Midnight auto-restart: "Restarting..." message-a delete pannitu details anuppu
+                if flag.get("msg_id"):
+                    try:
+                        await self.delete_messages(flag["chat_id"], flag["msg_id"])
+                    except Exception as e:
+                        logging.error(f"Old restart msg delete failed: {e}")
                 await self.send_message(
                     chat_id=LOG_CHANNEL,
                     text=script.RESTART_GC_TXT.format(today, time_str),
                     parse_mode=enums.ParseMode.HTML
                 )
+                # pending=False pannidrom; date mattum irukkattum (innaikku thirumba restart aagama irukka)
+                _write_flag({"date": flag.get("date"), "pending": False, "chat_id": None, "msg_id": None})
             else:
                 await self.send_message(
                     chat_id=LOG_CHANNEL,
-                    text="<b>  Bot is Online!</b>",
+                    text="<b>Bot is Online!</b>",
                     parse_mode=enums.ParseMode.HTML
                 )
         except Exception as e:
-            logging.error(f"  LOG_CHANNEL Error: {e}")
+            logging.error(f"LOG_CHANNEL Error: {e}")
 
     async def stop(self, *args, **kwargs):
         await super().stop(*args, **kwargs)
