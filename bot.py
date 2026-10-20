@@ -219,7 +219,7 @@ class Bot(Client):
             else:
                 await self.send_message(
                     chat_id=LOG_CHANNEL,
-                    text="<b>Bot is Online!</b>",
+                    text="<b>✅ Bot is Online!</b>",
                     parse_mode=enums.ParseMode.HTML
                 )
         except Exception as e:
