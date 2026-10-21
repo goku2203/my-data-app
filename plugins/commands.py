@@ -75,21 +75,17 @@ async def auto_delete_file(client, message, delay):
     except Exception as e:
         logger.error(f"Error deleting file: {e}")
 
-async def send_file_to_user(client, user_id, file_id, protect_content_flag, file_name=None, file_size=None, file_caption=None, auto_delete_minutes=None):
+async def send_file_to_user(client, user_id, file_id, protect_content_flag, file_name=None, file_size=None, file_caption=None):
     try:
         safe_file_name = html.escape(file_name) if file_name else "Unknown File"
         safe_file_size = html.escape(file_size) if file_size else "Unknown Size"
         
         # Admin auto-delete time edukkum
         ad_settings = await db.get_autodelete_settings()
-        logger.info(f"[SEND] user={user_id} protect={protect_content_flag} group_auto_delete={auto_delete_minutes} global={ad_settings}")
-        if auto_delete_minutes:
-            # Group /settings-la set panna time (global admin setting-a override pannum)
-            del_time = auto_delete_minutes
-            ad_enabled = True
-        else:
-            del_time = ad_settings['time']
-            ad_enabled = ad_settings['enabled']
+        # ELLAA groups / channels / autopost / pazhaya links-kum ONE global time (/settings button-la maathalaam)
+        del_time = ad_settings['time']
+        ad_enabled = ad_settings['enabled']
+        logger.info(f"[SEND] user={user_id} protect={protect_content_flag} auto_delete_enabled={ad_enabled} time={del_time}min")
         
         caption = None
         if CUSTOM_FILE_CAPTION:
@@ -116,7 +112,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 parse_mode=enums.ParseMode.HTML, 
                 protect_content=protect_content_flag
             )
-            asyncio.create_task(auto_delete_file(client, sent_message, (auto_delete_minutes * 60) if auto_delete_minutes else FILE_AUTO_DELETE_SECONDS))
+            asyncio.create_task(auto_delete_file(client, sent_message, FILE_AUTO_DELETE_SECONDS))
             
             reply_markup = await create_file_buttons(client, sent_message)
             
@@ -152,9 +148,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
             )
             # DB la admin auto-delete on panniruntha mattum delete aagum
             ad_settings = await db.get_autodelete_settings()
-            if auto_delete_minutes:
-                asyncio.create_task(auto_delete_file(client, msg, auto_delete_minutes * 60))
-            elif ad_settings['enabled']:
+            if ad_settings['enabled']:
                 asyncio.create_task(auto_delete_file(client, msg, ad_settings['time'] * 60))
         except:
             pass
@@ -548,7 +542,7 @@ async def start(client, message):
                 pre, file_id = b64_str.split("_", 1)
             else:
                 file_id = b64_str
-            protect_content_flag, grp_del_mins = parse_pre(pre)
+            protect_content_flag, _ = parse_pre(pre)
             files_ = await get_file_details(file_id)
             if not files_:
                 files_ = await get_file_details(b64_str)
@@ -562,8 +556,7 @@ async def start(client, message):
                     protect_content_flag=protect_content_flag,
                     file_name=getattr(files, 'file_name', None) or (files.get('file_name', '') if isinstance(files, dict) else ''),
                     file_size=get_size(getattr(files, 'file_size', 0) if not isinstance(files, dict) else files.get('file_size', 0)),
-                    file_caption=getattr(files, 'caption', None) or (files.get('caption', '') if isinstance(files, dict) else ''),
-                    auto_delete_minutes=grp_del_mins
+                    file_caption=getattr(files, 'caption', None) or (files.get('caption', '') if isinstance(files, dict) else '')
                 )
                 return
         except Exception:
@@ -585,7 +578,7 @@ async def start(client, message):
         f_caption = getattr(files, 'caption', '')
         actual_file_id = getattr(files, 'file_id', None) or getattr(files, 'id', None) or file_id
         
-    protect_content_flag, grp_del_mins = parse_pre(pre)
+    protect_content_flag, _ = parse_pre(pre)
     await send_file_to_user(
         client=client,
         user_id=message.from_user.id,
@@ -593,8 +586,7 @@ async def start(client, message):
         protect_content_flag=protect_content_flag,
         file_name=title,
         file_size=size,
-        file_caption=f_caption,
-        auto_delete_minutes=grp_del_mins
+        file_caption=f_caption
     )
     PENDING_VERIFY_FILES.pop(message.from_user.id, None)
     try:
@@ -748,7 +740,7 @@ async def settings(client, message):
     settings = await get_settings(grp_id)
 
     if settings is not None:
-        reply_markup = build_settings_markup(settings, grp_id)
+        reply_markup = build_settings_markup(settings, grp_id, await db.get_autodelete_settings())
 
         await message.reply_text(
             text=f"<b>Change Your Settings for {title} As Your Wish ⚙</b>",
