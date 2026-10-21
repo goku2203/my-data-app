@@ -23,7 +23,7 @@ async def master_admin_panel(bot: Client, message: Message):
 <blockquote>Welcome back, Admin! Choose the command you need below.</blockquote>
 
 <blockquote><b>⚙️ Sʏsᴛᴇᴍ & Sᴇᴛᴛɪɴɢs</b></blockquote>
-<blockquote>1. <code>/panel</code>
+<blockquote>1. <code>/stats</code> | <code>/status</code>
 <b>Server status & database details</b>
 2. <code>/settings</code>
 <b>Auto-filter settings menu</b>
