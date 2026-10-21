@@ -49,36 +49,9 @@ class temp(object):
 
 
 async def is_subscribed(user_id: int, client) -> bool:
-    auth_channels = await db.get_auth_channels()
-    if not auth_channels:
-        return True  # No channels to check
-
-    # Check if user is joined in channels
-    joined_all = True
-    for channel in auth_channels:
-        try:
-            member = await client.get_chat_member(channel, user_id)
-            if member.status not in [
-                ChatMemberStatus.MEMBER,
-                ChatMemberStatus.ADMINISTRATOR,
-                ChatMemberStatus.OWNER,
-            ]:
-                joined_all = False
-                break
-        except Exception:
-            joined_all = False
-            break
-
-    if joined_all:
-        return True
-
-    # If REQUEST_FSUB_MODE is True, check join requests
-    if REQUEST_FSUB_MODE:
-        requested_channels = JOIN_REQUEST_USERS.get(user_id, set())
-        if set(auth_channels).issubset(requested_channels):
-            return True
-
-    return False
+    # FIX: Munnadi is_subscribed-um get_missing_channels-um vera vera logic use pannuchu.
+    # Ippo rendum oru logic: ovvoru channel-kum (member) illana (join request anuppirukkanum).
+    return not await get_missing_channels(user_id, client)
 
 async def create_invite_links(client) -> dict:
     links = {}
@@ -536,30 +509,34 @@ def get_clean_size(size):
 
 # ----- END -----
 
+async def _channel_ok(user_id: int, channel, client) -> bool:
+    """True = user antha channel-la member (or join request anuppiyirukkaanga)"""
+    try:
+        member = await client.get_chat_member(channel, user_id)
+        if member.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+            return True
+    except Exception:
+        pass  # UserNotParticipant ithu normal; join request irukkanu keezha paakkalaam
+
+    if REQUEST_FSUB_MODE:
+        if channel in JOIN_REQUEST_USERS.get(user_id, set()):
+            return True
+        # Bot restart aana memory poidum, so DB-la paakkurom
+        try:
+            if await db.has_join_request(user_id, channel):
+                JOIN_REQUEST_USERS.setdefault(user_id, set()).add(channel)
+                return True
+        except Exception as e:
+            logger.error(f"Join request DB check failed: {e}")
+    return False
+
 async def get_missing_channels(user_id: int, client) -> list:
     auth_channels = await db.get_auth_channels()
     if not auth_channels:
         return []
-
-    missing = []
-    # FSUB mode on la iruntha request check pannum
-    requested_channels = JOIN_REQUEST_USERS.get(user_id, set()) if REQUEST_FSUB_MODE else set()
-
-    for channel in auth_channels:
-        if channel in requested_channels:
-            continue
-        try:
-            member = await client.get_chat_member(channel, user_id)
-            if member.status not in [
-                ChatMemberStatus.MEMBER,
-                ChatMemberStatus.ADMINISTRATOR,
-                ChatMemberStatus.OWNER,
-            ]:
-                missing.append(channel)
-        except Exception:
-            missing.append(channel)
-
-    return missing
+    # Ellaa channels-um orey nerathula (parallel) check pannum, so fast
+    results = await asyncio.gather(*[_channel_ok(user_id, ch, client) for ch in auth_channels])
+    return [ch for ch, ok in zip(auth_channels, results) if not ok]
 
 # Inga unga thevaiyillatha varthaigalai add pannikkonga
 JUNK_WORDS = [
