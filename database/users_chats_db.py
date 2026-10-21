@@ -96,7 +96,15 @@ class Database:
         await self.grp.update_one({'id': int(id)}, {'$set': {'chat_status': chat_status}})
             
     async def update_settings(self, id, settings):
-        await self.grp.update_one({'id': int(id)}, {'$set': {'settings': settings}})
+        # upsert=True: group DB-la illanaalum settings permanent-aa save aagum (restart-ku piragum poga koodathu)
+        await self.grp.update_one(
+            {'id': int(id)},
+            {
+                '$set': {'settings': settings},
+                '$setOnInsert': {'title': 'Unknown', 'chat_status': {'is_disabled': False, 'reason': ''}}
+            },
+            upsert=True
+        )
             
     async def get_settings(self, id):
         default = {
