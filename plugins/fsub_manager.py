@@ -150,4 +150,5 @@ async def list_fsub_channels(client, message):
 @Client.on_message(filters.command("clear_join_users") & filters.user(ADMINS))
 async def clear_join_users(_, message: Message):
     JOIN_REQUEST_USERS.clear()
+    await db.clear_join_requests()
     await message.reply_text("✅ Cleared all join request users.")
