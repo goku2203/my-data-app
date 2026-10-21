@@ -10,7 +10,7 @@ import base64
 import urllib.parse
 
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
-from pyrogram.types import Message, InlineKeyboardButton
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram import enums
 from pyrogram.enums import ChatMemberStatus
 
@@ -194,6 +194,60 @@ async def broadcast_messages(user_id, message):
         return False, "Error"
     except Exception as e:
         return False, "Error"
+
+# ==========================================
+# 🕒 PER-GROUP AUTO DELETE + FILE LINK PREFIX HELPERS
+# Link prefix format:  file | filep | file10 | filep30   (p = protected, number = auto-delete minutes)
+# ==========================================
+AUTO_DELETE_CYCLE = [0, 5, 10, 30]   # 0 = Default (bot-oda global admin setting)
+_PRE_REGEX = re.compile(r"^file(p?)(\d*)$")
+
+def build_pre(settings):
+    """Group settings-la irundhu start-link prefix create pannum."""
+    pre = 'filep' if settings.get('file_secure') else 'file'
+    mins = settings.get('auto_delete')
+    if mins:
+        pre += str(int(mins))
+    return pre
+
+def parse_pre(pre):
+    """Prefix-a (protect_content, auto_delete_minutes) aaga maathum. Pazhaya 'file'/'filep' links-um work aagum."""
+    m = _PRE_REGEX.match(pre or "")
+    if not m:
+        return False, None
+    protect = bool(m.group(1))
+    mins = int(m.group(2)) if m.group(2) else None
+    return protect, (mins if mins else None)
+
+def auto_delete_label(settings):
+    mins = settings.get('auto_delete')
+    return f"⏳ {int(mins)} Min" if mins else "⏳ Default"
+
+def next_auto_delete(settings):
+    cur = settings.get('auto_delete') or 0
+    if cur in AUTO_DELETE_CYCLE:
+        return AUTO_DELETE_CYCLE[(AUTO_DELETE_CYCLE.index(cur) + 1) % len(AUTO_DELETE_CYCLE)]
+    return AUTO_DELETE_CYCLE[1]
+
+def build_settings_markup(settings, grp_id):
+    """/settings command-um, button click-um rendu idathulayum same markup use aagum."""
+    g = str(grp_id)
+    def row(label, key, text):
+        cb = f'setgs#{key}#{settings[key]}#{g}'
+        return [InlineKeyboardButton(label, callback_data=cb), InlineKeyboardButton(text, callback_data=cb)]
+    yn = lambda k: '✅ Yes' if settings[k] else '❌ No'
+    ad_cb = f'setad#{g}'
+    return InlineKeyboardMarkup([
+        row('Filter Button', 'button', 'Single' if settings['button'] else 'Double'),
+        row('Bot PM', 'botpm', yn('botpm')),
+        row('File Secure', 'file_secure', yn('file_secure')),
+        row('IMDB', 'imdb', yn('imdb')),
+        row('Spell Check', 'spell_check', yn('spell_check')),
+        row('Welcome', 'welcome', yn('welcome')),
+        [InlineKeyboardButton('Auto Delete File', callback_data=ad_cb),
+         InlineKeyboardButton(auto_delete_label(settings), callback_data=ad_cb)],
+        [InlineKeyboardButton("❌ Close", callback_data="close_data")],
+    ])
 
 async def get_settings(group_id):
     settings = temp.SETTINGS.get(group_id)
