@@ -1,6 +1,10 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=240&color=0:0f2027,50:203a43,100:2c5364&text=Mikasa%20Filter%20Bot&fontSize=64&fontColor=ffffff&fontAlign=50&fontAlignY=40&animation=fadeIn&desc=Index%20%E2%80%A2%20Search%20%E2%80%A2%20Verify%20%E2%80%A2%20Autopost&descSize=22&descAlign=50&descAlignY=64" alt="Mikasa Filter Bot" width="100%" />
+<img src="https://capsule-render.vercel.app/api?type=waving&height=240&color=0:0f2027,50:203a43,100:2c5364&text=Goku%20Stark%20Auto%20Filter%20Bot&fontSize=56&fontColor=ffffff&fontAlign=50&fontAlignY=40&animation=fadeIn&desc=Index%20%E2%80%A2%20Search%20%E2%80%A2%20Verify%20%E2%80%A2%20Autopost&descSize=22&descAlign=50&descAlignY=64" alt="Goku Stark Auto Filter Bot" width="100%" />
+
+<a href="https://github.com/goku2203/my-data-app">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=24&duration=3000&pause=800&color=38BDF8&center=true&vCenter=true&width=700&height=50&lines=Fast+%E2%9A%A1+Smart+%F0%9F%A7%A0+Automated+%F0%9F%A4%96;Index+%E2%80%A2+Search+%E2%80%A2+Verify+%E2%80%A2+Autopost;Powered+by+Pyrofork+%2B+MongoDB+%F0%9F%9A%80" alt="Typing animation" />
+</a>
 
 <p>
   A fast Telegram bot for <b>file indexing, smart search, verification and channel automation</b>.<br/>
