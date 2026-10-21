@@ -169,41 +169,36 @@ async def broadcast_messages(user_id, message):
         return False, "Error"
 
 # ==========================================
-# 🕒 PER-GROUP AUTO DELETE + FILE LINK PREFIX HELPERS
-# Link prefix format:  file | filep | file10 | filep30   (p = protected, number = auto-delete minutes)
+# 🕒 GLOBAL AUTO DELETE + FILE LINK PREFIX HELPERS
+# Link prefix:  file | filep   (p = protected)
+# Auto delete time ELLAATHUKKUM oru global setting (DB-la permanent).
 # ==========================================
-AUTO_DELETE_CYCLE = [0, 5, 10, 30]   # 0 = Default (bot-oda global admin setting)
+AUTO_DELETE_CYCLE = [5, 10, 30]
 _PRE_REGEX = re.compile(r"^file(p?)(\d*)$")
 
 def build_pre(settings):
-    """Group settings-la irundhu start-link prefix create pannum."""
-    pre = 'filep' if settings.get('file_secure') else 'file'
-    mins = settings.get('auto_delete')
-    if mins:
-        pre += str(int(mins))
-    return pre
+    return 'filep' if settings.get('file_secure') else 'file'
 
 def parse_pre(pre):
-    """Prefix-a (protect_content, auto_delete_minutes) aaga maathum. Pazhaya 'file'/'filep' links-um work aagum."""
+    """Prefix-a (protect_content, ignored) aaga maathum. Pazhaya 'file10' maadhiri links-um work aagum (number ignore aagum)."""
     m = _PRE_REGEX.match(pre or "")
     if not m:
         return False, None
-    protect = bool(m.group(1))
-    mins = int(m.group(2)) if m.group(2) else None
-    return protect, (mins if mins else None)
+    return bool(m.group(1)), None
 
-def auto_delete_label(settings):
-    mins = settings.get('auto_delete')
-    return f"⏳ {int(mins)} Min" if mins else "⏳ Default"
+def auto_delete_label(ad):
+    if not ad.get('enabled'):
+        return "❌ Off"
+    return f"⏳ {int(ad.get('time', 5))} Min"
 
-def next_auto_delete(settings):
-    cur = settings.get('auto_delete') or 0
+def next_auto_delete(ad):
+    cur = int(ad.get('time', 5)) if ad.get('enabled') else None
     if cur in AUTO_DELETE_CYCLE:
         return AUTO_DELETE_CYCLE[(AUTO_DELETE_CYCLE.index(cur) + 1) % len(AUTO_DELETE_CYCLE)]
-    return AUTO_DELETE_CYCLE[1]
+    return AUTO_DELETE_CYCLE[0]
 
-def build_settings_markup(settings, grp_id):
-    """/settings command-um, button click-um rendu idathulayum same markup use aagum."""
+def build_settings_markup(settings, grp_id, ad):
+    """/settings command-um, button click-um rendu idathulayum same markup. ad = global autodelete settings."""
     g = str(grp_id)
     def row(label, key, text):
         cb = f'setgs#{key}#{settings[key]}#{g}'
@@ -218,7 +213,7 @@ def build_settings_markup(settings, grp_id):
         row('Spell Check', 'spell_check', yn('spell_check')),
         row('Welcome', 'welcome', yn('welcome')),
         [InlineKeyboardButton('Auto Delete File', callback_data=ad_cb),
-         InlineKeyboardButton(auto_delete_label(settings), callback_data=ad_cb)],
+         InlineKeyboardButton(auto_delete_label(ad), callback_data=ad_cb)],
         [InlineKeyboardButton("❌ Close", callback_data="close_data")],
     ])
 
