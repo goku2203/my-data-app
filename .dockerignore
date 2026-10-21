@@ -1,0 +1,10 @@
+.git
+.github
+__pycache__
+*.pyc
+*.session
+*.session-journal
+TelegramBot.txt
+restart_flag.json
+.env
+README.md
