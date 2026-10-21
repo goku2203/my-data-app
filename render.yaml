@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: my-data-app
+    runtime: docker
+    plan: free
+    region: singapore          # India-kku nearest (oregon/frankfurt-um use pannalaam)
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # --- required (Render dashboard-la value podu) ---
+      - key: API_ID
+        sync: false
+      - key: API_HASH
+        sync: false
+      - key: BOT_TOKEN
+        sync: false
+      - key: DATABASE_URI
+        sync: false
+      - key: ADMINS
+        sync: false
+      - key: CHANNELS
+        sync: false
+      - key: AUTH_CHANNEL
+        sync: false
+      - key: LOG_CHANNEL
+        sync: false
+      - key: SHORTLINK_URL
+        sync: false
+      - key: SHORTLINK_API
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+      # --- unga service URL (https://<name>.onrender.com) - illana Render-oda RENDER_EXTERNAL_URL automatic-aa use aagum ---
+      - key: RENDER_URL
+        sync: false
+      - key: PYTHONUNBUFFERED
+        value: "1"

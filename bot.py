@@ -5,6 +5,7 @@ import os
 import sys
 import asyncio
 import json
+import re
 from datetime import date, datetime, timedelta
 import pytz
 import aiohttp
@@ -50,20 +51,40 @@ routes = webserver.RouteTableDef()
 async def root_route_handler(request):
     return webserver.Response(text="Bot is Running on Render!")
 
+@routes.get("/health", allow_head=True)
+async def health_route_handler(request):
+    return webserver.Response(text="OK")
+
+_VERIFY_HTML = None
+_CODE_OK = re.compile(r"^[A-Za-z0-9+/=_\- ]{8,4000}$")
+
+def _load_verify_html():
+    global _VERIFY_HTML
+    if _VERIFY_HTML is None:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "verify.html"), "r", encoding="utf-8") as f:
+            _VERIFY_HTML = f.read()
+    return _VERIFY_HTML
+
 @routes.get("/verify", allow_head=True)
 async def verify_route_handler(request):
     code = request.query.get("code", "")
-    if not code:
+    if not code or not _CODE_OK.match(code):
         return webserver.Response(text="Invalid Security Token!", status=400)
-        
     try:
-        with open("verify.html", "r", encoding="utf-8") as f:
-            html_content = f.read()
-        html_content = html_content.replace("{{CODE}}", code)
+        html_content = _load_verify_html()
     except Exception as e:
         return webserver.Response(text=f"Error loading verification file: {e}", status=500)
-            
-    return webserver.Response(text=html_content, content_type="text/html")
+    return webserver.Response(
+        text=html_content,
+        content_type="text/html",
+        headers={
+            "Cache-Control": "no-store",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "Referrer-Policy": "no-referrer",
+            "X-Robots-Tag": "noindex, nofollow",
+        },
+    )
 
 async def web_server():
     web_app = webserver.Application(client_max_size=30000000)
@@ -82,13 +103,15 @@ async def keep_alive():
             try:
                 # Koyeb URL-a thavirthu, unga original Render URL-a ping pannum.
                 # Ithu unga bot-a sleep aagama 24/7 online-la vechikkum.
-                target_url = KEEP_ALIVE_URL if KEEP_ALIVE_URL and "koyeb" not in KEEP_ALIVE_URL else RENDER_URL
+                target_url = RENDER_URL or environ.get("RENDER_EXTERNAL_URL", "")
                 if target_url:
-                    await session.get(target_url)
+                    target_url = target_url.rstrip("/") + "/health"
+                    async with session.get(target_url, timeout=aiohttp.ClientTimeout(total=20)) as resp:
+                        await resp.read()
                     logging.info(f"Sent keep-alive request to: {target_url}")
             except Exception as e:
                 logging.error(f"Keep-alive request failed: {e}")
-            await asyncio.sleep(111)
+            await asyncio.sleep(240)  # Render free: 15 min inactivity-la sleep aagum, 4 min ping podhum
 
 # ---------------- MIDNIGHT AUTO RESTART (FIXED) ----------------
 # Restart pannum pothu "Midnight System Restarting" message id-a intha file la save pannuvom.
@@ -162,9 +185,7 @@ class Bot(Client):
         )
 
     async def start(self, **kwargs):
-        # Bot start aagum pothu maintenance status edukka
-        temp.MAINT_MODE = await db.get_maintenance()
-        
+        # Web server mudhalla start aagatum - Render port detect panna
         try:
             self.web_app = webserver.AppRunner(await web_server())
             await self.web_app.setup()
@@ -175,6 +196,9 @@ class Bot(Client):
         except Exception as e:
             logging.error(f"  Web Server Error: {e}")
 
+        # Bot start aagum pothu maintenance status edukka
+        temp.MAINT_MODE = await db.get_maintenance()
+        
         b_users, b_chats = await db.get_banned()
         temp.BANNED_USERS = b_users
         temp.BANNED_CHATS = b_chats

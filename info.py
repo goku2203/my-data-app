@@ -106,7 +106,7 @@ CAM_DB_CHANNEL = int(environ.get("CAM_DB_CHANNEL", "-1003952875911"))
 TMDB_API_KEY = environ.get("TMDB_API_KEY", "")
 
 # --- Render URL Setup ---
-RENDER_URL = environ.get("RENDER_URL", "https://my-data-app-lovv.onrender.com")
+RENDER_URL = (environ.get("RENDER_URL") or environ.get("RENDER_EXTERNAL_URL") or "https://my-data-app-lovv.onrender.com").rstrip("/")
 
 # --- Log Summary Setup ---
 LOG_STR = "Current Customized Configurations are:-\n"

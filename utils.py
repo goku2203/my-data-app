@@ -452,7 +452,7 @@ async def get_verify_link(user_id, file_id=None):
         if not clean_short_link.startswith("http"):
             clean_short_link = link
 
-        encoded_url = base64.b64encode(clean_short_link.encode('utf-8')).decode('utf-8')
+        encoded_url = base64.urlsafe_b64encode(clean_short_link.encode('utf-8')).decode('utf-8').rstrip('=')
         
         # Unga exact Render URL inga hardcode panniyachu (Entha error-um varathu)
         render_base_url = RENDER_URL
