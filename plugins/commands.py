@@ -82,6 +82,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
         
         # Admin auto-delete time edukkum
         ad_settings = await db.get_autodelete_settings()
+        logger.info(f"[SEND] user={user_id} protect={protect_content_flag} group_auto_delete={auto_delete_minutes} global={ad_settings}")
         if auto_delete_minutes:
             # Group /settings-la set panna time (global admin setting-a override pannum)
             del_time = auto_delete_minutes
