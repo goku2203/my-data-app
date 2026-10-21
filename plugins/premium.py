@@ -17,7 +17,7 @@ async def premium_callback_handler(client: Client, query: CallbackQuery):
         "<blockquote><b>🔥 CHEAPEST PRICES:</b>\n"
         "✨ <b>1 Day:</b> ₹9 Only\n"
         "✨ <b>7 Days:</b> ₹59 Only\n"
-        "✨ <b>24 Months:</b> ₹99 Only (Best Offer! 🤩)</blockquote>\n\n"
+        "✨ <b>24 Days:</b> ₹99 Only (Best Offer! 🤩)</blockquote>\n\n"
         "<b>💡 How to Pay?</b>\n"
         "1. Click the <b>'Pay Now'</b> button below.\n"
         "2. Make the payment and take a <b>Screenshot</b>.\n"
