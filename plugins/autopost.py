@@ -398,7 +398,7 @@ async def media_handler(client, message):
             'print_q': get_print_quality(raw_name), 
             'size': get_clean_size(media.file_size),
             'raw_size': media.file_size,
-            'link': f"https://t.me/{temp.U_NAME}?start=filep_{file_id}"
+            'link': f"https://t.me/{temp.U_NAME}?start=file_{file_id}"
         }
         if clean_name not in BATCH_DATA:
             BATCH_DATA[clean_name] = []
