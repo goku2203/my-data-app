@@ -24,7 +24,7 @@ API_HASH = environ.get('API_HASH', '')
 BOT_TOKEN = environ.get('BOT_TOKEN', '')
 
 # --- Keep Alive ---
-KEEP_ALIVE_URL = environ.get("KEEP_ALIVE_URL", "https://burning-brittney-leech2-3bc21fb5.koyeb.app/")
+KEEP_ALIVE_URL = environ.get("KEEP_ALIVE_URL", "")
 
 # --- Modes & Settings ---
 HYPER_MODE = is_enabled(environ.get('HYPER_MODE', 'False'), False)
