@@ -18,7 +18,7 @@ from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerId
 from database.ia_filterdb import Media, get_file_details, get_search_results
 from Script import script
 from info import HYPER_MODE, ADMINS, CUSTOM_FILE_CAPTION, IMDB_TEMPLATE, MISSING_LOG_CHANNEL, WAIT_STICKERS
-from utils import get_size, is_subscribed, get_poster, temp, get_settings, create_invite_links, clean_filename
+from utils import get_size, is_subscribed, get_poster, temp, get_settings, create_invite_links, clean_filename, build_pre
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -99,10 +99,12 @@ async def next_page(bot, query):
     if not settings:
         settings = {"button": True, "botpm": False, "file_secure": False, "imdb": False, "spell_check": False, "template": IMDB_TEMPLATE, "welcome": False}
 
+    pre = build_pre(settings)
+
     if HYPER_MODE:
         cap_lines = []
         for file in files:
-            file_link = f"https://t.me/{temp.U_NAME}?start=file_{file.file_id}"
+            file_link = f"https://t.me/{temp.U_NAME}?start={pre}_{file.file_id}"
             disp_name = clean_filename(file.file_name) 
             cap_lines.append(f"📁 {get_size(file.file_size)} - [{disp_name}]({file_link})")
         cap_text = "\n".join(cap_lines)
@@ -230,6 +232,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         settings = await get_settings(query.message.chat.id)
         if not settings:
              settings = {"button": True, "botpm": False, "file_secure": False, "imdb": False, "spell_check": False, "template": IMDB_TEMPLATE, "welcome": False}
+        pre = build_pre(settings)
 
         if CUSTOM_FILE_CAPTION:
             try:
@@ -245,20 +248,20 @@ async def cb_handler(client: Client, query: CallbackQuery):
         try:
             if not await is_subscribed(query.from_user.id, client):
                 invite_links = await create_invite_links(client)
-                first_link = next(iter(invite_links.values()), f"https://t.me/{temp.U_NAME}?start={ident}_{file_id}")
+                first_link = next(iter(invite_links.values()), f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
                 await query.answer(url=first_link)
                 return
             elif settings['botpm']:
-                await query.answer(url=f"https://t.me/{temp.U_NAME}?start={ident}_{file_id}")
+                await query.answer(url=f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
                 return
             else:
-                await query.answer(url=f"https://t.me/{temp.U_NAME}?start={ident}_{file_id}")
+                await query.answer(url=f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
         except UserIsBlocked:
             await query.answer('Unblock the bot mahn !', show_alert=True)
         except PeerIdInvalid:
-            await query.answer(url=f"https://t.me/{temp.U_NAME}?start={ident}_{file_id}")
+            await query.answer(url=f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
         except Exception as e:
-            await query.answer(url=f"https://t.me/{temp.U_NAME}?start={ident}_{file_id}")
+            await query.answer(url=f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
 
     elif query.data.startswith("checksub"):
         if not await is_subscribed(query.from_user.id, client):
@@ -390,7 +393,7 @@ async def auto_filter(client, msg, spoll=False):
         if files:
             files.sort(key=lambda x: (x.file_name.lower(), x.file_size if x.file_size else 0), reverse=False)
 
-        pre = 'filep' if settings['file_secure'] else 'file'
+        pre = build_pre(settings)
 
         if HYPER_MODE:
             cap_lines = []

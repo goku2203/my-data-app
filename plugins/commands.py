@@ -19,7 +19,7 @@ from database.ia_filterdb import Media, get_file_details, unpack_new_file_id
 from database.users_chats_db import db
 from database.connections_mdb import active_connection
 from info import CHANNELS, ADMINS, LOG_CHANNEL, VERIFY_LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY
-from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user, clean_filename
+from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user, clean_filename, parse_pre, build_settings_markup
 from plugins.menu import START_BUTTONS
 from plugins.fsub_manager import send_fsub_prompt
 
@@ -75,14 +75,20 @@ async def auto_delete_file(client, message, delay):
     except Exception as e:
         logger.error(f"Error deleting file: {e}")
 
-async def send_file_to_user(client, user_id, file_id, protect_content_flag, file_name=None, file_size=None, file_caption=None):
+async def send_file_to_user(client, user_id, file_id, protect_content_flag, file_name=None, file_size=None, file_caption=None, auto_delete_minutes=None):
     try:
         safe_file_name = html.escape(file_name) if file_name else "Unknown File"
         safe_file_size = html.escape(file_size) if file_size else "Unknown Size"
         
         # Admin auto-delete time edukkum
         ad_settings = await db.get_autodelete_settings()
-        del_time = ad_settings['time']
+        if auto_delete_minutes:
+            # Group /settings-la set panna time (global admin setting-a override pannum)
+            del_time = auto_delete_minutes
+            ad_enabled = True
+        else:
+            del_time = ad_settings['time']
+            ad_enabled = ad_settings['enabled']
         
         caption = None
         if CUSTOM_FILE_CAPTION:
@@ -109,7 +115,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 parse_mode=enums.ParseMode.HTML, 
                 protect_content=protect_content_flag
             )
-            asyncio.create_task(auto_delete_file(client, sent_message, FILE_AUTO_DELETE_SECONDS))
+            asyncio.create_task(auto_delete_file(client, sent_message, (auto_delete_minutes * 60) if auto_delete_minutes else FILE_AUTO_DELETE_SECONDS))
             
             reply_markup = await create_file_buttons(client, sent_message)
             
@@ -129,7 +135,7 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
                 parse_mode=enums.ParseMode.HTML,
                 protect_content=protect_content_flag,
             )
-            if ad_settings['enabled']:
+            if ad_enabled:
                 asyncio.create_task(auto_delete_file(client, msg, del_time * 60))
         
     except Exception as e:
@@ -145,7 +151,9 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
             )
             # DB la admin auto-delete on panniruntha mattum delete aagum
             ad_settings = await db.get_autodelete_settings()
-            if ad_settings['enabled']:
+            if auto_delete_minutes:
+                asyncio.create_task(auto_delete_file(client, msg, auto_delete_minutes * 60))
+            elif ad_settings['enabled']:
                 asyncio.create_task(auto_delete_file(client, msg, ad_settings['time'] * 60))
         except:
             pass
@@ -539,7 +547,7 @@ async def start(client, message):
                 pre, file_id = b64_str.split("_", 1)
             else:
                 file_id = b64_str
-            protect_content_flag = True if pre == 'filep' else False
+            protect_content_flag, grp_del_mins = parse_pre(pre)
             files_ = await get_file_details(file_id)
             if not files_:
                 files_ = await get_file_details(b64_str)
@@ -553,7 +561,8 @@ async def start(client, message):
                     protect_content_flag=protect_content_flag,
                     file_name=getattr(files, 'file_name', None) or (files.get('file_name', '') if isinstance(files, dict) else ''),
                     file_size=get_size(getattr(files, 'file_size', 0) if not isinstance(files, dict) else files.get('file_size', 0)),
-                    file_caption=getattr(files, 'caption', None) or (files.get('caption', '') if isinstance(files, dict) else '')
+                    file_caption=getattr(files, 'caption', None) or (files.get('caption', '') if isinstance(files, dict) else ''),
+                    auto_delete_minutes=grp_del_mins
                 )
                 return
         except Exception:
@@ -575,7 +584,7 @@ async def start(client, message):
         f_caption = getattr(files, 'caption', '')
         actual_file_id = getattr(files, 'file_id', None) or getattr(files, 'id', None) or file_id
         
-    protect_content_flag = True if pre == 'filep' else False
+    protect_content_flag, grp_del_mins = parse_pre(pre)
     await send_file_to_user(
         client=client,
         user_id=message.from_user.id,
@@ -583,7 +592,8 @@ async def start(client, message):
         protect_content_flag=protect_content_flag,
         file_name=title,
         file_size=size,
-        file_caption=f_caption
+        file_caption=f_caption,
+        auto_delete_minutes=grp_del_mins
     )
     PENDING_VERIFY_FILES.pop(message.from_user.id, None)
     try:
@@ -737,74 +747,7 @@ async def settings(client, message):
     settings = await get_settings(grp_id)
 
     if settings is not None:
-        buttons = [
-            [
-                InlineKeyboardButton(
-                    'Filter Button',
-                    callback_data=f'setgs#button#{settings["button"]}#{grp_id}',
-                ),
-                InlineKeyboardButton(
-                    'Single' if settings["button"] else 'Double',
-                    callback_data=f'setgs#button#{settings["button"]}#{grp_id}',
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    'Bot PM',
-                    callback_data=f'setgs#botpm#{settings["botpm"]}#{grp_id}',
-                ),
-                InlineKeyboardButton(
-                    '✅ Yes' if settings["botpm"] else '❌ No',
-                    callback_data=f'setgs#botpm#{settings["botpm"]}#{grp_id}',
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    'File Secure',
-                    callback_data=f'setgs#file_secure#{settings["file_secure"]}#{grp_id}',
-                ),
-                InlineKeyboardButton(
-                    '✅ Yes' if settings["file_secure"] else '❌ No',
-                    callback_data=f'setgs#file_secure#{settings["file_secure"]}#{grp_id}',
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    'IMDB',
-                    callback_data=f'setgs#imdb#{settings["imdb"]}#{grp_id}',
-                ),
-                InlineKeyboardButton(
-                    '✅ Yes' if settings["imdb"] else '❌ No',
-                    callback_data=f'setgs#imdb#{settings["imdb"]}#{grp_id}',
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    'Spell Check',
-                    callback_data=f'setgs#spell_check#{settings["spell_check"]}#{grp_id}',
-                ),
-                InlineKeyboardButton(
-                    '✅ Yes' if settings["spell_check"] else '❌ No',
-                    callback_data=f'setgs#spell_check#{settings["spell_check"]}#{grp_id}',
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    'Welcome',
-                    callback_data=f'setgs#welcome#{settings["welcome"]}#{grp_id}',
-                ),
-                InlineKeyboardButton(
-                    '✅ Yes' if settings["welcome"] else '❌ No',
-                    callback_data=f'setgs#welcome#{settings["welcome"]}#{grp_id}',
-                ),
-            ],
-
-            [
-                InlineKeyboardButton("❌ Close", callback_data="close_data")
-            ],
-        ]
-
-        reply_markup = InlineKeyboardMarkup(buttons)
+        reply_markup = build_settings_markup(settings, grp_id)
 
         await message.reply_text(
             text=f"<b>Change Your Settings for {title} As Your Wish ⚙</b>",
