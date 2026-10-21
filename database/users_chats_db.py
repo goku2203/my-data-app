@@ -10,6 +10,7 @@ class Database:
         self.col = self.db.users
         self.grp = self.db.groups
         self.config = self.db.config
+        self.jreq = self.db.join_requests
 
     def new_user(self, id, name):
         return dict(
@@ -142,6 +143,20 @@ class Database:
             {"$set": {"channels": channels}},
             upsert=True,
         )
+
+    # ---------- JOIN REQUEST (FSUB) - restart-ku piragum poga koodathu ----------
+    async def add_join_request(self, user_id, chat_id):
+        await self.jreq.update_one(
+            {'user_id': int(user_id), 'chat_id': int(chat_id)},
+            {'$set': {'user_id': int(user_id), 'chat_id': int(chat_id)}},
+            upsert=True
+        )
+
+    async def has_join_request(self, user_id, chat_id):
+        return await self.jreq.find_one({'user_id': int(user_id), 'chat_id': int(chat_id)}) is not None
+
+    async def clear_join_requests(self):
+        await self.jreq.delete_many({})
 
     async def get_auth_channels(self) -> list[int]:
         doc = await self.config.find_one({"_id": "auth_channels"})
