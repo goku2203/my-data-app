@@ -90,14 +90,14 @@ async def get_status_text(client, user_mention):
     updated = datetime.now(IST).strftime("%I:%M %p")
 
     text = (
-        "<blockquote><b>📡 Bᴏᴛ Sᴛᴀᴛᴜs Dᴀsʜʙᴏᴀʀᴅ</b></blockquote>\n"
+        "<blockquote><b>📡 Bᴏᴛ Sᴛᴀᴛᴜs Dᴀsʜʙᴏᴀʀᴅ</b></blockquote>\n\n"
         f"<i>Hᴇʏ {user_mention} ✨ ʜᴇʀᴇ's ʏᴏᴜʀ ʟɪᴠᴇ ʙᴏᴛ ʀᴇᴘᴏʀᴛ.</i>\n\n"
 
         "<b>🤖 Sʏsᴛᴇᴍ Pᴇʀғᴏʀᴍᴀɴᴄᴇ</b>\n"
         "<blockquote>"
         f"⏱️ <b>Uptime</b> ➜ <code>{uptime}</code>\n"
         f"🚀 <b>Ping</b> ➜ <code>{ping} ms</code>"
-        "</blockquote>\n"
+        "</blockquote>\n\n"
 
         "<b>📊 Usᴇʀ Sᴛᴀᴛɪsᴛɪᴄs</b>\n"
         "<blockquote>"
@@ -105,14 +105,14 @@ async def get_status_text(client, user_mention):
         f"👥 <b>Total Groups</b> ➜ <code>{total_chats:,}</code>\n"
         f"🗂️ <b>Total Files</b> ➜ <code>{total_files:,}</code>\n"
         f"📅 <b>Monthly Verified</b> ➜ <code>{monthly_verified:,}</code>"
-        "</blockquote>\n"
+        "</blockquote>\n\n"
 
         "<b>💾 Dᴀᴛᴀʙᴀsᴇ (MᴏɴɢᴏDB)</b>\n"
         "<blockquote>"
         f"📈 <b>Used</b> ➜ <code>{used_str}</code> (<code>{mongo_percent:.2f}%</code>)\n"
         f"🟢 <b>Free</b> ➜ <code>{free_str}</code>\n"
         f"<code>{_bar(mongo_percent)}</code>"
-        "</blockquote>\n"
+        "</blockquote>\n\n"
 
         "<b>🖥️ Sᴇʀᴠᴇʀ (Rᴇɴᴅᴇʀ Cʟᴏᴜᴅ)</b>\n"
         "<blockquote>"
@@ -120,7 +120,7 @@ async def get_status_text(client, user_mention):
         f"<code>{_bar(cpu)}</code>\n"
         f"💽 <b>RAM</b> ➜ <code>{ram}%</code>\n"
         f"<code>{_bar(ram)}</code>"
-        "</blockquote>\n"
+        "</blockquote>\n\n"
 
         f"<i>🕒 Uᴘᴅᴀᴛᴇᴅ: {updated} IST\n
         🗑️ Aᴜᴛᴏ-ᴄʟᴏsᴇ ɪɴ 10 ᴍɪɴ</i>"
