@@ -21,14 +21,13 @@ from database.connections_mdb import active_connection
 from info import CHANNELS, ADMINS, LOG_CHANNEL, VERIFY_LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, FILE_CHANNELS, FILE_CHANNEL_SENDING_MODE, FILE_AUTO_DELETE_SECONDS, IS_VERIFY
 from utils import get_settings, get_size, is_subscribed, save_group_settings, temp, create_invite_links, get_verify_link, check_verification, verify_user, clean_filename, parse_pre, build_settings_markup
 from plugins.menu import START_BUTTONS
-from plugins.fsub_manager import send_fsub_prompt
+from plugins.fsub_manager import fsub_gate
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 BATCH_FILES = {}
 PENDING_VERIFY_FILES = {}
-FORCE_MSG = {}
 AUTO_DELETE_SECONDS = 15
 VERIFY_SHAPE = re.compile(r'^[A-Za-z]{3,10}_\d{6,12}_[A-Za-z]{2,10}_.+$')
 
@@ -153,60 +152,8 @@ async def send_file_to_user(client, user_id, file_id, protect_content_flag, file
         except:
             pass
 
-@Client.on_callback_query(filters.regex(r'^checksubp#') | filters.regex(r'^checksub#'))
-async def checksub_callback(client, callback_query):
-    data = callback_query.data
-    pre, file_id = data.split('#', 1)
-    user_id = callback_query.from_user.id
-    protect_content_flag = True if pre == 'checksubp' else False
-
-    files = await get_file_details(file_id)
-    file_details = files[0] if files else None
-    
-    if await is_subscribed(user_id, client):
-        try:
-            actual_file_id = (
-                getattr(file_details, 'file_id', None)
-                or getattr(file_details, 'id', None)
-                or (file_details.get('file_id') or file_details.get('_id') if isinstance(file_details, dict) else None)
-                or file_id
-            ) if file_details else file_id
-
-            file_name = getattr(file_details, 'file_name', None) or (file_details.get('file_name') if isinstance(file_details, dict) else None) if file_details else None
-            file_size_raw = getattr(file_details, 'file_size', 0) if not isinstance(file_details, dict) else (file_details.get('file_size', 0) if file_details else 0)
-            file_caption = getattr(file_details, 'caption', None) or (file_details.get('caption') if isinstance(file_details, dict) else None) if file_details else None
-
-            await send_file_to_user(
-                client=client,
-                user_id=user_id,
-                file_id=actual_file_id,
-                protect_content_flag=protect_content_flag,
-                file_name=file_name,
-                file_size=get_size(file_size_raw) if file_size_raw else None,
-                file_caption=file_caption
-            )
-            await callback_query.message.delete()
-        except Exception as e:
-            logger.error(f"File send error in callback: {e}")
-            await callback_query.answer("Failed to send file. Please try again later.", show_alert=True)
-    else:
-        links = await create_invite_links(client)
-        btn = [[InlineKeyboardButton("🤖 Jᴏɪɴ Uᴘᴅᴀᴛᴇs Cʜᴀɴɴᴇʟ", url=url)] for url in links.values()]
-        btn.append([InlineKeyboardButton("🔄 Try Again", callback_data=data)])
-        await callback_query.edit_message_text(
-            text="**❌ You still haven't joined all channels!**\n\nPlease join and press Try Again:",
-            reply_markup=InlineKeyboardMarkup(btn)
-        )
-
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
-    if message.from_user.id in FORCE_MSG:
-        try:
-            await client.delete_messages(message.chat.id, FORCE_MSG[message.from_user.id])
-            del FORCE_MSG[message.from_user.id]
-        except:
-            pass
-    
     # 🎯 GROUP-LA START KUDUTHA VARA VENDIYA BUTTONS
     if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
         buttons = [
@@ -232,14 +179,9 @@ async def start(client, message):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
 
-    if not await is_subscribed(message.from_user.id, client):
-        if len(message.command) > 1:
-            payload = message.command[1]
-        else:
-            payload = "start"
-            
-        force_msg = await send_fsub_prompt(client, message, payload)
-        FORCE_MSG[message.from_user.id] = force_msg.id
+    # 🔐 FSub: bot start / file link / autopost link - ellathukkum MUDHALLA fsub page.
+    # Join pannina udane automatic-aa inthe same /start flow thirumba run aagum (verify page / file).
+    if await fsub_gate(client, message, resume=lambda: start(client, message)):
         return
 
     # 🎯 BOT PM-LA START KUDUTHA VARA VENDIYA BUTTONS

@@ -20,4 +20,11 @@ async def join_request_handler(client, update: ChatJoinRequest):
         except Exception as e:
             logging.error(f"Join request save failed: {e}")
 
+        # Join request anuppina udane FSub page automatic-aa complete aagum
+        try:
+            from plugins.fsub_manager import refresh_user
+            await refresh_user(client, user_id)
+        except Exception as e:
+            logging.error(f"FSub auto refresh failed: {e}")
+
 #  @MrMNTG @MusammilN

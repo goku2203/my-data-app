@@ -19,6 +19,7 @@ from database.ia_filterdb import Media, get_file_details, get_search_results
 from Script import script
 from info import HYPER_MODE, ADMINS, CUSTOM_FILE_CAPTION, IMDB_TEMPLATE, MISSING_LOG_CHANNEL, WAIT_STICKERS
 from utils import get_size, is_subscribed, get_poster, temp, get_settings, create_invite_links, clean_filename, build_pre
+from plugins.fsub_manager import fsub_gate
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -55,16 +56,25 @@ async def auto_delete_msgs(bot_msg, user_msg, delay):
         delete_msg(user_msg)
     )
 
+def _is_searchable(text: str) -> bool:
+    """auto_filter eppo search pannum nu athe rules - group-la saadha chat-ku fsub kaattama irukka."""
+    if not text or len(text) <= 2 or len(text) >= 100:
+        return False
+    low = JUNK_REGEX.sub('', text).strip().lower()
+    if "@" in low or "http" in low or "t.me" in low:
+        return False
+    if SPAM_REGEX.search(low):
+        return False
+    return True
+
 @Client.on_message((filters.group | filters.private) & filters.text & ~filters.regex(r"^[/\.]"))
 async def give_filter(client, message):
-            
-    # Bot PM (Private)-la mattum thaan Fsub check pannanum
-    if message.chat.type == enums.ChatType.PRIVATE:
-        if not await is_subscribed(message.from_user.id, client):
-            from plugins.fsub_manager import send_fsub_prompt
-            await send_fsub_prompt(client, message)
+    # 🔐 FSub: Bot PM-la ellaa text-kum, Group-la movie name (search aagura text) -kum mudhalla fsub page.
+    # Join pannina udane automatic-aa antha search thirumba run aagum.
+    if message.from_user and (message.chat.type == enums.ChatType.PRIVATE or _is_searchable(message.text)):
+        if await fsub_gate(client, message, resume=lambda: auto_filter(client, message)):
             return
-            
+
     await auto_filter(client, message)
 
 @Client.on_callback_query(filters.regex(r"^next"))
@@ -208,7 +218,7 @@ async def advantage_spoll_choker(bot, query):
         k = await query.message.edit(script.MOV_NT_FND)
         asyncio.create_task(auto_delete_msgs(k, query.message.reply_to_message, 10))
 
-@Client.on_callback_query(filters.regex(r"^(close_data|alertmessage|file|checksub|pages|esp|msp|hsp|tsp)"))
+@Client.on_callback_query(filters.regex(r"^(close_data|alertmessage|file|pages|esp|msp|hsp|tsp)"))
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "close_data":
         try:
@@ -246,34 +256,14 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f_caption = f"{title}"
 
         try:
-            if not await is_subscribed(query.from_user.id, client):
-                invite_links = await create_invite_links(client)
-                first_link = next(iter(invite_links.values()), f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
-                await query.answer(url=first_link)
-                return
-            elif settings['botpm']:
-                await query.answer(url=f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
-                return
-            else:
-                await query.answer(url=f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
+            # FSub + verify ellam bot PM /start-la nadakkum, so inga direct deep link mattum
+            await query.answer(url=f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
         except UserIsBlocked:
             await query.answer('Unblock the bot mahn !', show_alert=True)
         except PeerIdInvalid:
             await query.answer(url=f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
         except Exception as e:
             await query.answer(url=f"https://t.me/{temp.U_NAME}?start={pre}_{file_id}")
-
-    elif query.data.startswith("checksub"):
-        if not await is_subscribed(query.from_user.id, client):
-            await query.answer("I Like Your Smartness, But Don't Be Oversmart", show_alert=True)
-            return
-        ident, file_id = query.data.split("#")
-        files_ = await get_file_details(file_id)
-        if not files_:
-            return await query.answer('No such file exist.')
-            
-        await query.answer()
-        await client.send_message(query.from_user.id, "Please request from Bot PM.")
 
     elif query.data == "pages":
         await query.answer()
