@@ -3,7 +3,7 @@ import logging
 from pyrogram import Client
 from pyrogram.types import ChatJoinRequest
 from database.users_chats_db import db
-from utils import JOIN_REQUEST_USERS
+from utils import JOIN_REQUEST_USERS, _JOINED_MARK
 
 @Client.on_chat_join_request()
 async def join_request_handler(client, update: ChatJoinRequest):
@@ -15,7 +15,9 @@ async def join_request_handler(client, update: ChatJoinRequest):
         if user_id not in JOIN_REQUEST_USERS:
             JOIN_REQUEST_USERS[user_id] = set()
         JOIN_REQUEST_USERS[user_id].add(chat_id)
+        _JOINED_MARK.discard((user_id, chat_id))  # puthusa request anuppuraanga = munnadi leave pannirukkaanga
         try:
+            await db.unmark_joined(user_id, chat_id)
             await db.add_join_request(user_id, chat_id)
         except Exception as e:
             logging.error(f"Join request save failed: {e}")

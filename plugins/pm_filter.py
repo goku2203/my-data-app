@@ -27,6 +27,17 @@ logger.setLevel(logging.INFO)
 BUTTONS = {}
 SPELL_CHECK = {}
 
+# 🔒 Vera user results button-a click panna indha message alert-aa varum (inga maathikkalaam)
+NOT_YOUR_MSG = "⚠️ Not your request!\nSearch for yourself 🔎"
+
+def _is_owner(req, user_id) -> bool:
+    """req = search panna user id. 0 = anonymous admin (yaar venumnaalum click pannalam)."""
+    try:
+        req = int(req)
+    except (TypeError, ValueError):
+        return False
+    return req == 0 or req == user_id
+
 LOG_COOLDOWN = 600
 RECENT_REQUESTS = {}
 
@@ -80,8 +91,8 @@ async def give_filter(client, message):
 @Client.on_callback_query(filters.regex(r"^next"))
 async def next_page(bot, query):
     ident, req, key, offset = query.data.split("_")
-    if int(req) not in [query.from_user.id, 0]:
-        return await query.answer("**Search for Yourself**🔎", show_alert=True)
+    if not _is_owner(req, query.from_user.id):
+        return await query.answer(NOT_YOUR_MSG, show_alert=True)
 
     try:
         offset = int(offset)
@@ -198,8 +209,8 @@ async def next_page(bot, query):
 @Client.on_callback_query(filters.regex(r"^spol")) 
 async def advantage_spoll_choker(bot, query):
     _, user, movie_ = query.data.split('#')
-    if int(user) != 0 and query.from_user.id != int(user):
-        return await query.answer("Search for Yourself🔎", show_alert=True)
+    if not _is_owner(user, query.from_user.id):
+        return await query.answer(NOT_YOUR_MSG, show_alert=True)
     if movie_ == "close_spellcheck":
         return await query.message.delete()
         

@@ -19,6 +19,8 @@ from utils import (
     get_invite_link,
     get_missing_channels,
     invalidate_fsub_cache,
+    mark_joined,
+    forget_membership,
 )
 
 logger = logging.getLogger(__name__)
@@ -310,19 +312,28 @@ async def _poller():
 
 @Client.on_chat_member_updated(group=11)
 async def fsub_member_update(client, update):
-    """FSub channel-la user join aana udane (bot antha channel-la admin-a irukkanum)."""
+    """FSub channel-la user JOIN / LEAVE aana udane (bot antha channel-la admin-a irukkanum)."""
     try:
-        new = update.new_chat_member
-        if not new or not new.user:
+        if update.chat.type == enums.ChatType.PRIVATE:
             return
-        user_id = new.user.id
-        if not any(k[1] == user_id for k in PENDING):
-            return  # indha user-ku prompt illa -> cheap exit
+        old, new = update.old_chat_member, update.new_chat_member
+        user = (new.user if new and new.user else None) or (old.user if old and old.user else None)
+        if not user or user.is_bot:
+            return
         if update.chat.id not in await get_auth_channels_cached():
-            return
-        if new.status not in (ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER):
-            return
-        await refresh_user(client, user_id)
+            return  # FSub channel illa -> cheap exit
+
+        in_status = (ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER)
+        joined_now = bool(new and new.status in in_status)
+
+        if joined_now:
+            if REQUEST_FSUB_MODE:
+                await mark_joined(user.id, update.chat.id)
+            if any(k[1] == user.id for k in PENDING):
+                await refresh_user(client, user.id)
+        else:
+            # 🚪 LEAVE / KICK / BAN -> join request + cache clear (FSub page thirumba varum)
+            await forget_membership(user.id, update.chat.id)
     except Exception as e:
         logger.error(f"[FSUB] member update error: {e}")
 
