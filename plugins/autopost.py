@@ -295,15 +295,21 @@ async def send_batched_post(client, clean_name):
         safe_title = get_safe_name(clean_name)
         movie_year = first_file['year']
         
+        # ✅ Full Caption Search Protection added here
+        safe_year = get_safe_name(f"Year: {movie_year}")
+        safe_audio = get_safe_name(f"Audio: {final_audio_str}")
+        safe_quality = get_safe_name(f"Quality: {final_print_str}")
+        safe_get_here = get_safe_name("Get Here:-")
+        
         # TMDB Image fetch
         image_url = await get_tmdb_image(clean_name, movie_year)
         # Intha edathula thaan template change pannirukken
         caption = (
             f"🎬 <b>{safe_title}</b>\n\n"
-            f"<blockquote>🗓 <b><i>Year: {first_file['year']}</i></b>\n"
-            f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
-            f"💿 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
-            f"📥 <b>Get Here:-</b>\n"
+            f"<blockquote>🗓 <b><i>{safe_year}</i></b>\n"
+            f"🔊 <b><i>{safe_audio}</i></b>\n"
+            f"💿 <b><i>{safe_quality}</i></b></blockquote>\n\n"
+            f"📥 <b>{safe_get_here}</b>\n"
         )
 
         all_files_to_post = []
