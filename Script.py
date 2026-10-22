@@ -6,12 +6,9 @@ class script(object):
 
     START_TXT = """<blockquote><b>⚡ Hᴇʏ {}!</b></blockquote>
     
-<blockquote><b>🎌 Wᴇʟᴄᴏᴍᴇ ᴛᴏ Mɪᴋᴀsᴀ Bᴏᴛ!</b></blockquote>
+<blockquote><b>⚔️ I am Mikasa, your loyal File Store Bot! 🧣❤️ Store unlimited files and keep them safe, always by your side. No files left behind! 🔥</b></blockquote>
 
-<blockquote><i>🎬 Sᴇᴀʀᴄʜ ғᴏʀ Mᴏᴠɪᴇs, Aɴɪᴍᴇ, Sᴇʀɪᴇs🎬</i>
-<i>⚡ Gᴇᴛ ғɪʟᴇs ɪɴ sᴇᴄᴏɴᴅs!</i></blockquote>
-
-<blockquote><b>❤️ I Aᴍ Aʟᴡᴀʏs Hᴇʀᴇ Tᴏ Hᴇʟᴘ Yᴏᴜ...</b></blockquote>"""
+<blockquote><b>🧣 Eʀᴇɴ... I'ʟʟ ᴘʀᴏᴛᴇᴄᴛ ʏᴏᴜʀ ғɪʟᴇs. Nᴏ ᴍᴀᴛᴛᴇʀ ᴡʜᴀᴛ... ❤️‍🔥</b></blockquote>"""
 
     HELP_TXT = """<b>👋 Welcome to the Help Menu!</b>
 
