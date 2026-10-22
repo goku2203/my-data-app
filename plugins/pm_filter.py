@@ -443,36 +443,36 @@ async def auto_filter(client, msg, spoll=False):
                 ])
             else:
                 btn.append([InlineKeyboardButton(text="📃 1/1", callback_data="pages")])
-
+            
         else:
             if settings["button"]:
-            btn = []
-            for file in files:
-                disp_name = clean_filename(file.file_name)
-                if not disp_name or disp_name.lower() == "none":
-                    disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
-                btn.append([
-                    InlineKeyboardButton(
-                        text=f"  [{get_size(file.file_size)}]   {disp_name}",
-                        callback_data=f'file#{file.file_id}'
-                    )
-                ])
-        else:
-            btn = []
-            for file in files:
-                disp_name = clean_filename(file.file_name)
-                if not disp_name or disp_name.lower() == "none":
-                    disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
-                btn.append([
-                    InlineKeyboardButton(
-                        text=f"{disp_name}",
-                        callback_data=f'file#{file.file_id}'
-                    ),
-                    InlineKeyboardButton(
-                        text=f"{get_size(file.file_size)}",
-                        callback_data=f'file#{file.file_id}'
-                    ),
-                ])
+                btn = []
+                for file in files:
+                    disp_name = clean_filename(file.file_name)
+                    if not disp_name or disp_name.lower() == "none":
+                        disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
+                    btn.append([
+                        InlineKeyboardButton(
+                            text=f"  [{get_size(file.file_size)}]   {disp_name}",
+                            callback_data=f'file#{file.file_id}'
+                        )
+                    ])
+            else:
+                btn = []
+                for file in files:
+                    disp_name = clean_filename(file.file_name)
+                    if not disp_name or disp_name.lower() == "none":
+                        disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
+                    btn.append([
+                        InlineKeyboardButton(
+                            text=f"{disp_name}",
+                            callback_data=f'file#{file.file_id}'
+                        ),
+                        InlineKeyboardButton(
+                            text=f"{get_size(file.file_size)}",
+                            callback_data=f'file#{file.file_id}'
+                        ),
+                    ])
                     
             if offset != "":
                 key = f"{message.chat.id}-{message.id}"
