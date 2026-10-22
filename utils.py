@@ -9,14 +9,14 @@ from typing import Union, List
 import base64
 import urllib.parse
 
-from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
+from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid, ChatAdminRequired, ChannelInvalid, ChannelPrivate, ChatIdInvalid
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram import enums
 from pyrogram.enums import ChatMemberStatus
 
 from imdb import IMDb
 
-from info import LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, VERIFY_EXPIRE, IS_VERIFY, SHORTLINK_URL, SHORTLINK_API, REQUEST_FSUB_MODE, RENDER_URL
+from info import LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, VERIFY_EXPIRE, IS_VERIFY, SHORTLINK_URL, SHORTLINK_API, REQUEST_FSUB_MODE, RENDER_URL, LOG_CHANNEL
 from database.users_chats_db import db
 
 logger = logging.getLogger(__name__)
@@ -49,24 +49,114 @@ class temp(object):
 
 
 async def is_subscribed(user_id: int, client) -> bool:
-    # FIX: Munnadi is_subscribed-um get_missing_channels-um vera vera logic use pannuchu.
-    # Ippo rendum oru logic: ovvoru channel-kum (member) illana (join request anuppirukkanum).
+    # Ellaa FSub channel-layum (member illana join request) irukkanum
     return not await get_missing_channels(user_id, client)
 
+# ==========================================
+# 🔐 FORCE SUB CORE (cache + safe checks)
+# ==========================================
+FSUB_OK = "ok"
+FSUB_MISSING = "missing"
+FSUB_BROKEN = "broken"      # bot admin illa / channel delete aachu -> user-a block pannama skip
+
+FSUB_OK_TTL = 90            # join aana user-a 90 sec cache (group-la flood API calls thadukka)
+FSUB_LINK_TTL = 6 * 3600    # invite link 6 hours cache (ovvoru click-kum puthu link create panna koodathu)
+FSUB_ALERT_GAP = 3600       # same broken channel alert 1 hour-ku oru thadava mattum
+
+_AUTH_CACHE = {"ts": 0.0, "data": []}
+_OK_CACHE = {}              # user_id -> expiry time
+_LINK_CACHE = {}            # channel_id -> (url, request_mode, created_ts)
+_TITLE_CACHE = {}           # channel_id -> title
+_ALERT_CACHE = {}           # channel_id -> last alert ts
+_LINK_LOCK = asyncio.Lock()
+
+async def get_auth_channels_cached(force: bool = False) -> list:
+    now = time.time()
+    if not force and now - _AUTH_CACHE["ts"] < 30:
+        return _AUTH_CACHE["data"]
+    data = await db.get_auth_channels()
+    _AUTH_CACHE["data"] = list(data)
+    _AUTH_CACHE["ts"] = now
+    return _AUTH_CACHE["data"]
+
+def invalidate_fsub_cache(links: bool = True, channel=None):
+    """Channel add / delete pannina apram call pannanum - ellaarukkum puthu list udane apply aagum."""
+    _AUTH_CACHE["ts"] = 0.0
+    _OK_CACHE.clear()
+    if links:
+        if channel is None:
+            _LINK_CACHE.clear()
+        else:
+            _LINK_CACHE.pop(channel, None)
+
+async def get_channel_title(client, channel) -> str:
+    title = _TITLE_CACHE.get(channel)
+    if title:
+        return title
+    try:
+        chat = await client.get_chat(channel)
+        title = chat.title or "Channel"
+        _TITLE_CACHE[channel] = title
+        return title
+    except Exception:
+        return "Channel"
+
+async def _alert_broken(client, channel, reason):
+    now = time.time()
+    if now - _ALERT_CACHE.get(channel, 0) < FSUB_ALERT_GAP:
+        return
+    _ALERT_CACHE[channel] = now
+    logger.error(f"[FSUB] Channel {channel} problem: {reason}")
+    try:
+        await client.send_message(
+            LOG_CHANNEL,
+            f"<b>⚠️ FSub Channel Problem</b>\n\n<b>Channel:</b> <code>{channel}</code>\n<b>Reason:</b> <code>{reason}</code>\n\n"
+            "<i>Bot-a antha channel-la admin aakkunga (Invite Users permission-oda). Appo varaikkum antha channel skip aagum, users block aaga maattanga.</i>",
+            parse_mode=enums.ParseMode.HTML
+        )
+    except Exception:
+        pass
+
+async def get_invite_link(client, channel, force: bool = False):
+    """Oru channel-ku invite link (cache-oda). Fail aanaa None."""
+    now = time.time()
+    cached = _LINK_CACHE.get(channel)
+    if cached and not force and cached[1] == REQUEST_FSUB_MODE and now - cached[2] < FSUB_LINK_TTL:
+        return cached[0]
+
+    reason = "unknown"
+    async with _LINK_LOCK:
+        cached = _LINK_CACHE.get(channel)
+        if cached and not force and cached[1] == REQUEST_FSUB_MODE and time.time() - cached[2] < FSUB_LINK_TTL:
+            return cached[0]
+        for attempt in range(2):
+            try:
+                invite = await client.create_chat_invite_link(
+                    channel,
+                    creates_join_request=REQUEST_FSUB_MODE,
+                    name="BotFSub"
+                )
+                _LINK_CACHE[channel] = (invite.invite_link, REQUEST_FSUB_MODE, time.time())
+                return invite.invite_link
+            except FloodWait as e:
+                reason = f"FloodWait {e.value}s"
+                if attempt == 0 and e.value <= 10:
+                    await asyncio.sleep(e.value + 1)
+                    continue
+                break
+            except Exception as e:
+                reason = f"invite link create failed: {type(e).__name__}"
+                break
+    await _alert_broken(client, channel, reason)
+    return None
+
 async def create_invite_links(client) -> dict:
-    links = {}
-    auth_channels = await db.get_auth_channels()
-    for channel in auth_channels:
-        try:
-            invite = await client.create_chat_invite_link(
-                channel,
-                creates_join_request=REQUEST_FSUB_MODE,  # Only enable join requests if REQUEST_FSUB_MODE is True
-                name="BotAuthAccess"
-            )
-            links[channel] = invite.invite_link
-        except Exception:
-            continue
-    return links
+    """{channel_id: url} - cache irukkurathunaala fast, API spam illa."""
+    channels = await get_auth_channels_cached()
+    if not channels:
+        return {}
+    results = await asyncio.gather(*[get_invite_link(client, ch) for ch in channels])
+    return {ch: url for ch, url in zip(channels, results) if url}
 
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
@@ -504,34 +594,63 @@ def get_clean_size(size):
 
 # ----- END -----
 
-async def _channel_ok(user_id: int, channel, client) -> bool:
-    """True = user antha channel-la member (or join request anuppiyirukkaanga)"""
-    try:
-        member = await client.get_chat_member(channel, user_id)
-        if member.status in [ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
-            return True
-    except Exception:
-        pass  # UserNotParticipant ithu normal; join request irukkanu keezha paakkalaam
+async def _channel_state(user_id: int, channel, client) -> str:
+    """ok = member / join-request anuppiyirukkaanga | missing = join pannala | broken = channel check panna mudiyala (skip)"""
+    for attempt in range(2):
+        try:
+            member = await client.get_chat_member(channel, user_id)
+            if member.status in (ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER):
+                return FSUB_OK
+            break  # LEFT / BANNED -> member illa
+        except UserNotParticipant:
+            break  # normal - join pannala
+        except FloodWait as e:
+            if attempt == 0 and e.value <= 5:
+                await asyncio.sleep(e.value + 1)
+                continue
+            return FSUB_MISSING
+        except (ChatAdminRequired, ChannelInvalid, ChannelPrivate, ChatIdInvalid) as e:
+            await _alert_broken(client, channel, type(e).__name__)
+            return FSUB_BROKEN
+        except PeerIdInvalid:
+            # user peer problem-aa channel problem-aa nu paakkurom
+            try:
+                await client.get_chat(channel)
+            except Exception as e:
+                await _alert_broken(client, channel, f"PeerIdInvalid/{type(e).__name__}")
+                return FSUB_BROKEN
+            break
+        except Exception as e:
+            logger.warning(f"[FSUB] get_chat_member error ch={channel} user={user_id}: {type(e).__name__}: {e}")
+            break
 
     if REQUEST_FSUB_MODE:
         if channel in JOIN_REQUEST_USERS.get(user_id, set()):
-            return True
+            return FSUB_OK
         # Bot restart aana memory poidum, so DB-la paakkurom
         try:
             if await db.has_join_request(user_id, channel):
                 JOIN_REQUEST_USERS.setdefault(user_id, set()).add(channel)
-                return True
+                return FSUB_OK
         except Exception as e:
             logger.error(f"Join request DB check failed: {e}")
-    return False
+    return FSUB_MISSING
 
-async def get_missing_channels(user_id: int, client) -> list:
-    auth_channels = await db.get_auth_channels()
+async def get_missing_channels(user_id: int, client, use_cache: bool = True) -> list:
+    now = time.time()
+    if use_cache and _OK_CACHE.get(user_id, 0) > now:
+        return []
+    auth_channels = await get_auth_channels_cached()
     if not auth_channels:
         return []
     # Ellaa channels-um orey nerathula (parallel) check pannum, so fast
-    results = await asyncio.gather(*[_channel_ok(user_id, ch, client) for ch in auth_channels])
-    return [ch for ch, ok in zip(auth_channels, results) if not ok]
+    states = await asyncio.gather(*[_channel_state(user_id, ch, client) for ch in auth_channels])
+    missing = [ch for ch, st in zip(auth_channels, states) if st == FSUB_MISSING]
+    if not missing:
+        if len(_OK_CACHE) > 5000:
+            _OK_CACHE.clear()
+        _OK_CACHE[user_id] = now + FSUB_OK_TTL
+    return missing
 
 # Inga unga thevaiyillatha varthaigalai add pannikkonga
 JUNK_WORDS = [

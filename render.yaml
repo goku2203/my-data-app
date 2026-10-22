@@ -33,5 +33,14 @@ services:
       # --- unga service URL (https://<name>.onrender.com) - illana Render-oda RENDER_EXTERNAL_URL automatic-aa use aagum ---
       - key: RENDER_URL
         sync: false
+      # --- FSub (optional - default values already set) ---
+      - key: REQUEST_FSUB_MODE      # True = "Request to Join" link, False = direct join
+        value: "True"
+      - key: FSUB_DONE_DELETE       # "Joined" small message auto delete (seconds)
+        value: "10"
+      - key: FSUB_PM_TTL
+        value: "600"
+      - key: FSUB_GROUP_TTL
+        value: "180"
       - key: PYTHONUNBUFFERED
         value: "1"
