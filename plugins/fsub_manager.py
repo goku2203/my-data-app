@@ -80,11 +80,12 @@ def _done_text(mention: str) -> str:
 #  📦 PENDING PROMPTS (memory-la mattum - chinna & fast)
 # ==========================================================
 class _Pending:
-    __slots__ = ("client", "prompt", "mention", "resume", "created", "missing", "last_check", "busy", "group")
+    __slots__ = ("client", "prompt", "mention", "resume", "created", "missing", "last_check", "busy", "group", "triggers")
 
-    def __init__(self, client, prompt, mention, resume, missing, group):
+    def __init__(self, client, prompt, mention, resume, missing, group, trigger=None):
         self.client = client
         self.prompt = prompt
+        self.triggers = [trigger] if trigger is not None else []  # user-oda message(s) - expire aanaa delete aagum
         self.mention = mention
         self.resume = resume
         self.missing = list(missing)
@@ -154,6 +155,8 @@ async def fsub_gate(client, message, resume=None) -> bool:
         if await _refresh(client, key):
             return True  # idhukulla join pannittaanga -> resume already run aagum
         if is_group:
+            if len(pend.triggers) < 20:
+                pend.triggers.append(message)  # indha message-um expire aanaa delete aagum
             return True  # group-la spam panna koodathu, same prompt-ae irukkattum
         # PM-la: pazhaya prompt-a delete panni, puthusa keezha kaattu
         old = PENDING.pop(key, None)
@@ -192,7 +195,7 @@ async def fsub_gate(client, message, resume=None) -> bool:
             logger.error(f"[FSUB] prompt send failed: {e}")
             return False
 
-    PENDING[key] = _Pending(client, sent, mention, resume, missing, is_group)
+    PENDING[key] = _Pending(client, sent, mention, resume, missing, is_group, trigger=message if is_group else None)
     _ensure_poller()
     return True
 
@@ -297,6 +300,8 @@ async def _poller():
                 if now - pend.created > ttl:
                     if PENDING.pop(key, None) is pend:
                         await _delete(pend.prompt)
+                        for m in pend.triggers:      # join pannala -> user message-um delete
+                            await _delete(m)
                     continue
                 due.append(key)
             if due:
