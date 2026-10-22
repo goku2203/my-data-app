@@ -11,6 +11,7 @@ class Database:
         self.grp = self.db.groups
         self.config = self.db.config
         self.jreq = self.db.join_requests
+        self.jmem = self.db.fsub_joined  # channel-la actual-aa join aanavanga (leave detect panna)
 
     def new_user(self, id, name):
         return dict(
@@ -157,6 +158,24 @@ class Database:
 
     async def clear_join_requests(self):
         await self.jreq.delete_many({})
+        await self.jmem.delete_many({})
+
+    async def remove_join_request(self, user_id, chat_id):
+        await self.jreq.delete_many({'user_id': int(user_id), 'chat_id': int(chat_id)})
+
+    # ---------- JOINED MARKER - user channel-la irundhaanga nu nyabagam vachukka ----------
+    async def mark_joined(self, user_id, chat_id):
+        await self.jmem.update_one(
+            {'user_id': int(user_id), 'chat_id': int(chat_id)},
+            {'$set': {'user_id': int(user_id), 'chat_id': int(chat_id)}},
+            upsert=True
+        )
+
+    async def was_joined(self, user_id, chat_id):
+        return await self.jmem.find_one({'user_id': int(user_id), 'chat_id': int(chat_id)}) is not None
+
+    async def unmark_joined(self, user_id, chat_id):
+        await self.jmem.delete_many({'user_id': int(user_id), 'chat_id': int(chat_id)})
 
     async def get_auth_channels(self) -> list[int]:
         doc = await self.config.find_one({"_id": "auth_channels"})
