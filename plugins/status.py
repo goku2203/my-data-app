@@ -122,8 +122,8 @@ async def get_status_text(client, user_mention):
         f"<code>{_bar(ram)}</code>"
         "</blockquote>\n\n"
 
-        f"<i>🕒 Uᴘᴅᴀᴛᴇᴅ: {updated} IST\n
-        🗑️ Aᴜᴛᴏ-ᴄʟᴏsᴇ ɪɴ 10 ᴍɪɴ</i>"
+        f"<i>🕒 Uᴘᴅᴀᴛᴇᴅ: {updated} IST\n"
+        "🗑️ Aᴜᴛᴏ-ᴄʟᴏsᴇ ɪɴ 10 ᴍɪɴ</i>"
     )
     return text
 
