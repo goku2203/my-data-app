@@ -16,7 +16,6 @@ from utils import (
     JOIN_REQUEST_USERS,
     create_invite_links,
     get_auth_channels_cached,
-    get_channel_title,
     get_invite_link,
     get_missing_channels,
     invalidate_fsub_cache,
@@ -113,19 +112,18 @@ async def _delete_later(msg, delay):
 
 
 async def _build(client, mention: str, missing_set: set):
-    """text + buttons ready pannum. Join pannathathukku mattum button varum."""
+    """text + buttons ready pannum. Channel name kaattaama "Channel 1, 2.." nu kaattum. Join pannathathukku mattum button varum."""
     channels = await get_auth_channels_cached()
     links = await create_invite_links(client)
     shown = [ch for ch in channels if ch in links]
-    titles = await asyncio.gather(*[get_channel_title(client, ch) for ch in shown])
 
     rows, buttons = [], []
-    for ch, raw_title in zip(shown, titles):
+    for num, ch in enumerate(shown, start=1):  # number fixed - join panna channel number maaraadhu
         joined = ch not in missing_set
-        rows.append((html.escape(_short(raw_title)), joined))
+        rows.append((f"{sc('channel')} {num}", joined))
         if not joined:
             icon, word = ("📨", sc("request")) if REQUEST_FSUB_MODE else ("📢", sc("join"))
-            buttons.append([InlineKeyboardButton(f"{icon} {word} • {_short(raw_title, 24)}", url=links[ch])])
+            buttons.append([InlineKeyboardButton(f"{icon} {word} {sc('channel')} {num}", url=links[ch])])
     return _prompt_text(mention, rows), InlineKeyboardMarkup(buttons)
 
 
