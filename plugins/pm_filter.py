@@ -93,6 +93,13 @@ async def next_page(bot, query):
     ident, req, key, offset = query.data.split("_")
     if not _is_owner(req, query.from_user.id):
         return await query.answer(NOT_YOUR_MSG, show_alert=True)
+    
+    # --- PUTHUSA ADD PANNA VENDIYA FSUB CHECK ---
+    from utils import get_missing_channels
+    missing = await get_missing_channels(query.from_user.id, bot)
+    if missing:
+        return await query.answer("  You left the FSub channel! Please search again and join.", show_alert=True)
+    # --------------------------------------------
 
     try:
         offset = int(offset)
@@ -211,6 +218,13 @@ async def advantage_spoll_choker(bot, query):
     _, user, movie_ = query.data.split('#')
     if not _is_owner(user, query.from_user.id):
         return await query.answer(NOT_YOUR_MSG, show_alert=True)
+        
+    # --- PUTHUSA ADD PANNA VENDIYA FSUB CHECK ---
+    from utils import get_missing_channels
+    missing = await get_missing_channels(query.from_user.id, bot)
+    if missing:
+        return await query.answer("  You left the FSub channel! Please search again and join.", show_alert=True)
+    # --------------------------------------------
     if movie_ == "close_spellcheck":
         return await query.message.delete()
         
@@ -240,6 +254,18 @@ async def cb_handler(client: Client, query: CallbackQuery):
             pass
 
     elif query.data.startswith("file"):
+        # 1. Yaru search pannangalo avanga mattum thaan click pannanum (Ownership Check)
+        if query.message.reply_to_message:
+            req_id = query.message.reply_to_message.from_user.id
+            if req_id != query.from_user.id:
+                return await query.answer("  Not your request! Search for yourself.", show_alert=True)
+        
+        # 2. Fsub channel leave pannitanga na block pannanum (FSub Check)
+        from utils import get_missing_channels
+        missing = await get_missing_channels(query.from_user.id, client)
+        if missing:
+            return await query.answer("  You left the FSub channel! Please search again and join.", show_alert=True)
+
         ident, file_id = query.data.split("#")
         files_ = await get_file_details(file_id)
         if not files_:
@@ -420,33 +446,33 @@ async def auto_filter(client, msg, spoll=False):
 
         else:
             if settings["button"]:
-                btn = []
-                for file in files:
-                    disp_name = clean_filename(file.file_name)
-                    if not disp_name or disp_name.lower() == "none":
-                        disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
-                    btn.append([
-                        InlineKeyboardButton(
-                            text=f"📁 [{get_size(file.file_size)}] ➵ {disp_name}", 
-                            url=f"https://t.me/{temp.U_NAME}?start={pre}_{file.file_id}"
-                        )
-                    ])
-            else:
-                btn = []
-                for file in files:
-                    disp_name = clean_filename(file.file_name)
-                    if not disp_name or disp_name.lower() == "none":
-                        disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
-                    btn.append([
-                        InlineKeyboardButton(
-                            text=f"{disp_name}",
-                            url=f"https://t.me/{temp.U_NAME}?start={pre}_{file.file_id}"
-                        ),
-                        InlineKeyboardButton(
-                            text=f"{get_size(file.file_size)}",
-                            url=f"https://t.me/{temp.U_NAME}?start={pre}_{file.file_id}"
-                        ),
-                    ])
+            btn = []
+            for file in files:
+                disp_name = clean_filename(file.file_name)
+                if not disp_name or disp_name.lower() == "none":
+                    disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
+                btn.append([
+                    InlineKeyboardButton(
+                        text=f"  [{get_size(file.file_size)}]   {disp_name}",
+                        callback_data=f'file#{file.file_id}'
+                    )
+                ])
+        else:
+            btn = []
+            for file in files:
+                disp_name = clean_filename(file.file_name)
+                if not disp_name or disp_name.lower() == "none":
+                    disp_name = clean_filename(getattr(file, "caption", "")) or "Unknown File"
+                btn.append([
+                    InlineKeyboardButton(
+                        text=f"{disp_name}",
+                        callback_data=f'file#{file.file_id}'
+                    ),
+                    InlineKeyboardButton(
+                        text=f"{get_size(file.file_size)}",
+                        callback_data=f'file#{file.file_id}'
+                    ),
+                ])
                     
             if offset != "":
                 key = f"{message.chat.id}-{message.id}"
