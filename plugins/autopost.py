@@ -303,7 +303,7 @@ async def send_batched_post(client, clean_name):
             f"<blockquote>🗓 <b><i>Year: {first_file['year']}</i></b>\n"
             f"🔊 <b><i>Audio: {final_audio_str}</i></b>\n"
             f"💿 <b><i>Quality: {final_print_str}</i></b></blockquote>\n\n"
-            f"📥 <b>Download Links:-</b>\n"
+            f"📥 <b>Get Here:-</b>\n"
         )
 
         all_files_to_post = []
