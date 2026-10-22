@@ -70,6 +70,31 @@ _TITLE_CACHE = {}           # channel_id -> title
 _ALERT_CACHE = {}           # channel_id -> last alert ts
 _LINK_LOCK = asyncio.Lock()
 
+_JOINED_MARK = set()        # (user_id, channel) -> indha user channel-la irundhaanga (memory copy)
+
+async def mark_joined(user_id: int, channel):
+    """User channel-la member-a irukkaanga nu note pannum (apram leave panna detect panna)."""
+    if (user_id, channel) in _JOINED_MARK:
+        return
+    if len(_JOINED_MARK) > 20000:
+        _JOINED_MARK.clear()
+    _JOINED_MARK.add((user_id, channel))
+    try:
+        await db.mark_joined(user_id, channel)
+    except Exception as e:
+        logger.error(f"[FSUB] mark_joined failed: {e}")
+
+async def forget_membership(user_id: int, channel):
+    """User channel-a LEAVE pannitaanga -> join request / joined / cache ellam clear. Next time FSub page varum."""
+    _JOINED_MARK.discard((user_id, channel))
+    JOIN_REQUEST_USERS.get(user_id, set()).discard(channel)
+    _OK_CACHE.pop(user_id, None)
+    try:
+        await db.remove_join_request(user_id, channel)
+        await db.unmark_joined(user_id, channel)
+    except Exception as e:
+        logger.error(f"[FSUB] forget_membership failed: {e}")
+
 async def get_auth_channels_cached(force: bool = False) -> list:
     now = time.time()
     if not force and now - _AUTH_CACHE["ts"] < 30:
@@ -596,14 +621,19 @@ def get_clean_size(size):
 
 async def _channel_state(user_id: int, channel, client) -> str:
     """ok = member / join-request anuppiyirukkaanga | missing = join pannala | broken = channel check panna mudiyala (skip)"""
+    not_member = False  # Telegram urudhi-aa "member illa" nu sonna mattum True (temporary error-ku False)
     for attempt in range(2):
         try:
             member = await client.get_chat_member(channel, user_id)
             if member.status in (ChatMemberStatus.MEMBER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER):
+                if REQUEST_FSUB_MODE:
+                    await mark_joined(user_id, channel)  # join aanaanga nu note - apram leave panna theriyum
                 return FSUB_OK
+            not_member = True
             break  # LEFT / BANNED -> member illa
         except UserNotParticipant:
-            break  # normal - join pannala
+            not_member = True
+            break  # normal - join pannala / leave pannitaanga
         except FloodWait as e:
             if attempt == 0 and e.value <= 5:
                 await asyncio.sleep(e.value + 1)
@@ -625,6 +655,16 @@ async def _channel_state(user_id: int, channel, client) -> str:
             break
 
     if REQUEST_FSUB_MODE:
+        # 🚪 Munnadi join aagi (request approve / member) ippo channel-la illa = LEAVE pannitaanga
+        #    -> pazhaya join request-a kanakku edukka koodathu, FSub page thirumba varanum
+        if not_member:
+            try:
+                left = (user_id, channel) in _JOINED_MARK or await db.was_joined(user_id, channel)
+            except Exception:
+                left = False
+            if left:
+                await forget_membership(user_id, channel)
+                return FSUB_MISSING
         if channel in JOIN_REQUEST_USERS.get(user_id, set()):
             return FSUB_OK
         # Bot restart aana memory poidum, so DB-la paakkurom
