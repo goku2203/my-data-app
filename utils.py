@@ -59,7 +59,7 @@ FSUB_OK = "ok"
 FSUB_MISSING = "missing"
 FSUB_BROKEN = "broken"      # bot admin illa / channel delete aachu -> user-a block pannama skip
 
-FSUB_OK_TTL = 90            # join aana user-a 90 sec cache (group-la flood API calls thadukka)
+FSUB_OK_TTL = 30            # join aana user-a 30 sec cache (group-la flood API calls thadukka)
 FSUB_LINK_TTL = 6 * 3600    # invite link 6 hours cache (ovvoru click-kum puthu link create panna koodathu)
 FSUB_ALERT_GAP = 3600       # same broken channel alert 1 hour-ku oru thadava mattum
 
