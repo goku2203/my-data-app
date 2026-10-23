@@ -260,11 +260,8 @@ async def cb_handler(client: Client, query: CallbackQuery):
             if req_id != query.from_user.id:
                 return await query.answer("  Not your request! Search for yourself.", show_alert=True)
         
-        # 2. Fsub channel leave pannitanga na block pannanum (FSub Check)
-        from utils import get_missing_channels
-        missing = await get_missing_channels(query.from_user.id, client)
-        if missing:
-            return await query.answer("  You left the FSub channel! Please search again and join.", show_alert=True)
+        # 2. FSub check: bot PM /start-la fsub_gate nadakkum. Channel leave pannirundha anga FSub page varum,
+        #    join pannina udane intha file automatic-aa varum. (alert-ku badhula direct FSub page)
 
         ident, file_id = query.data.split("#")
         files_ = await get_file_details(file_id)
