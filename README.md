@@ -3,7 +3,7 @@
 <img src="https://capsule-render.vercel.app/api?type=waving&height=240&color=0:0f2027,50:203a43,100:2c5364&text=Goku%20Stark%20Auto%20Filter%20Bot&fontSize=56&fontColor=ffffff&fontAlign=50&fontAlignY=40&animation=fadeIn&desc=Index%20%E2%80%A2%20Search%20%E2%80%A2%20Verify%20%E2%80%A2%20Autopost&descSize=22&descAlign=50&descAlignY=64" alt="Goku Stark Auto Filter Bot" width="100%" />
 
 <a href="https://github.com/goku2203/my-data-app">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=24&duration=3000&pause=800&color=38BDF8&center=true&vCenter=true&width=700&height=50&lines=Fast+%E2%9A%A1+Smart+%F0%9F%A7%A0+Automated+%F0%9F%A4%96;Index+%E2%80%A2+Search+%E2%80%A2+Verify+%E2%80%A2+Autopost;Powered+by+Pyrofork+%2B+MongoDB+%F0%9F%9A%80" alt="Typing animation" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=24&duration=3000&pause=800&color=38BDF8&center=true&vCenter=true&width=700&height=50&lines=Fast+%E2%9A%A1+Smart+%F0%9F%A7%A0+Automated+%F0%9F%A4%96;Auto+Force-Subscribe+%F0%9F%94%92;Index+%E2%80%A2+Search+%E2%80%A2+Verify+%E2%80%A2+Autopost;Powered+by+Pyrofork+%2B+MongoDB+%F0%9F%9A%80" alt="Typing animation" />
 </a>
 
 <p>
@@ -41,7 +41,7 @@
 | ✅ **Verification** | Web verify page (`/verify`) + shortlink. The pending file is delivered right after verifying |
 | 🤖 **Autopost** | Groups files by title, detects year / audio / quality / size, adds a TMDB poster and posts to your updates channel |
 | 🔔 **New File Alerts** | Clean "added" alerts in your alert channel with a duplicate guard |
-| 📢 **Force Subscribe** | Multiple channels, with join-request support |
+| 📢 **Force Subscribe** | Multiple channels, join-request support, auto-unlock after joining, re-check if a user leaves |
 | 📊 **Live Status** | `/stats` dashboard: uptime, users, groups, files, DB usage, CPU and RAM |
 | 🗑️ **Auto Delete** | Sent files are removed after a set time |
 | 💎 **Premium Menu** | Plans and payment flow inside the bot |
@@ -49,8 +49,34 @@
 
 ---
 
+## 🔒 Force Subscribe
+
+```text
+User sends a name / opens a link
+        │
+        ├─ joined all channels ─────► result / file instantly
+        │
+        └─ missing any channel ─────► FSub page (only missing channels get a button)
+                                          │
+                                          ▼
+                              user joins → auto unlock → search / file continues
+```
+
+- Bot must be **admin** (with *Invite Users*) in every FSub channel.
+- `REQUEST_FSUB_MODE=True` uses join-request links, `False` uses direct join.
+- Timings (`FSUB_PM_TTL`, `FSUB_GROUP_TTL`, `FSUB_DONE_DELETE`) are at the top of `plugins/fsub_manager.py`.
+
+---
+
 ## 🆕 What's New
 
+- 🔒 **New Force Subscribe page** – text-only, small-caps design with *Channel 1, 2, 3…* buttons (no Try Again)
+- ⚡ **Auto unlock** – after the user joins, a small message appears for 10 seconds and the search or file continues automatically
+- 🚪 **Works everywhere** – group search, bot PM, `/start` and autopost links all show the FSub page first
+- 🔁 **Leave detection** – if a user leaves any channel, the FSub page comes back on the next search
+- 🧹 **Group clean-up** – unjoined prompts and the user's message are auto-deleted
+- 🛡️ **Safer links** – cached invite links, and a channel the bot can't access is skipped instead of blocking users
+- 🆕 **New channel** – `/addfsub` checks the bot is admin first, then applies to everyone immediately
 - 🐛 **Verify fix** – after verification the user gets their file instead of *File Not Found*
 - 🌐 **Web server** – `/` and `/health` for Render, `/verify` for the verification page
 - 🛠️ **`/vsettings`** – change verify mode and duration from inside Telegram
@@ -121,7 +147,8 @@ Set these in Render → *Environment* or a local `.env` file. Never commit real 
 
 | Variable | Description |
 |---|---|
-| `AUTH_CHANNEL` | Force-subscribe channel IDs |
+| `AUTH_CHANNEL` | Force-subscribe channel IDs (used only when none are saved via `/addfsub`) |
+| `REQUEST_FSUB_MODE` | `True` = join-request links, `False` = direct join |
 | `IS_VERIFY`, `VERIFY_EXPIRE`, `VERIFY_LOG_CHANNEL` | Verification system |
 | `SHORTLINK_URL`, `SHORTLINK_API` | Shortlink provider |
 | `TMDB_API_KEY` | Posters for autopost |
@@ -188,7 +215,7 @@ python3 bot.py
 | `/vsettings`, `/vstats` | Verify settings and stats |
 | `/settings` | Auto-filter settings |
 | `/deletefiles`, `/cleandb`, `/scanmovie` | File management |
-| `/addfsub`, `/delfsub`, `/listfsub` | Force-subscribe channels |
+| `/addfsub`, `/delfsub`, `/listfsub`, `/fsubrefresh` | Force-subscribe channels and links |
 | `/broadcast` | Message all users |
 | `/ban`, `/unban`, `/enable`, `/disable`, `/leave` | User and chat control |
 | `/ping`, `/usage`, `/restart` | System tools |
