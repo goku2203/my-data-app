@@ -6,7 +6,7 @@ import sys
 import asyncio
 import json
 import re
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 import pytz
 import aiohttp
 from aiohttp import web as webserver
@@ -31,7 +31,7 @@ from pyrogram import Client, __version__, enums
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL, KEEP_ALIVE_URL, DEFAULT_AUTH_CHANNELS, RENDER_URL
+from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL, KEEP_ALIVE_URL, DEFAULT_AUTH_CHANNELS, RENDER_URL, ADMINS
 from utils import temp
 from typing import Union, Optional, AsyncGenerator
 from pyrogram import types
@@ -96,13 +96,60 @@ async def preload_auth_channels():
         await db.set_auth_channels(DEFAULT_AUTH_CHANNELS)
         logging.info("Set default AUTH_CHANNELs in DB.")
 
-# REPLACE PANNU:
-async def keep_alive():
+# ---------------- KEEP ALIVE + RENDER HOURS ALERT ----------------
+# RENDER_HOURS_ALERT    : intha hours-ku mela pona LOG_CHANNEL + ADMINS-ku alert (default 700)
+# RENDER_HOURS_LIMIT    : Render free limit (default 750)
+# RENDER_OTHER_SERVICES : same Render account-la 24/7 odura vera free service count (default 0)
+PING_EVERY = 240  # seconds
+
+async def _send_hours_alert(bot, used_hours, limit):
+    left = max(limit - used_hours, 0)
+    text = (
+        "<b>\u26a0\ufe0f Render Free Hours Alert</b>\n\n"
+        f"Intha month use aana hours: <b>{used_hours:.1f} / {limit:.0f}</b>\n"
+        f"Meedham iruppadhu: <b>{left:.1f} hrs</b> (approx)\n\n"
+        "Limit mudinja Render ella free service-um suspend pannidum. "
+        "Munnadiye vera Render account-la deploy panna ready aagu, illa paid plan-ku maaru.\n\n"
+        "<i>Note: ithu bot-oda own counter (approx). Exact value Render dashboard > Billing-la paaru.</i>"
+    )
+    targets = [LOG_CHANNEL] + [a for a in ADMINS if isinstance(a, int)]
+    for chat in targets:
+        try:
+            await bot.send_message(chat, text, parse_mode=enums.ParseMode.HTML)
+        except Exception as e:
+            logging.error(f"Hours alert send failed for {chat}: {e}")
+
+async def _track_hours(bot):
+    """Ovvoru ping-kum 240s add pannum, threshold thaandina oru thadava alert anuppum."""
+    alert_at = float(environ.get("RENDER_HOURS_ALERT", "700"))
+    limit = float(environ.get("RENDER_HOURS_LIMIT", "750"))
+    others = int(environ.get("RENDER_OTHER_SERVICES", "0"))
+    month = datetime.now(timezone.utc).strftime("%Y-%m")
+    meta = db.db.meta
+    add = PING_EVERY * (1 + others)
+
+    doc = await meta.find_one_and_update(
+        {"_id": "render_hours", "month": month},
+        {"$inc": {"seconds": add}},
+        return_document=True,
+    )
+    if doc is None:  # puthu month (illa first time) -> reset
+        await meta.replace_one(
+            {"_id": "render_hours"},
+            {"_id": "render_hours", "month": month, "seconds": add, "alerted": False},
+            upsert=True,
+        )
+        doc = await meta.find_one({"_id": "render_hours"})
+
+    used_hours = doc["seconds"] / 3600
+    if used_hours >= alert_at and not doc.get("alerted"):
+        await _send_hours_alert(bot, used_hours, limit)
+        await meta.update_one({"_id": "render_hours"}, {"$set": {"alerted": True}})
+
+async def keep_alive(bot):
     async with aiohttp.ClientSession() as session:
         while True:
             try:
-                # Koyeb URL-a thavirthu, unga original Render URL-a ping pannum.
-                # Ithu unga bot-a sleep aagama 24/7 online-la vechikkum.
                 target_url = RENDER_URL or environ.get("RENDER_EXTERNAL_URL", "")
                 if target_url:
                     target_url = target_url.rstrip("/") + "/health"
@@ -111,7 +158,11 @@ async def keep_alive():
                     logging.info(f"Sent keep-alive request to: {target_url}")
             except Exception as e:
                 logging.error(f"Keep-alive request failed: {e}")
-            await asyncio.sleep(240)  # Render free: 15 min inactivity-la sleep aagum, 4 min ping podhum
+            try:
+                await _track_hours(bot)
+            except Exception as e:
+                logging.error(f"Hours tracking failed: {e}")
+            await asyncio.sleep(PING_EVERY)
 
 # ---------------- MIDNIGHT AUTO RESTART (FIXED) ----------------
 # Restart pannum pothu "Midnight System Restarting" message id-a intha file la save pannuvom.
@@ -213,7 +264,7 @@ class Bot(Client):
         self.username = '@' + me.username
 
         await preload_auth_channels()
-        asyncio.create_task(keep_alive())
+        asyncio.create_task(keep_alive(self))
         asyncio.create_task(auto_restart(self)) # Ithu thaan puthusa add panna timer task
         logging.info(f"{me.first_name} running on Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
